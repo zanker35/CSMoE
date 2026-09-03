@@ -1,0 +1,29 @@
+material {
+    name : CSMoEWorldBaked,
+    parameters : [
+        {
+            type : sampler2d,
+            name : baseColor
+        },
+        {
+            type : sampler2d,
+            name : lightmap
+        }
+    ],
+    requires : [
+        uv0,
+        uv1
+    ],
+    shadingModel : unlit,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 albedo = texture(materialParams_baseColor, getUV0());
+        vec3 bakedLight = texture(materialParams_lightmap, getUV1()).rgb;
+        material.baseColor = vec4(albedo.rgb * bakedLight, albedo.a);
+    }
+}

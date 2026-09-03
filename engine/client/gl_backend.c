@@ -18,6 +18,7 @@ GNU General Public License for more details.
 #include "common.h"
 #include "client.h"
 #include "gl_local.h"
+#include "ref_backend.h"
 #include "mathlib.h"
 
 char		r_speeds_msg[MAX_SYSPATH];
@@ -405,6 +406,7 @@ void GL_FrontFace( GLenum front )
 
 void GAME_EXPORT GL_SetRenderMode( int mode )
 {
+	R_BackendR2DSetRenderMode( mode );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 	switch( mode )
@@ -508,10 +510,16 @@ qboolean VID_ScreenShot( const char *filename, int shot_type )
 	uint	flags = IMAGE_FLIP_Y;
 	int	width = 0, height = 0;
 	qboolean	result;
+	const renderer_backend_t *backend = R_BackendAPI();
 
 	r_shot = Mem_Alloc( r_temppool, sizeof( rgbdata_t ));
-	r_shot->width = (glState.width + 3) & ~3;
-	r_shot->height = (glState.height + 3) & ~3;
+	if( !backend || !R_BackendDrawableSize( &width, &height ))
+	{
+		width = glState.width;
+		height = glState.height;
+	}
+	r_shot->width = backend ? width : (width + 3) & ~3;
+	r_shot->height = backend ? height : (height + 3) & ~3;
 	r_shot->flags = IMAGE_HAS_COLOR | IMAGE_HAS_ALPHA;
 	r_shot->type = PF_RGBA_32;
 	r_shot->size = r_shot->width * r_shot->height * PFDesc[r_shot->type].bpp;
@@ -519,8 +527,25 @@ qboolean VID_ScreenShot( const char *filename, int shot_type )
 	r_shot->buffer = Mem_Alloc( r_temppool, r_shot->size );
 
 	// get screen frame
-	pglPixelStorei(GL_PACK_ALIGNMENT, 1);	// PANDORA, just in case
-	pglReadPixels( 0, 0, r_shot->width, r_shot->height, GL_RGBA, GL_UNSIGNED_BYTE, r_shot->buffer );
+	if( backend )
+	{
+		renderer_readback_t readback;
+		readback.pixels = r_shot->buffer;
+		readback.width = r_shot->width;
+		readback.height = r_shot->height;
+		readback.stride = r_shot->width * 4;
+		if( !backend->ReadPixels( &readback ))
+		{
+			FS_FreeImage( r_shot );
+			return false;
+		}
+	}
+	else
+	{
+		pglPixelStorei(GL_PACK_ALIGNMENT, 1);	// PANDORA, just in case
+		pglReadPixels( 0, 0, r_shot->width, r_shot->height,
+			GL_RGBA, GL_UNSIGNED_BYTE, r_shot->buffer );
+	}
 	switch( shot_type )
 	{
 	case VID_SCREENSHOT:

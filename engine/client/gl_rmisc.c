@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include "client.h"
 #include "gl_local.h"
 #include "mod_local.h"
+#include "ref_backend.h"
 
 typedef struct
 {
@@ -482,5 +483,8 @@ void R_NewMap( void )
 
 	GL_BuildLightmaps ();
 	R_GenerateVBO();
+
+	if( R_BackendAPI() )
+		R_BackendAPI()->OnMapLoaded( cl.worldmodel );
 }
 #endif // XASH_DEDICATED

@@ -21,6 +21,7 @@ GNU General Public License for more details.
 #include "input.h"
 #include "input_ime.h"
 #include "gl_vidnt.h"
+#include "ref_backend.h"
 #include <SDL.h>
 #include <SDL_syswm.h>
 
@@ -51,6 +52,13 @@ void R_ChangeDisplaySettingsFast( int width, int height );
 
 void *SDL_GetVideoDevice( void );
 
+static SDL_Window *vid_gl_context_window;
+
+SDL_Window *VID_GetGLContextWindow( void )
+{
+	return vid_gl_context_window ? vid_gl_context_window : host.hWnd;
+}
+
 static void SDLCALL GL_GetDrawableSize(SDL_Window* window, int* w, int* h)
 {
 #ifdef XASH_QINDIEGL
@@ -59,7 +67,16 @@ static void SDLCALL GL_GetDrawableSize(SDL_Window* window, int* w, int* h)
 	*w = params[2];
 	*h = params[3];
 #else
-	return SDL_GL_GetDrawableSize(window, w, h);
+	if( R_BackendIsFilament() )
+	{
+#if SDL_VERSION_ATLEAST( 2, 26, 0 )
+		SDL_GetWindowSizeInPixels( window, w, h );
+#else
+		SDL_GetWindowSize( window, w, h );
+#endif
+		return;
+	}
+	SDL_GL_GetDrawableSize(window, w, h);
 #endif
 }
 
@@ -221,7 +238,8 @@ static void WIN_SetWindowIcon( HICON ico )
 qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 {
 	static string	wndname;
-	Uint32 wndFlags = SDL_WINDOW_OPENGL;
+	/* Filament installs its own CAMetalLayer on the Cocoa content view. */
+	Uint32 wndFlags = R_BackendIsFilament() ? 0 : SDL_WINDOW_OPENGL;
 	rgbdata_t *icon = NULL;
 	char iconpath[MAX_STRING];
 
@@ -258,6 +276,26 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 			return VID_CreateWindow( width, height, fullscreen );
 		}
 		return false;
+	}
+
+	if( R_BackendIsFilament() )
+	{
+		/*
+		 * The migration still uses the legacy GL texture registry and 2D
+		 * producers.  Keep their context off-screen while the user-visible
+		 * window is a native Metal window.
+		 */
+		vid_gl_context_window = SDL_CreateWindow( "CSMoE OpenGL compatibility",
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 32, 32,
+			SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN );
+		if( !vid_gl_context_window )
+		{
+			MsgDev( D_ERROR, "VID_CreateWindow: couldn't create compatibility OpenGL context window: %s\n",
+				SDL_GetError() );
+			SDL_DestroyWindow( host.hWnd );
+			host.hWnd = NULL;
+			return false;
+		}
 	}
 
 	if( fullscreen )
@@ -374,6 +412,11 @@ void VID_DestroyWindow( void )
 		SDL_DestroyWindow ( host.hWnd );
 		host.hWnd = NULL;
 	}
+	if( vid_gl_context_window )
+	{
+		SDL_DestroyWindow( vid_gl_context_window );
+		vid_gl_context_window = NULL;
+	}
 
 	if( glState.fullScreen )
 	{
@@ -409,6 +452,9 @@ void R_ChangeDisplaySettingsFast( int width, int height )
 
 		SCR_VidInit();
 	}
+
+	if( R_BackendAPI() && R_BackendAPI()->Resize )
+		R_BackendAPI()->Resize( width, height );
 
 	// Automatically set HUD scale to DPI
 	if (hud_scale->value == 0.0f)

@@ -1,0 +1,38 @@
+material {
+    name : CSMoEWorldTransparent,
+    parameters : [
+        {
+            type : sampler2d,
+            name : baseColor
+        },
+        {
+            type : sampler2d,
+            name : lightmap
+        },
+        {
+            type : float,
+            name : opacity
+        }
+    ],
+    requires : [
+        uv0,
+        uv1
+    ],
+    shadingModel : unlit,
+    blending : transparent,
+    depthWrite : false,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 albedo = texture(materialParams_baseColor, getUV0());
+        vec3 bakedLight = texture(materialParams_lightmap, getUV1()).rgb;
+        vec4 color =
+            vec4(albedo.rgb * bakedLight, albedo.a * materialParams.opacity);
+        color.rgb *= color.a;
+        material.baseColor = color;
+    }
+}

@@ -342,6 +342,8 @@ void R_UnloadSkybox( void )
 {
 	int	i;
 
+	R_BackendSkyTextureClear();
+
 	// release old skybox
 	for( i = 0; i < 6; i++ )
 	{

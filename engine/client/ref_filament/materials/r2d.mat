@@ -1,0 +1,32 @@
+material {
+    name : CSMoER2D,
+    parameters : [
+        {
+            type : sampler2d,
+            name : colorTexture
+        }
+    ],
+    requires : [
+        uv0,
+        color
+    ],
+    shadingModel : unlit,
+    blending : transparent,
+    depthCulling : false,
+    depthWrite : false,
+    culling : none,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 color =
+            texture(materialParams_colorTexture, getUV0()) * getColor();
+        // Filament's transparent blend expects premultiplied output while
+        // GoldSrc's 2D path uses SRC_ALPHA, ONE_MINUS_SRC_ALPHA. Some legacy
+        // font atlases retain non-zero RGB in fully transparent texels.
+        color.rgb *= color.a;
+        material.baseColor = color;
+    }
+}

@@ -778,7 +778,11 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 	if (isLocalPlayer)
 		RestorePlayerState(pplayer);
 
-	if( gHUD.cl_shadows->value != 0.0f )
+	static cvar_t *renderer = gEngfuncs.pfnGetCvarPointer ?
+		gEngfuncs.pfnGetCvarPointer( "r_renderer" ) : NULL;
+	const bool filamentRenderer = renderer && renderer->string &&
+		strcmp( renderer->string, "filament" ) == 0;
+	if( gHUD.cl_shadows->value != 0.0f && !filamentRenderer )
 	{
 		Vector chestpos;
 
@@ -1123,4 +1127,3 @@ int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interfac
 	// Success
 	return 1;
 }
-

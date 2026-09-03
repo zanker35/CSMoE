@@ -33,6 +33,10 @@ qboolean VID_SetMode( void );
 qboolean VID_SetScreenResolution( int width, int height );
 void VID_DestroyWindow( void );
 void VID_RestoreScreenResolution( void );
+#if XASH_VIDEO == VIDEO_SDL
+struct SDL_Window;
+struct SDL_Window *VID_GetGLContextWindow( void );
+#endif
 
 void GL_CheckExtension( const char *name, const dllfunc_t *funcs, const char *cvarname, int r_ext );
 

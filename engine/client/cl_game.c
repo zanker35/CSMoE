@@ -28,6 +28,7 @@ GNU General Public License for more details.
 #include "shake.h"
 #include "sprite.h"
 #include "gl_local.h"
+#include "ref_backend.h"
 #include "library.h"
 #include "vgui_draw.h"
 #include "sound.h"		// SND_STOP_LOOPING
@@ -605,8 +606,11 @@ static void SPR_DrawGeneric( int frame, float x, float y, float width, float hei
 	// scale for screen sizes
 	SPR_AdjustSize( &x, &y, &width, &height );
 	texnum = R_GetSpriteTexture( clgame.ds.pSprite, frame );
+	R_BackendR2DSetColor( clgame.ds.spriteColor[0], clgame.ds.spriteColor[1],
+		clgame.ds.spriteColor[2], clgame.ds.spriteColor[3] );
 	pglColor4ubv( clgame.ds.spriteColor );
 	R_DrawStretchPic( x, y, width, height, s1, t1, s2, t2, texnum );
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 }
 
 /*
@@ -720,12 +724,14 @@ void CL_DrawScreenFade( void )
 	}
 
 	pglColor4ub( sf->fader, sf->fadeg, sf->fadeb, iFadeAlpha );
+	R_BackendR2DSetColor( sf->fader, sf->fadeg, sf->fadeb, iFadeAlpha );
 
 	if( sf->fadeFlags & FFADE_MODULATE )
 		GL_SetRenderMode( kRenderTransAdd );
 	else GL_SetRenderMode( kRenderTransTexture );
 	R_DrawStretchPic( 0, 0, scr_width->integer, scr_height->integer, 0, 0, 1, 1, cls.fillImage );
 	pglColor4ub( 255, 255, 255, 255 );
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 }
 
 /*
@@ -1501,12 +1507,14 @@ void GAME_EXPORT CL_FillRGBA( int x, int y, int width, int height, int r, int g,
 	b = bound( 0, b, 255 );
 	a = bound( 0, a, 255 );
 	pglColor4ub( r, g, b, a );
+	R_BackendR2DSetColor( r, g, b, a );
 
 	SPR_AdjustSize( &x1, &y1, &w1, &h1 );
 
 	GL_SetRenderMode( kRenderTransAdd );
 	R_DrawStretchPic( x1, y1, w1, h1, 0, 0, 1, 1, cls.fillImage );
 	pglColor4ub( 255, 255, 255, 255 );
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 }
 
 /*
@@ -3012,6 +3020,7 @@ void GAME_EXPORT CL_FillRGBABlend( int x, int y, int width, int height, int r, i
 	GL_SetRenderMode( kRenderTransTexture );
 	R_DrawStretchPic( x1, y1, w1, h1, 0, 0, 1, 1, cls.fillImage );
 	pglColor4ub( 255, 255, 255, 255 );
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 }
 
 /*
@@ -3042,6 +3051,8 @@ TriApi implementation
 
 =================
 */
+static qboolean tri_backend_capture;
+
 /*
 =============
 TriRenderMode
@@ -3051,6 +3062,7 @@ set rendermode
 */
 void GAME_EXPORT TriRenderMode( int mode )
 {
+	R_BackendR2DSetRenderMode( mode );
 	switch( mode )
 	{
 	case kRenderNormal:
@@ -3086,6 +3098,13 @@ begin triangle sequence
 */
 void GAME_EXPORT TriBegin( int mode )
 {
+	if( R_BackendAPI() && glState.in2DMode )
+	{
+		tri_backend_capture = true;
+		R_BackendR2DBegin( mode );
+		return;
+	}
+	tri_backend_capture = false;
 	switch( mode )
 	{
 	case TRI_POINTS:
@@ -3126,6 +3145,12 @@ draw triangle sequence
 */
 void GAME_EXPORT TriEnd( void )
 {
+	if( tri_backend_capture )
+	{
+		R_BackendR2DEnd();
+		tri_backend_capture = false;
+		return;
+	}
 	pglEnd();
 	pglDisable( GL_ALPHA_TEST );
 }
@@ -3143,6 +3168,8 @@ void GAME_EXPORT TriColor4f( float r, float g, float b, float a )
 	clgame.ds.triColor[2] = (byte)bound( 0, (b * 255.0f), 255 );
 	clgame.ds.triColor[3] = (byte)bound( 0, (a * 255.0f), 255 );
 	pglColor4ub( clgame.ds.triColor[0], clgame.ds.triColor[1], clgame.ds.triColor[2], clgame.ds.triColor[3] );
+	R_BackendR2DSetColor( clgame.ds.triColor[0], clgame.ds.triColor[1],
+		clgame.ds.triColor[2], clgame.ds.triColor[3] );
 }
 
 /*
@@ -3158,6 +3185,7 @@ void GAME_EXPORT TriColor4ub( byte r, byte g, byte b, byte a )
 	clgame.ds.triColor[2] = b;
 	clgame.ds.triColor[3] = a;
 	pglColor4ub( r, g, b, a );
+	R_BackendR2DSetColor( r, g, b, a );
 }
 
 /*
@@ -3168,6 +3196,11 @@ TriTexCoord2f
 */
 void GAME_EXPORT TriTexCoord2f( float u, float v )
 {
+	if( tri_backend_capture )
+	{
+		R_BackendR2DTexCoord( u, v );
+		return;
+	}
 	pglTexCoord2f( u, v );
 }
 
@@ -3179,6 +3212,11 @@ TriVertex3fv
 */
 void GAME_EXPORT TriVertex3fv( const float *v )
 {
+	if( tri_backend_capture )
+	{
+		R_BackendR2DVertex( v[0], v[1] );
+		return;
+	}
 	pglVertex3fv( v );
 }
 
@@ -3190,6 +3228,11 @@ TriVertex3f
 */
 void GAME_EXPORT TriVertex3f( float x, float y, float z )
 {
+	if( tri_backend_capture )
+	{
+		R_BackendR2DVertex( x, y );
+		return;
+	}
 	pglVertex3f( x, y, z );
 }
 
@@ -3210,6 +3253,7 @@ void GAME_EXPORT TriBrightness( float brightness )
 	rgba[3] = clgame.ds.triColor[3] * brightness;
 
 	pglColor4ubv( rgba );
+	R_BackendR2DSetColor( rgba[0], rgba[1], rgba[2], rgba[3] );
 }
 
 /*
@@ -3261,6 +3305,8 @@ int GAME_EXPORT TriSpriteTexture( model_t *pSpriteModel, int frame )
 	}
 
 	GL_Bind( XASH_TEXTURE0, gl_texturenum );
+	if( R_BackendAPI() && glState.in2DMode )
+		R_BackendR2DSetTexture( gl_texturenum );
 
 	return 1;
 }
@@ -3382,8 +3428,17 @@ Heavy legacy of Quake...
 void GAME_EXPORT TriColor4fRendermode( float r, float g, float b, float a, int rendermode )
 {
 	if( rendermode == kRenderTransAlpha )
+	{
 		pglColor4f( r, g, b, a );
-	else pglColor4f( r * a, g * a, b * a, 1.0f );
+		R_BackendR2DSetColor( bound( 0.0f, r * 255.0f, 255.0f ), bound( 0.0f, g * 255.0f, 255.0f ),
+			bound( 0.0f, b * 255.0f, 255.0f ), bound( 0.0f, a * 255.0f, 255.0f ));
+	}
+	else
+	{
+		pglColor4f( r * a, g * a, b * a, 1.0f );
+		R_BackendR2DSetColor( bound( 0.0f, r * a * 255.0f, 255.0f ), bound( 0.0f, g * a * 255.0f, 255.0f ),
+			bound( 0.0f, b * a * 255.0f, 255.0f ), 255 );
+	}
 }
 
 /*

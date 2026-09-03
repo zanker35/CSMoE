@@ -18,6 +18,11 @@ GNU General Public License for more details.
 #include "common.h"
 #include "client.h"
 #include "gl_local.h"
+#include "ref_backend.h"
+
+#ifndef GL_CURRENT_COLOR
+#define GL_CURRENT_COLOR 0x0B00
+#endif
 
 /*
 =============
@@ -68,6 +73,19 @@ R_DrawStretchPic
 */
 void R_DrawStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, int texnum )
 {
+	if( R_BackendAPI() )
+	{
+		GLfloat color[4];
+		pglGetFloatv( GL_CURRENT_COLOR, color );
+		R_BackendR2DSetColor(
+			bound( 0, (int)( color[0] * 255.0f + 0.5f ), 255 ),
+			bound( 0, (int)( color[1] * 255.0f + 0.5f ), 255 ),
+			bound( 0, (int)( color[2] * 255.0f + 0.5f ), 255 ),
+			bound( 0, (int)( color[3] * 255.0f + 0.5f ), 255 ));
+		R_BackendR2DDrawQuad( x, y, w, h, s1, t1, s2, t2, texnum );
+		return;
+	}
+
 	GL_Bind( XASH_TEXTURE0, texnum );
 
 	pglBegin( GL_QUADS );

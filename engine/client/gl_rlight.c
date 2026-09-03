@@ -21,6 +21,7 @@ GNU General Public License for more details.
 #include "gl_local.h"
 #include "pm_local.h"
 #include "studio.h"
+#include "ref_backend.h"
 
 /*
 =============================================================================
@@ -42,7 +43,7 @@ void R_AnimateLight( void )
 	float		scale;
 	lightstyle_t	*ls;
 
-	if( !RI.drawWorld || !cl.worldmodel )
+	if(( !RI.drawWorld && !R_BackendAPI() ) || !cl.worldmodel )
 		return;
 
 	scale = r_lighting_modulate->value;

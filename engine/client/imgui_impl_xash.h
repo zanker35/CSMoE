@@ -26,6 +26,7 @@ qboolean ImGui_ImplGL_Init(void);
 void ImGui_ImplGL_Shutdown(void);
 void ImGui_ImplGL_NewFrame(void);
 void ImGui_ImplGL_Render(void);
+void ImGui_ImplGL_EndFrame(qboolean renderDrawData);
 void ImGui_ImplGL_Client_OnGUI(void);
 void ImGui_ImplGL_Menu_OnGUI(void);
 void ImGui_ImplGL_Engine_OnGUI(void);

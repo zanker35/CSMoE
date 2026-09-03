@@ -20,6 +20,7 @@ GNU General Public License for more details.
 #include "const.h"
 #include "entity_types.h"
 #include "gl_local.h"
+#include "ref_backend.h"
 #include "vgui_draw.h"
 
 #include "touch.h" // IN_TouchDraw( )
@@ -455,7 +456,7 @@ void V_PostRender( void )
 	}
 
 #ifdef XASH_IMGUI
-	ImGui_ImplGL_Render();
+	ImGui_ImplGL_EndFrame( !R_BackendIsFilament() );
 #endif
 
 	SCR_MakeScreenShot();

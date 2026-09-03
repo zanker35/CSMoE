@@ -24,6 +24,7 @@ GNU General Public License for more details.
 #include "pm_local.h"
 #include "gl_local.h"
 #include "cl_tent.h"
+#include "ref_backend.h"
 
 // NOTE: enable this if you want merge both 'model' and 'modelT' files into one model slot.
 // otherwise it's uses two slots in models[] array for models with external textures
@@ -2201,7 +2202,8 @@ R_StudioDrawMesh
 
 ===============
 */
-static void R_StudioDrawMesh( short *ptricmds, float s, float t, float a, float scale )
+static void R_StudioDrawMesh( short *ptricmds, float s, float t, float a,
+	float scale, int texture )
 {
 	GLubyte alpha = 255 * a;
 	int i;
@@ -2336,6 +2338,15 @@ static void R_StudioDrawMesh( short *ptricmds, float s, float t, float a, float 
 		}
 	}
 
+	R_BackendStudioSubmit( texture, g_iRenderMode,
+		g_nFaceFlags | g_nForceFaceFlags,
+		(const float *)g_xarrayverts, (const float *)g_xarraycoord,
+		(const unsigned char *)g_xarraycolor,
+		startArrayVerts, g_nNumArrayVerts - startArrayVerts,
+		&g_xarrayelems[startArrayElems],
+		g_nNumArrayElems - startArrayElems,
+		RI.currententity == &clgame.viewent );
+
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, 12, g_xarrayverts );
 
@@ -2444,7 +2455,9 @@ static void R_StudioDrawMeshes( mstudiotexture_t *ptexture, short *pskinref, flo
 			GL_Bind( XASH_TEXTURE0, ptexture[pskinref[pmesh->skinref]].index );
 		}
 
-		R_StudioDrawMesh( ptricmds, s, t, alpha, scale );
+		R_StudioDrawMesh( ptricmds, s, t, alpha, scale,
+			( g_nForceFaceFlags & STUDIO_NF_CHROME ) ?
+				0 : ptexture[pskinref[pmesh->skinref]].index );
 	}
 }
 

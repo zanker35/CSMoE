@@ -1,0 +1,26 @@
+material {
+    name : CSMoEWorldShadowReceiver,
+    parameters : [
+        {
+            type : float,
+            name : opacity
+        }
+    ],
+    shadingModel : unlit,
+    shadowMultiplier : true,
+    blending : transparent,
+    depthWrite : false,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        // In Filament's unlit shadow-multiplier variant this color is
+        // multiplied by (1 - directional light visibility). It therefore
+        // becomes a transparent black overlay only where a real-time caster
+        // shadows the already-lightmapped BSP.
+        material.baseColor = vec4(0.0, 0.0, 0.0, materialParams.opacity);
+    }
+}

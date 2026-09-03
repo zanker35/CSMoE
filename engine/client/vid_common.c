@@ -22,6 +22,7 @@ GNU General Public License for more details.
 #include "mod_local.h"
 #include "input.h"
 #include "gl_vidnt.h"
+#include "ref_backend.h"
 
 #if defined(XASH_WINRT)
 #include "platform/winrt/winrt_interop.h"
@@ -806,6 +807,12 @@ R_RenderInfo_f
 */
 void R_RenderInfo_f( void )
 {
+	if( R_BackendAPI() )
+	{
+		R_BackendPrintInfo();
+		return;
+	}
+
 	Msg( "\n" );
 	Msg( "GL_VENDOR: %s\n", glConfig.vendor_string );
 	Msg( "GL_RENDERER: %s\n", glConfig.renderer_string );
@@ -893,11 +900,11 @@ void GL_InitCommands( void )
 	gl_swapInterval = Cvar_Get( "gl_swapInterval", "0", CVAR_ARCHIVE,  "time beetween frames (in msec)" );
 	gl_extensions = Cvar_Get( "gl_extensions", "1", CVAR_GLCONFIG, "allow gl_extensions" );
 	gl_detailscale = Cvar_Get( "gl_detailscale", "4.0", CVAR_ARCHIVE, "default scale applies while auto-generate list of detail textures" );
-	gl_texture_anisotropy = Cvar_Get( "gl_anisotropy", "2.0", CVAR_ARCHIVE, "textures anisotropic filter" );
+	gl_texture_anisotropy = Cvar_Get( "gl_anisotropy", "16.0", CVAR_ARCHIVE, "textures anisotropic filter" );
 	gl_texture_lodbias =  Cvar_Get( "gl_texture_lodbias", "0.0", CVAR_ARCHIVE, "LOD bias for mipmapped textures" );
 	gl_compress_textures = Cvar_Get( "gl_compress_textures", "0", CVAR_GLCONFIG, "compress textures to safe video memory" );
 	gl_luminance_textures = Cvar_Get( "gl_luminance_textures", "0", CVAR_GLCONFIG, "force all textures to luminance" );
-	gl_msaa = Cvar_Get( "gl_msaa", "0", CVAR_GLCONFIG, "MSAA samples. Use with caution, engine may fail with some values" );
+	gl_msaa = Cvar_Get( "gl_msaa", "4", CVAR_GLCONFIG, "MSAA samples. Use with caution, engine may fail with some values" );
 	gl_compensate_gamma_screenshots = Cvar_Get( "gl_compensate_gamma_screenshots", "0", CVAR_ARCHIVE, "allow to apply gamma value for screenshots and snapshots" );
 	gl_keeptjunctions = Cvar_Get( "gl_keeptjunctions", "1", CVAR_ARCHIVE, "disable to reduce vertexes count but removing tjuncs causes blinking pixels" );
 	gl_allow_static = Cvar_Get( "gl_allow_static", "0", CVAR_ARCHIVE, "force to drawing non-moveable brushes as part of world (save FPS)" );
@@ -909,8 +916,8 @@ void GL_InitCommands( void )
 	gl_test = Cvar_Get( "gl_test", "0", 0, "engine developer cvar for quick testing new features" );
 	gl_wireframe = Cvar_Get( "gl_wireframe", "0", 0, "show wireframe overlay" );
 	gl_overview = Cvar_Get( "dev_overview", "0", 0, "show level overview" );
-	gl_overbright = Cvar_Get( "gl_overbright", "0", CVAR_ARCHIVE, "Overbright mode (0-2)");
-	gl_overbright_studio = Cvar_Get( "gl_overbright_studio", "0", CVAR_ARCHIVE, "Overbright for studiomodels");
+	gl_overbright = Cvar_Get( "gl_overbright", "1", CVAR_ARCHIVE, "Overbright mode (0-2)");
+	gl_overbright_studio = Cvar_Get( "gl_overbright_studio", "1", CVAR_ARCHIVE, "Overbright for studiomodels");
 
 	// these cvar not used by engine but some mods requires this
 	Cvar_Get( "gl_polyoffset", "-0.1", 0, "polygon offset for decals" );
@@ -1106,13 +1113,19 @@ R_Init
 */
 qboolean R_Init( void )
 {
+	const renderer_backend_t *backend;
+	renderer_init_t backendInit;
+
 	if( glw_state.initialized )
 		return true;
+
+	R_BackendSelectFromCommandLine();
 
 	// give initial OpenGL configuration
 	Cbuf_AddText( "exec opengl.cfg\n" );
 
 	GL_InitCommands();
+	R_BackendRegisterCvars();
 	
 	// Set screen resolution and fullscreen mode if passed in on command line.
 	// This is done after executing opengl.cfg, as the command line values should take priority.
@@ -1128,12 +1141,42 @@ qboolean R_Init( void )
 	// create the window and set up the context
 	if( !R_Init_OpenGL( ))
 	{
-		GL_RemoveCommands();
 		R_Free_OpenGL();
+		if( R_BackendIsFilament() )
+		{
+			R_BackendFallbackToOpenGL( "Metal window creation failed" );
+			if( R_Init_OpenGL() )
+				goto video_initialized;
+		}
 
+		GL_RemoveCommands();
 		// can't initialize video subsystem
 		Host_NewInstance( va("#%s", GI->gamefolder ), "fallback to dedicated mode\n" );
 		return false;
+	}
+
+video_initialized:
+	backend = R_BackendAPI();
+	if( backend )
+	{
+		backendInit.window = host.hWnd;
+		backendInit.width = glState.width;
+		backendInit.height = glState.height;
+		backendInit.fullscreen = glState.fullScreen;
+
+		if( !backend->Init( &backendInit ))
+		{
+			backend->Shutdown();
+			R_Free_OpenGL();
+			R_BackendFallbackToOpenGL( "Metal device or swap chain initialization failed" );
+			if( !R_Init_OpenGL() )
+			{
+				GL_RemoveCommands();
+				R_Free_OpenGL();
+				Host_NewInstance( va("#%s", GI->gamefolder ), "fallback to dedicated mode\n" );
+				return false;
+			}
+		}
 	}
 
 	renderinfo->modified = false;
@@ -1165,9 +1208,14 @@ R_Shutdown
 void R_Shutdown( void )
 {
 	int	i;
+	const renderer_backend_t *backend;
 
 	if( !glw_state.initialized )
 		return;
+
+	backend = R_BackendAPI();
+	if( backend )
+		backend->OnMapUnloaded();
 
 	// release SpriteTextures
 	for( i = 1; i < MAX_IMAGES; i++ )
@@ -1181,6 +1229,9 @@ void R_Shutdown( void )
 	R_ShutdownImages();
 
 	Mem_FreePool( &r_temppool );
+
+	if( backend )
+		backend->Shutdown();
 
 	// shut down OS specific OpenGL stuff like contexts, etc.
 	R_Free_OpenGL();

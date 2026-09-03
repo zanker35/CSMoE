@@ -26,6 +26,7 @@ GNU General Public License for more details.
 #include "joyinput.h"
 #include "sound.h"
 #include "gl_vidnt.h"
+#include "ref_backend.h"
 
 #ifdef XASH_IMGUI
 #include "imgui_impl_xash.h"
@@ -515,11 +516,21 @@ static void SDLash_EventFilter( SDL_Event *event )
 			Sys_Quit();
 			break;
 		case SDL_WINDOWEVENT_RESIZED:
+		{
+			int width = event->window.data1;
+			int height = event->window.data2;
 			if( vid_fullscreen->integer != 0 ) break;
 			Cvar_SetFloat( "vid_mode",  VID_NOMODE ); // no mode
-			R_ChangeDisplaySettingsFast( event->window.data1,
-										 event->window.data2 );
+			if( R_BackendIsFilament() )
+			{
+#if SDL_VERSION_ATLEAST( 2, 26, 0 )
+				SDL_GetWindowSizeInPixels( host.hWnd, &width, &height );
+#endif
+			}
+			else SDL_GL_GetDrawableSize( host.hWnd, &width, &height ); // HiDPI: data1/data2 are points, renderer needs pixels
+			R_ChangeDisplaySettingsFast( width, height );
 			break;
+		}
 		case SDL_WINDOWEVENT_MAXIMIZED:
 		{
 #if !defined(TARGET_OS_MAC) && !defined(XASH_WINRT) && !defined(XASH_QINDIEGL)

@@ -922,7 +922,7 @@ qboolean GL_CreateContext( void )
 	pglGetIntegerv(GL_SAMPLES_ARB, &glConfig.msaasamples);
 	
 #else
-	if( ( glw_state.context = SDL_GL_CreateContext( host.hWnd ) ) == NULL)
+	if( ( glw_state.context = SDL_GL_CreateContext( VID_GetGLContextWindow() ) ) == NULL)
 	{
 		MsgDev(D_ERROR, "GL_CreateContext: %s\n", SDL_GetError());
 		return GL_DeleteContext();
@@ -968,7 +968,7 @@ qboolean GL_UpdateContext( void )
 		return GL_DeleteContext();
 	}
 #else
-	if(!( SDL_GL_MakeCurrent( host.hWnd, glw_state.context ) ) )
+	if(!( SDL_GL_MakeCurrent( VID_GetGLContextWindow(), glw_state.context ) ) )
 	{
 		MsgDev(D_ERROR, "GL_UpdateContext: %s", SDL_GetError());
 		return GL_DeleteContext();

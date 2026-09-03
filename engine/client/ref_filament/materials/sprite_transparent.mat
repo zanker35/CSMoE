@@ -1,0 +1,26 @@
+material {
+    name : CSMoESpriteTransparent,
+    parameters : [
+        {
+            type : sampler2d,
+            name : colorTexture
+        }
+    ],
+    requires : [
+        uv0,
+        color
+    ],
+    shadingModel : unlit,
+    blending : transparent,
+    depthWrite : false,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor =
+            texture(materialParams_colorTexture, getUV0()) * getColor();
+    }
+}

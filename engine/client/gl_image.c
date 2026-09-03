@@ -18,6 +18,7 @@ GNU General Public License for more details.
 #include "common.h"
 #include "client.h"
 #include "gl_local.h"
+#include "ref_backend.h"
 #include "studio.h"
 
 #define TEXTURES_HASH_SIZE	64
@@ -1435,6 +1436,18 @@ static void GL_UploadTexture( rgbdata_t *pic, gltexture_t *tex, qboolean subImag
 
 		if(!( tex->flags & TF_NOMIPMAP ) && !( tex->flags & TF_SKYSIDE ) && !( tex->flags & TF_TEXTURE_3D ))
 			data = GL_ApplyGamma( data, tex->width * tex->height, ( tex->flags & TF_NORMALMAP ));
+
+		if( i == 0 && glTarget == GL_TEXTURE_2D && dataType == GL_UNSIGNED_BYTE && data )
+		{
+			qboolean srgb = Q_strncmp( tex->name, "*lightmap", 9 ) != 0 &&
+				Q_strncmp( tex->name, "*deluxemap", 10 ) != 0 &&
+				!( tex->flags & ( TF_NORMALMAP | TF_DEPTHMAP ));
+			R_BackendTextureUpload( tex - r_textures, tex->width, tex->height,
+				inFormat, data, srgb );
+			if( tex->flags & TF_SKYSIDE )
+				R_BackendSkyTextureUpload(( tex->texnum - 5800 ) % 6,
+					tex - r_textures, tex->width, tex->height, inFormat, data );
+		}
 
 		if( glTarget == GL_TEXTURE_1D )
 		{
@@ -3832,6 +3845,7 @@ void R_FreeImage( gltexture_t *image )
 	if( image->flags & (TF_KEEP_RGBDATA|TF_KEEP_8BIT) && image->original )
 		FS_FreeImage( image->original );
 
+	R_BackendTextureFree( image - r_textures );
 	pglDeleteTextures( 1, &image->texnum );
 	Q_memset( image, 0, sizeof( *image ));
 }

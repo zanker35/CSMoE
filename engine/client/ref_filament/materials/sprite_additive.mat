@@ -1,0 +1,29 @@
+material {
+    name : CSMoESpriteAdditive,
+    parameters : [
+        {
+            type : sampler2d,
+            name : colorTexture
+        }
+    ],
+    requires : [
+        uv0,
+        color
+    ],
+    shadingModel : unlit,
+    blending : add,
+    depthWrite : false,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 color = texture(materialParams_colorTexture, getUV0()) * getColor();
+        // GoldSrc kRenderTransAdd uses SRC_ALPHA, ONE. Filament's additive
+        // blend adds RGB directly, so premultiply to preserve legacy alpha.
+        color.rgb *= color.a;
+        material.baseColor = color;
+    }
+}

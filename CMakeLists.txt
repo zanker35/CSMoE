@@ -60,9 +60,16 @@ else()
 endif()
 
 option(XASH_LUASH "LUA support for CSMoE. Expected lua 5.3" ON)
+option(CSMOE_RENDERER_FILAMENT "Build the experimental Filament renderer backend" OFF)
+set(CSMOE_FILAMENT_ROOT "" CACHE PATH "Path to the pinned Filament 1.74.0 SDK")
 
 if (APPLE OR ANDROID)
 	add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-invalid-offsetof)
+	# New Apple clang (15+) defaults several pointer/int-conversion warnings to
+	# errors; the Xash3D engine is legacy C and trips these harmlessly. Demote them.
+	if(APPLE)
+		add_compile_options(-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration -Wno-incompatible-pointer-types)
+	endif()
 elseif(MSVC)
 
 else()

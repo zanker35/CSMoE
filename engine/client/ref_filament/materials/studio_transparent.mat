@@ -1,0 +1,29 @@
+material {
+    name : CSMoEStudioTransparent,
+    parameters : [
+        {
+            type : sampler2d,
+            name : colorTexture
+        }
+    ],
+    requires : [
+        uv0,
+        color
+    ],
+    shadingModel : unlit,
+    blending : transparent,
+    depthWrite : false,
+    doubleSided : true,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 texel = texture(materialParams_colorTexture, getUV0());
+        vec4 vertexColor = getColor();
+        vec3 lighting = max(vertexColor.rgb, vec3(0.28));
+        material.baseColor =
+            vec4(texel.rgb * lighting, texel.a * vertexColor.a);
+    }
+}

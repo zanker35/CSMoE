@@ -18,6 +18,7 @@ GNU General Public License for more details.
 #include "keydefs.h"
 #include "protocol.h"		// get the protocol version
 #include "gl_local.h"
+#include "ref_backend.h"
 #include "qfont.h"
 #include "server.h" // Log_Printf( , ... )
 
@@ -676,6 +677,7 @@ int Con_DrawGenericChar( int x, int y, int number, rgba_t color )
 	rc = &con.curFont->fontRc[number];
 
 	pglColor4ubv( color );
+	R_BackendR2DSetColor( color[0], color[1], color[2], color[3] );
 	R_GetTextureParms( &w, &h, con.curFont->hFontTexture );
 
 	// calc rectangle
@@ -689,6 +691,7 @@ int Con_DrawGenericChar( int x, int y, int number, rgba_t color )
 	TextAdjustSize( &x, &y, &width, &height );
 	R_DrawStretchPic( x, y, width, height, s1, t1, s2, t2, con.curFont->hFontTexture );
 	pglColor4ub( 255, 255, 255, 255 ); // don't forget reset color
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 
 	return con.curFont->charWidths[number];
 }

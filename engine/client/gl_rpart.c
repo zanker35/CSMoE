@@ -23,7 +23,9 @@ GNU General Public License for more details.
 #include "entity_types.h"
 #include "triangleapi.h"
 #include "cl_tent.h"
+#include "sprite.h"
 #include "studio.h"
+#include "ref_backend.h"
 
 /*
 ==============================================================
@@ -405,6 +407,7 @@ void CL_UpdateParticle( particle_t *p, float ft )
 	float	size = 1.5f;
 	int	i, iRamp, alpha = 255;
 	vec3_t	right, up;
+	vec3_t	points[4];
 	rgb_t	color;
 
 	r_stats.c_particle_count++;
@@ -510,19 +513,34 @@ void CL_UpdateParticle( particle_t *p, float ft )
 	else
 		GL_Bind( XASH_TEXTURE0, cls.particleImage );
 
+	VectorAdd( p->org, up, points[0] );
+	VectorSubtract( points[0], right, points[0] );
+	VectorAdd( p->org, up, points[1] );
+	VectorAdd( points[1], right, points[1] );
+	VectorSubtract( p->org, up, points[2] );
+	VectorAdd( points[2], right, points[2] );
+	VectorSubtract( p->org, up, points[3] );
+	VectorSubtract( points[3], right, points[3] );
+
 	// add the 4 corner vertices.
 	pglBegin( GL_QUADS );
 
 	pglTexCoord2f( 0.0f, 1.0f );
-	pglVertex3f( p->org[0] - right[0] + up[0], p->org[1] - right[1] + up[1], p->org[2] - right[2] + up[2] );
+	pglVertex3fv( points[0] );
 	pglTexCoord2f( 0.0f, 0.0f );
-	pglVertex3f( p->org[0] + right[0] + up[0], p->org[1] + right[1] + up[1], p->org[2] + right[2] + up[2] );
+	pglVertex3fv( points[1] );
 	pglTexCoord2f( 1.0f, 0.0f );
-	pglVertex3f( p->org[0] + right[0] - up[0], p->org[1] + right[1] - up[1], p->org[2] + right[2] - up[2] );
+	pglVertex3fv( points[2] );
 	pglTexCoord2f( 1.0f, 1.0f );
-	pglVertex3f( p->org[0] - right[0] - up[0], p->org[1] - right[1] - up[1], p->org[2] - right[2] - up[2] );
+	pglVertex3fv( points[3] );
 
 	pglEnd();
+	R_BackendSpriteSubmit(
+		r_oldparticles->integer == 1 ?
+			cls.oldParticleImage : cls.particleImage,
+		kRenderTransTexture, SPR_INDEXALPHA,
+		color[0], color[1], color[2], (byte)alpha,
+		(const float *)points );
 
 	if( p->type != pt_clientcustom )
 	{

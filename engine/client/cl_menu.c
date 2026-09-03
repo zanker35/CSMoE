@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "input.h"
 #include "server.h" // !!svgame.hInstance
 #include "gl_vidnt.h"
+#include "ref_backend.h"
 
 static MENUAPI	GetMenuAPI;
 static ADDTOUCHBUTTONTOLIST pfnAddTouchButtonToList;
@@ -526,9 +527,11 @@ static void pfnFillRGBA( int x, int y, int width, int height, int r, int g, int 
 	b = bound( 0, b, 255 );
 	a = bound( 0, a, 255 );
 	pglColor4ub( r, g, b, a );
+	R_BackendR2DSetColor( r, g, b, a );
 	GL_SetRenderMode( kRenderTransTexture );
 	R_DrawStretchPic( x, y, width, height, 0, 0, 1, 1, cls.fillImage );
 	pglColor4ub( 255, 255, 255, 255 );
+	R_BackendR2DSetColor( 255, 255, 255, 255 );
 }
 
 /*

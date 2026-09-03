@@ -196,6 +196,7 @@ set(XASH_ENGINE_CLIENT_SOURCES
    client/cl_video.c
    client/cl_view.c
    client/cl_netgraph.c
+   client/ref_backend.c
    client/gl_backend.c
    client/gl_beams.c
    client/gl_cull.c
@@ -248,6 +249,179 @@ set(XASH_ENGINE_DEDICATED_SOURCES
 set(XASH_ENGINE_LAUNCHER_SOURCES
 	common/launcher.c
 )
+
+if(CSMOE_RENDERER_FILAMENT)
+	if(NOT APPLE)
+		message(FATAL_ERROR "The first Filament vertical slice currently supports macOS only")
+	endif()
+
+	find_package(Filament 1.74.0 EXACT REQUIRED)
+
+	set(CSMOE_FILAMENT_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated/filament")
+	set(CSMOE_FILAMENT_WORLD_BAKED_INC "${CSMOE_FILAMENT_GENERATED_DIR}/world_baked.inc")
+	set(CSMOE_FILAMENT_WORLD_TRANSPARENT_INC "${CSMOE_FILAMENT_GENERATED_DIR}/world_transparent.inc")
+	set(CSMOE_FILAMENT_WORLD_SHADOW_RECEIVER_INC "${CSMOE_FILAMENT_GENERATED_DIR}/world_shadow_receiver.inc")
+	set(CSMOE_FILAMENT_SKY_INC "${CSMOE_FILAMENT_GENERATED_DIR}/sky.inc")
+	set(CSMOE_FILAMENT_R2D_INC "${CSMOE_FILAMENT_GENERATED_DIR}/r2d.inc")
+	set(CSMOE_FILAMENT_STUDIO_OPAQUE_INC "${CSMOE_FILAMENT_GENERATED_DIR}/studio_opaque.inc")
+	set(CSMOE_FILAMENT_STUDIO_TRANSPARENT_INC "${CSMOE_FILAMENT_GENERATED_DIR}/studio_transparent.inc")
+	set(CSMOE_FILAMENT_SPRITE_MASKED_INC "${CSMOE_FILAMENT_GENERATED_DIR}/sprite_masked.inc")
+	set(CSMOE_FILAMENT_SPRITE_TRANSPARENT_INC "${CSMOE_FILAMENT_GENERATED_DIR}/sprite_transparent.inc")
+	set(CSMOE_FILAMENT_SPRITE_ADDITIVE_INC "${CSMOE_FILAMENT_GENERATED_DIR}/sprite_additive.inc")
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_WORLD_BAKED_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_WORLD_BAKED_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_baked.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_baked.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_WORLD_TRANSPARENT_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_WORLD_TRANSPARENT_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_transparent.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_transparent.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_WORLD_SHADOW_RECEIVER_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_WORLD_SHADOW_RECEIVER_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_shadow_receiver.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/world_shadow_receiver.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_SKY_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_SKY_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sky.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sky.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_R2D_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_R2D_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/r2d.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/r2d.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_STUDIO_OPAQUE_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_STUDIO_OPAQUE_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/studio_opaque.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/studio_opaque.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_STUDIO_TRANSPARENT_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_STUDIO_TRANSPARENT_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/studio_transparent.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/studio_transparent.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_SPRITE_MASKED_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_SPRITE_MASKED_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_masked.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_masked.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_SPRITE_TRANSPARENT_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_SPRITE_TRANSPARENT_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_transparent.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_transparent.mat"
+		VERBATIM)
+	add_custom_command(
+		OUTPUT "${CSMOE_FILAMENT_SPRITE_ADDITIVE_INC}"
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${CSMOE_FILAMENT_GENERATED_DIR}"
+		COMMAND "${Filament_MATC_EXECUTABLE}"
+			-p desktop
+			-a metal
+			-f header
+			-o "${CSMOE_FILAMENT_SPRITE_ADDITIVE_INC}"
+			"${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_additive.mat"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/client/ref_filament/materials/sprite_additive.mat"
+		VERBATIM)
+
+	add_library(csmoe_filament_backend OBJECT
+		client/ref_filament/ref_filament.mm
+		"${CSMOE_FILAMENT_WORLD_BAKED_INC}"
+		"${CSMOE_FILAMENT_WORLD_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_WORLD_SHADOW_RECEIVER_INC}"
+		"${CSMOE_FILAMENT_SKY_INC}"
+		"${CSMOE_FILAMENT_R2D_INC}"
+		"${CSMOE_FILAMENT_STUDIO_OPAQUE_INC}"
+		"${CSMOE_FILAMENT_STUDIO_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_SPRITE_MASKED_INC}"
+		"${CSMOE_FILAMENT_SPRITE_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_SPRITE_ADDITIVE_INC}")
+	set_source_files_properties(
+		"${CSMOE_FILAMENT_WORLD_BAKED_INC}"
+		"${CSMOE_FILAMENT_WORLD_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_WORLD_SHADOW_RECEIVER_INC}"
+		"${CSMOE_FILAMENT_SKY_INC}"
+		"${CSMOE_FILAMENT_R2D_INC}"
+		"${CSMOE_FILAMENT_STUDIO_OPAQUE_INC}"
+		"${CSMOE_FILAMENT_STUDIO_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_SPRITE_MASKED_INC}"
+		"${CSMOE_FILAMENT_SPRITE_TRANSPARENT_INC}"
+		"${CSMOE_FILAMENT_SPRITE_ADDITIVE_INC}"
+		PROPERTIES
+		GENERATED TRUE
+		HEADER_FILE_ONLY TRUE)
+	set_target_properties(csmoe_filament_backend PROPERTIES
+		CXX_STANDARD 20
+		CXX_STANDARD_REQUIRED ON
+		OBJCXX_STANDARD 20
+		OBJCXX_STANDARD_REQUIRED ON)
+	target_compile_definitions(csmoe_filament_backend PRIVATE XASH_FILAMENT=1 XASH_SDL=1)
+	target_include_directories(csmoe_filament_backend PRIVATE
+		.
+		common/
+		common/imagelib/
+		client/
+		server/
+		../common
+		../pm_shared
+		"${CSMOE_FILAMENT_GENERATED_DIR}")
+	target_link_libraries(csmoe_filament_backend PRIVATE Filament::Filament sdl2)
+endif()
 
 if(WIN32)
 set(XASH_ENGINE_SOURCES ${XASH_ENGINE_SOURCES} ${XASH_ENGINE_WIN32_SOURCES})
@@ -373,6 +547,12 @@ elseif(XASH_SINGLE_BINARY) # Set executable or library
 	add_executable(${XASH_ENGINE} ${XASH_ENGINE_SOURCES})
 else()
 	add_library(${XASH_ENGINE} SHARED ${XASH_ENGINE_SOURCES})
+endif()
+
+if(CSMOE_RENDERER_FILAMENT)
+	target_sources(${XASH_ENGINE} PRIVATE $<TARGET_OBJECTS:csmoe_filament_backend>)
+	target_compile_definitions(${XASH_ENGINE} PRIVATE XASH_FILAMENT=1)
+	target_link_libraries(${XASH_ENGINE} Filament::Filament)
 endif()
 
 if(XASH_STATIC_GAMELIB)

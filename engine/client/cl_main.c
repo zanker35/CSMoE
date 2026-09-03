@@ -17,6 +17,7 @@ GNU General Public License for more details.
 
 #include "common.h"
 #include "client.h"
+#include "ref_backend.h"
 #include "net_encode.h"
 #include "cl_tent.h"
 #include "gl_local.h"
@@ -53,6 +54,7 @@ convar_t    *cl_nosmooth;
 convar_t    *cl_smoothtime;
 convar_t	*cl_draw_particles;
 convar_t	*cl_lightstyle_lerping;
+convar_t	*cl_autocmd;
 convar_t	*cl_idealpitchscale;
 convar_t	*cl_solid_players;
 convar_t	*cl_draw_beams;
@@ -1085,6 +1087,9 @@ CL_ClearState
 */
 void CL_ClearState( void )
 {
+	if( R_BackendAPI() )
+		R_BackendAPI()->OnMapUnloaded();
+
 	S_StopAllSounds ();
 	R_ClearVBO();
 	CL_ClearEffects ();
@@ -2133,7 +2138,8 @@ void CL_InitLocal( void )
 	cl_cmdrate = Cvar_Get( "cl_cmdrate", "30", CVAR_ARCHIVE, "max number of command packets sent to server per second" );
 	cl_draw_particles = Cvar_Get( "cl_draw_particles", "1", CVAR_ARCHIVE, "disable particle effects" );
 	cl_draw_beams = Cvar_Get( "cl_draw_beams", "1", CVAR_ARCHIVE, "disable view beams" );
-	cl_lightstyle_lerping = Cvar_Get( "cl_lightstyle_lerping", "0", CVAR_ARCHIVE, "enable animated light lerping (perfomance option)" );
+	cl_lightstyle_lerping = Cvar_Get( "cl_lightstyle_lerping", "1", CVAR_ARCHIVE, "enable animated light lerping (perfomance option)" );
+	cl_autocmd = Cvar_Get( "cl_autocmd", "", 0, "staged commands 'N:cmd|N:cmd' run N frames after entering a level (automated testing)" );
 	cl_sprite_nearest = Cvar_Get( "cl_sprite_nearest", "0", CVAR_ARCHIVE, "disable texture filtering on sprites" );
 	cl_showerror = Cvar_Get( "cl_showerror", "0", CVAR_ARCHIVE, "show prediction error" );
 	cl_updaterate = Cvar_Get( "cl_updaterate", "60", CVAR_USERINFO|CVAR_ARCHIVE, "refresh rate of server messages" );
@@ -2267,6 +2273,57 @@ Host_ClientFrame
 
 ==================
 */
+/*
+==================
+CL_RunAutoCmd
+
+cl_autocmd runs staged console commands N rendered frames after the client
+enters a level: "120:jointeam 2|300:screenshot|360:quit".  Startup +exec
+scripts can't do this — their wait chains queue ahead of the signon commands
+and stall the connection — so this is the channel for scripted captures.
+==================
+*/
+static void CL_RunAutoCmd( void )
+{
+	static int	frames, cursor;
+	const char	*spec = cl_autocmd->string;
+	int		i, stage;
+
+	if( !spec[0] ) return;
+
+	if( cls.state != ca_active )
+	{
+		frames = cursor = 0;
+		return;
+	}
+
+	frames++;
+
+	for( i = 0, stage = 0; spec[i]; stage++ )
+	{
+		int		at = Q_atoi( &spec[i] );
+		const char	*colon = Q_strchr( &spec[i], ':' );
+		const char	*bar;
+		if( !colon ) break;
+		bar = Q_strchr( colon, '|' );
+
+		if( stage == cursor && frames >= at )
+		{
+			char	cmd[256];
+			size_t	len = bar ? (size_t)( bar - colon - 1 ) : Q_strlen( colon + 1 );
+			if( len >= sizeof( cmd )) len = sizeof( cmd ) - 1;
+			Q_strncpy( cmd, colon + 1, len + 1 );
+			Msg( "autocmd[%i]: %s\n", stage, cmd );
+			Cbuf_AddText( cmd );
+			Cbuf_AddText( "\n" );
+			cursor++;
+		}
+
+		if( !bar ) break;
+		i = ( bar - spec ) + 1;
+	}
+}
+
 void Host_ClientFrame( void )
 {
 	// if client is not active, skip render functions
@@ -2327,6 +2384,8 @@ void Host_ClientFrame( void )
 	}
 
 	Con_RunConsole();
+
+	CL_RunAutoCmd();
 
 	cls.framecount++;
 }

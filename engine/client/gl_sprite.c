@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "studio.h"
 #include "entity_types.h"
 #include "cl_tent.h"
+#include "ref_backend.h"
 
 // it's a Valve default value for LoadMapSprite (probably must be power of two)
 #define MAPSPRITE_SIZE	128
@@ -854,30 +855,43 @@ qboolean R_SpriteOccluded( cl_entity_t *e, vec3_t origin, int *alpha, float *psc
 R_DrawSpriteQuad
 =================
 */
-static void R_DrawSpriteQuad( mspriteframe_t *frame, vec3_t org, vec3_t v_right, vec3_t v_up, float scale )
+static void R_DrawSpriteQuad( mspriteframe_t *frame, vec3_t org,
+	vec3_t v_right, vec3_t v_up, float scale, int renderMode,
+	int textureFormat, const vec3_t color, float alpha, qboolean submitBackend )
 {
-	vec3_t	point;
+	vec3_t	points[4];
 
 	r_stats.c_sprite_polys++;
 
+	VectorMA( org, frame->down * scale, v_up, points[0] );
+	VectorMA( points[0], frame->left * scale, v_right, points[0] );
+	VectorMA( org, frame->up * scale, v_up, points[1] );
+	VectorMA( points[1], frame->left * scale, v_right, points[1] );
+	VectorMA( org, frame->up * scale, v_up, points[2] );
+	VectorMA( points[2], frame->right * scale, v_right, points[2] );
+	VectorMA( org, frame->down * scale, v_up, points[3] );
+	VectorMA( points[3], frame->right * scale, v_right, points[3] );
+
 	pglBegin( GL_QUADS );
 		pglTexCoord2f( 0.0f, 1.0f );
-		VectorMA( org, frame->down * scale, v_up, point );
-		VectorMA( point, frame->left * scale, v_right, point );
-		pglVertex3fv( point );
+		pglVertex3fv( points[0] );
 		pglTexCoord2f( 0.0f, 0.0f );
-		VectorMA( org, frame->up * scale, v_up, point );
-		VectorMA( point, frame->left * scale, v_right, point );
-		pglVertex3fv( point );
+		pglVertex3fv( points[1] );
 		pglTexCoord2f( 1.0f, 0.0f );
-		VectorMA( org, frame->up * scale, v_up, point );
-		VectorMA( point, frame->right * scale, v_right, point );
-		pglVertex3fv( point );
+		pglVertex3fv( points[2] );
 		pglTexCoord2f( 1.0f, 1.0f );
-		VectorMA( org, frame->down * scale, v_up, point );
-		VectorMA( point, frame->right * scale, v_right, point );
-		pglVertex3fv( point );
+		pglVertex3fv( points[3] );
 	pglEnd();
+
+	if( submitBackend )
+	{
+		R_BackendSpriteSubmit( frame->gl_texturenum, renderMode, textureFormat,
+			(byte)( bound( 0.0f, color[0], 1.0f ) * 255.0f ),
+			(byte)( bound( 0.0f, color[1], 1.0f ) * 255.0f ),
+			(byte)( bound( 0.0f, color[2], 1.0f ) * 255.0f ),
+			(byte)( bound( 0.0f, alpha, 1.0f ) * 255.0f ),
+			(const float *)points );
+	}
 }
 
 static qboolean R_SpriteHasLightmap( cl_entity_t *e, int texFormat )
@@ -1074,7 +1088,9 @@ void R_DrawSpriteModel( cl_entity_t *e )
 		// draw the single non-lerped frame
 		pglColor4f( color[0], color[1], color[2], flAlpha );
 		GL_Bind( XASH_TEXTURE0, frame->gl_texturenum );
-		R_DrawSpriteQuad( frame, origin, v_right, v_up, scale );
+		R_DrawSpriteQuad( frame, origin, v_right, v_up, scale,
+			e->curstate.rendermode, psprite->texFormat,
+			color, flAlpha, true );
 	}
 	else
 	{
@@ -1086,14 +1102,18 @@ void R_DrawSpriteModel( cl_entity_t *e )
 		{
 			pglColor4f( color[0], color[1], color[2], flAlpha * ilerp );
 			GL_Bind( XASH_TEXTURE0, oldframe->gl_texturenum );
-			R_DrawSpriteQuad( oldframe, origin, v_right, v_up, scale );
+			R_DrawSpriteQuad( oldframe, origin, v_right, v_up, scale,
+				e->curstate.rendermode, psprite->texFormat,
+				color, flAlpha * ilerp, true );
 		}
 
 		if( lerp != 0.0f )
 		{
 			pglColor4f( color[0], color[1], color[2], flAlpha * lerp );
 			GL_Bind( XASH_TEXTURE0, frame->gl_texturenum );
-			R_DrawSpriteQuad( frame, origin, v_right, v_up, scale );
+			R_DrawSpriteQuad( frame, origin, v_right, v_up, scale,
+				e->curstate.rendermode, psprite->texFormat,
+				color, flAlpha * lerp, true );
 		}
 	}
 
@@ -1108,7 +1128,8 @@ void R_DrawSpriteModel( cl_entity_t *e )
 
 		pglColor4f( color2[0], color2[1], color2[2], flAlpha );
 		GL_Bind( XASH_TEXTURE0, tr.whiteTexture );
-		R_DrawSpriteQuad( frame, origin, v_right, v_up, scale );
+		R_DrawSpriteQuad( frame, origin, v_right, v_up, scale,
+			kRenderNormal, SPR_NORMAL, color2, flAlpha, false );
 
 		if( glState.drawTrans ) 
 			pglDepthMask( GL_FALSE );

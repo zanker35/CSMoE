@@ -115,7 +115,11 @@ elseif(APPLE)
 	add_executable(${XASH_LAUNCHER} MACOSX_BUNDLE xash_static.cpp ${APP_ICNS})
 
 	set_target_properties(${XASH_LAUNCHER} PROPERTIES
-			OUTPUT_NAME CSMoE) # Change name to your gamedir, if you building a standalone game
+			OUTPUT_NAME CSMoE
+			MACOSX_BUNDLE_GUI_IDENTIFIER "org.moemod.csmoe"
+			MACOSX_BUNDLE_BUNDLE_NAME "CSMoE"
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+			MACOSX_BUNDLE_BUNDLE_VERSION "1") # Change name to your gamedir, if you building a standalone game
 
 	set_target_properties(${XASH_LAUNCHER} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in")
 	set_target_properties(${XASH_LAUNCHER} PROPERTIES MACOSX_BUNDLE_ICON_FILE "Icon.icns")

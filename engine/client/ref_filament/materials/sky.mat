@@ -1,0 +1,24 @@
+material {
+    name : CSMoESky,
+    parameters : [
+        {
+            type : sampler2d,
+            name : baseColor
+        }
+    ],
+    requires : [
+        uv0
+    ],
+    shadingModel : unlit,
+    doubleSided : true,
+    depthCulling : false,
+    depthWrite : false,
+    featureLevel : 1
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = texture(materialParams_baseColor, getUV0());
+    }
+}

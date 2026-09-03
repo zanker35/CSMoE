@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "beamdef.h"
 #include "particledef.h"
 #include "entity_types.h"
+#include "ref_backend.h"
 
 #define IsLiquidContents( cnt )	( cnt == CONTENTS_WATER || cnt == CONTENTS_SLIME || cnt == CONTENTS_LAVA )
 
@@ -1231,6 +1232,15 @@ R_BeginFrame
 */
 void R_BeginFrame( qboolean clearScene )
 {
+	const renderer_backend_t *backend = R_BackendAPI();
+
+	if( backend )
+	{
+		backend->BeginFrame( &cl.refdef );
+		CL_ExtraUpdate();
+		return;
+	}
+
 	glConfig.softwareGammaUpdate = false;	// in case of possible fails
 
 	if(( gl_clear->integer || gl_overview->integer ) && clearScene && cls.state != ca_cinematic )
@@ -1271,10 +1281,34 @@ R_RenderFrame
 */
 void R_RenderFrame( const ref_params_t *fd, qboolean drawWorld )
 {
+	const renderer_backend_t *backend = R_BackendAPI();
+
 	if( r_norefresh->integer )
 		return;
 
 	tr.realframecount++;
+
+	if( backend )
+	{
+		if( drawWorld )
+			r_lastRefdef = *fd;
+
+		// The vertical slice reuses the mature Studio pose and triangle
+		// extraction path while Filament owns the actual visible submission.
+		// This compatibility pass renders only into the hidden GL window.
+		RI.params = RP_NONE;
+		RI.farClip = 0;
+		RI.clipFlags = 15;
+		RI.drawWorld = drawWorld;
+		RI.thirdPerson = cl.thirdperson;
+		RI.drawOrtho = (RI.drawWorld) ? gl_overview->integer : 0;
+		GL_BackendStartFrame();
+		R_RenderScene( fd );
+		GL_BackendEndFrame();
+
+		backend->RenderScene( fd, drawWorld );
+		return;
+	}
 
 	if( RI.drawOrtho != gl_overview->integer )
 		tr.fResetVis = true;
@@ -1333,6 +1367,15 @@ R_EndFrame
 */
 void R_EndFrame( void )
 {
+	const renderer_backend_t *backend = R_BackendAPI();
+
+	if( backend )
+	{
+		backend->RenderOverlay();
+		backend->EndFrame();
+		return;
+	}
+
 	if( r_strobe->integer )
 		R_Strobe_Tick();
 	else
