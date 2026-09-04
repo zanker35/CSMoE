@@ -60,7 +60,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 		return 1;
 
 	wchar_t wstr[1024];
-	cl::Q_UTF8ToUTF16(str, wstr, 1024, STRINGCONVERT_SKIP);
+	cl::Q_UTF8ToUTF16(str, wstr, 1024, cl::STRINGCONVERT_SKIP);
 	
 	wchar_t* szIt = wstr;
 	
@@ -111,7 +111,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char * str, int r, int g, int b, float scale, bool drawing )
 {
 	wchar_t wstr[1024];
-	cl::Q_UTF8ToUTF16(str, wstr, 1024, STRINGCONVERT_SKIP);
+	cl::Q_UTF8ToUTF16(str, wstr, 1024, cl::STRINGCONVERT_SKIP);
 
 	if (!wstr[0])
 		return 0;
@@ -252,6 +252,43 @@ int DrawUtils::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int 
 		x += iWidth;
 	}
 
+	return x;
+}
+
+int DrawUtils::GetNEWHudNumberWidth(int type, int number, int drawZero, int digits, int spacing)
+{
+	char value[16];
+	snprintf(value, sizeof(value), "%d", max(0, number));
+	int count = static_cast<int>(strlen(value));
+	if (drawZero)
+		count = max(count, min(10, digits));
+	const int width = type ? gHUD.m_NEWHUD_iFontWidth_Dollar : gHUD.m_NEWHUD_iFontWidth;
+	return count * (width + spacing);
+}
+
+int DrawUtils::DrawNEWHudNumber(int type, int x, int y, int number, int r, int g, int b, int a,
+	int drawZero, int digits, int spacing)
+{
+	const int base = type ? gHUD.m_NEWHUD_dollar_number_0 : gHUD.m_NEWHUD_number_0;
+	const int width = type ? gHUD.m_NEWHUD_iFontWidth_Dollar : gHUD.m_NEWHUD_iFontWidth;
+	if (base < 0)
+		return DrawHudNumber2(x, y, max(0, number), r, g, b);
+
+	char value[16];
+	snprintf(value, sizeof(value), "%0*d", drawZero ? max(1, min(10, digits)) : 1, max(0, number));
+	ScaleColors(r, g, b, a);
+	bool significant = false;
+	for (const char *digit = value; *digit; ++digit)
+	{
+		const int index = *digit - '0';
+		significant = significant || index != 0 || !digit[1];
+		if (significant)
+			SPR_Set(gHUD.GetSprite(base + index), r, g, b);
+		else
+			SPR_Set(gHUD.GetSprite(base + index), 100 * a / 255, 100 * a / 255, 100 * a / 255);
+		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(base + index));
+		x += width + spacing;
+	}
 	return x;
 }
 

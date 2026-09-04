@@ -32,6 +32,10 @@ GNU General Public License for more details.
 #include "vgui_draw.h"
 #include "sound.h"		// SND_STOP_LOOPING
 
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
+
 #if XASH_IMGUI
 #include "imgui_console.h"
 #endif
@@ -432,6 +436,17 @@ void SPR_AdjustSize( float *x, float *y, float *w, float *h )
 
 	if( w ) *w *= xscale;
 	if( h ) *h *= yscale;
+}
+
+void SPR_AdjustSizeReverse( float *x, float *y, float *w, float *h )
+{
+	float xscale = scr_width->value / (float)clgame.scrInfo.iWidth;
+	float yscale = scr_height->value / (float)clgame.scrInfo.iHeight;
+
+	if( x ) *x /= xscale;
+	if( y ) *y /= yscale;
+	if( w ) *w /= xscale;
+	if( h ) *h /= yscale;
 }
 
 /*
@@ -1739,6 +1754,12 @@ returns drawed chachter width (in real screen pixels)
 */
 int GAME_EXPORT pfnDrawCharacter( int x, int y, int number, int r, int g, int b )
 {
+#ifdef XASH_VGUI2
+	clgame.ds.adjust_size = true;
+	int w = VGUI2_Surface_DrawChar( x, y, number, r, g, b, max( r, max( g, b )) );
+	clgame.ds.adjust_size = false;
+	return w;
+#else
 	if( !cls.creditsFont.valid )
 		return 0;
 
@@ -1766,6 +1787,7 @@ int GAME_EXPORT pfnDrawCharacter( int x, int y, int number, int r, int g, int b 
 
 	return clgame.scrInfo.charWidths[number];
 #endif
+#endif
 }
 
 /*
@@ -1775,14 +1797,17 @@ pfnDrawConsoleString
 drawing string like a console string 
 =============
 */
-int GAME_EXPORT pfnDrawConsoleString( int x, int y, char *string )
+int GAME_EXPORT pfnDrawConsoleString( int x, int y, const char *string )
 {
 	int	drawLen;
 
 	if( !string || !*string ) return 0; // silent ignore
 	clgame.ds.adjust_size = true;
 	Con_SetFont( con_fontsize->integer );
-#ifdef XASH_IMGUI
+#ifdef XASH_VGUI2
+	drawLen = VGUI2_Surface_DrawConsoleString( x, y, string, clgame.ds.textColor[0],
+		clgame.ds.textColor[1], clgame.ds.textColor[2], clgame.ds.textColor[3] );
+#elif defined(XASH_IMGUI)
 	drawLen = ImGui_Console_AddGenericString(x, y, string, clgame.ds.textColor);
 #else
 	drawLen = Con_DrawString(x, y, string, clgame.ds.textColor);
@@ -1821,7 +1846,9 @@ void GAME_EXPORT pfnDrawConsoleStringLen( const char *pText, int *length, int *h
 {
 	Con_SetFont( con_fontsize->integer );
 	clgame.ds.adjust_size = true;
-#ifdef XASH_IMGUI
+#ifdef XASH_VGUI2
+	VGUI2_Surface_DrawStringLen( pText, length, height );
+#elif defined(XASH_IMGUI)
 	ImGui_Console_DrawStringLen( pText, length, height );
 #else
 	Con_DrawStringLen( pText, length, height );
@@ -2853,7 +2880,12 @@ pfnVGUI2DrawCharacter
 */
 static int GAME_EXPORT pfnVGUI2DrawCharacter( int x, int y, int number, unsigned int font )
 {
-#ifdef XASH_IMGUI
+#ifdef XASH_VGUI2
+	clgame.ds.adjust_size = true;
+	int w = VGUI2_Surface_DrawChar( x, y, number, 255, 255, 255, 255 );
+	clgame.ds.adjust_size = false;
+	return w;
+#elif defined(XASH_IMGUI)
 	clgame.ds.adjust_size = true;
 	int w = ImGui_Console_DrawChar(x, y, number, g_color_table[7]);
 	clgame.ds.adjust_size = false;
@@ -2904,6 +2936,12 @@ pfnDrawString
 */
 static int GAME_EXPORT pfnDrawString( int x, int y, const char *str, int r, int g, int b )
 {
+#ifdef XASH_VGUI2
+	clgame.ds.adjust_size = true;
+	int width = VGUI2_Surface_DrawConsoleString( x, y, str, r, g, b, 255 );
+	clgame.ds.adjust_size = false;
+	return x + width;
+#else
 	Con_UtfProcessChar(0);
 
 	// draw the string until we hit the null character or a newline character
@@ -2913,6 +2951,7 @@ static int GAME_EXPORT pfnDrawString( int x, int y, const char *str, int r, int 
 	}
 
 	return x;
+#endif
 }
 
 /*
@@ -2923,10 +2962,16 @@ pfnDrawStringReverse
 */
 static int GAME_EXPORT pfnDrawStringReverse( int x, int y, const char *str, int r, int g, int b )
 {
+#ifdef XASH_VGUI2
+	int width = 0;
+	VGUI2_Surface_DrawStringLen( str, &width, NULL );
+	x -= width;
+#else
 	// find the end of the string
 	char *szIt;
 	for( szIt = (char*)str; *szIt != 0; szIt++ )
 		x -= clgame.scrInfo.charWidths[ (unsigned char) *szIt ];
+#endif
 	pfnDrawString( x, y, str, r, g, b );
 	return x;
 }
@@ -4031,6 +4076,10 @@ void CL_UnloadProgs( void )
 {
 	if( !clgame.hInstance ) return;
 
+#ifdef XASH_VGUI2
+	VGui2_Shutdown();
+#endif
+
 	CL_FreeEdicts();
 	CL_FreeTempEnts();
 	CL_FreeViewBeams();
@@ -4154,6 +4203,10 @@ qboolean CL_LoadProgs( const char *name )
 		clgame.hInstance = NULL;
 		return false;
 	}
+
+#ifdef XASH_VGUI2
+	VGui2_Initialize( &gEngfuncs );
+#endif
 
 	Cvar_Get( "cl_nopred", "1", CVAR_ARCHIVE|CVAR_USERINFO, "disable client movement predicting" );
 	cl_lw = Cvar_Get( "cl_lw", "0", CVAR_ARCHIVE|CVAR_USERINFO, "enable client weapon predicting" );

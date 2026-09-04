@@ -5,6 +5,11 @@
 // $NoKeywords: $
 //=============================================================================
 
+#if defined(XASH_VGUI2) && defined(__cplusplus)
+#include "port.h"
+#include "xash3d_types.h"
+#include "../SourceSDK/public/tier0/platform.h"
+#else
 #ifndef BASETYPES_H
 #define BASETYPES_H
 #ifdef _WIN32
@@ -61,3 +66,4 @@ struct vrect_t
 
 
 #endif // BASETYPES_H
+#endif // XASH_VGUI2

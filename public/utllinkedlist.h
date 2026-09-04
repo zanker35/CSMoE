@@ -6,6 +6,9 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#if defined(XASH_VGUI2)
+#include "../SourceSDK/public/tier1/utllinkedlist.h"
+#else
 #ifndef UTLLINKEDLIST_H
 #define UTLLINKEDLIST_H
 
@@ -933,3 +936,4 @@ inline void CUtlLinkedList<T,S,ML,I,M>::LinkToTail( I elem )
 //-----------------------------------------------------------------------------
 
 #endif // UTLLINKEDLIST_H
+#endif // XASH_VGUI2

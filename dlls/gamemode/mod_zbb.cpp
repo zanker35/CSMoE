@@ -372,6 +372,8 @@ private:
 		auto sp = std::make_shared<CZombieClass_ZBB>(m_pPlayer);
 		m_pCharacter = sp;
 		m_pZBB_Delegate = sp;
+		if (!EquipZombie())
+			return;
 
 		m_pModZBB->m_BuildingInterfaces[m_pPlayer->entindex()] = g_pDelegateZombieShared;
 	}

@@ -76,12 +76,38 @@ qboolean GAME_EXPORT VGUI_IsInGame( void )
 
 void GAME_EXPORT VGUI_GetMousePos( int *_x, int *_y )
 {
-	float xscale = scr_width->value / (float)clgame.scrInfo.iWidth;
-	float yscale = scr_height->value / (float)clgame.scrInfo.iHeight;
+	float xscale = clgame.scrInfo.iWidth > 0 ? scr_width->value / clgame.scrInfo.iWidth : 1.0f;
+	float yscale = clgame.scrInfo.iHeight > 0 ? scr_height->value / clgame.scrInfo.iHeight : 1.0f;
 	int x, y;
 
 	CL_GetMousePosition( &x, &y );
+#ifdef XASH_SDL
+	if( host.hWnd )
+	{
+		int width, height;
+		SDL_GetWindowSize( host.hWnd, &width, &height );
+		// SDL reports window points; VGUI lays out in HUD coordinates.
+		if( width > 0 ) x = (int)((float)x * scr_width->value / width);
+		if( height > 0 ) y = (int)((float)y * scr_height->value / height);
+	}
+#endif
 	*_x = x / xscale, *_y = y / yscale;
+}
+
+void GAME_EXPORT VGUI_SetMousePos( int x, int y )
+{
+#ifdef XASH_SDL
+	if( host.hWnd )
+	{
+		int width, height;
+		int ui_width = clgame.scrInfo.iWidth > 0 ? clgame.scrInfo.iWidth : scr_width->integer;
+		int ui_height = clgame.scrInfo.iHeight > 0 ? clgame.scrInfo.iHeight : scr_height->integer;
+		SDL_GetWindowSize( host.hWnd, &width, &height );
+		if( ui_width > 0 ) x = (int)((float)x * width / ui_width);
+		if( ui_height > 0 ) y = (int)((float)y * height / ui_height);
+		SDL_WarpMouseInWindow( host.hWnd, x, y );
+	}
+#endif
 }
 
 void VGUI_InitCursors( void )
@@ -109,8 +135,12 @@ void VGUI_InitCursors( void )
 void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 {
 	qboolean visible;
+#ifndef XASH_VGUI2
 	if( cls.key_dest != key_game || cl.refdef.paused )
 		return;
+#endif
+	if( cursor < dc_user || cursor >= dc_last )
+		cursor = dc_arrow;
 	
 	switch( cursor )
 	{
@@ -124,7 +154,7 @@ void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 	}
 
 #ifdef XASH_SDL
-	if( host.mouse_visible )
+	if( visible )
 	{
 		SDL_SetRelativeMouseMode( SDL_FALSE );
 		SDL_SetCursor( s_pDefaultCursor[cursor] );
@@ -135,12 +165,13 @@ void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 		SDL_ShowCursor( false );
 		if( host.mouse_visible )
 			SDL_GetRelativeMouseState( NULL, NULL );
-	}
-	//SDL_SetRelativeMouseMode(false);
+#ifdef XASH_VGUI2
+		if( cls.key_dest == key_game && cls.state == ca_active
+			&& clgame.dllFuncs.pfnLookEvent && !Cvar_VariableInteger( "touch_enable" ))
+			SDL_SetRelativeMouseMode( SDL_TRUE );
 #endif
-	if( s_currentCursor == cursor )
-		return;
-
+	}
+#endif
 	s_currentCursor = cursor;
 	host.mouse_visible = visible;
 }
@@ -156,11 +187,15 @@ void GAME_EXPORT VGUI_SetVisible( qboolean state )
 {
 	host.mouse_visible=state;
 #ifdef XASH_SDL
+	if( state )
+		SDL_SetRelativeMouseMode( SDL_FALSE );
 	SDL_ShowCursor( state );
 	if( !state )
 		SDL_GetRelativeMouseState( NULL, NULL );
 
+#ifndef XASH_VGUI2
 	SDLash_EnableTextInput( state, true );
+#endif
 #endif
 }
 
@@ -204,6 +239,7 @@ vguiapi_t vgui =
 	NULL,
 	NULL,
 	NULL,
+	VGUI_SetMousePos,
 };
 
 qboolean VGui_IsActive( void )
@@ -233,7 +269,7 @@ void VGui_Startup( int width, int height )
 
 	if( !vgui.initialized )
 	{
-#ifdef XASH_INTERNAL_GAMELIBS
+#if defined(XASH_INTERNAL_GAMELIBS) && !defined(XASH_VGUI2)
 		s_pVGuiSupport = Com_LoadLibrary( "client", false );
 
 		if( s_pVGuiSupport )
@@ -270,7 +306,15 @@ void VGui_Startup( int width, int height )
 		if( !vguiloader[0] && !Sys_GetParmFromCmdLine( "-vguiloader", vguiloader ) )
 			Q_strncpy( vguiloader, VGUI_SUPPORT_DLL, 256 );
 
+#ifdef XASH_VGUI2
+#ifdef XASH_STATIC_GAMELIB
+		s_pVGuiSupport = Com_LoadLibrary( "vgui2_support", false );
+#else
+		s_pVGuiSupport = Com_LoadLibrary( VGUI2_SUPPORT_DLL, false );
+#endif
+#else
 		s_pVGuiSupport = Com_LoadLibrary( vguiloader, false );
+#endif
 
 		if( !s_pVGuiSupport )
 		{
@@ -347,6 +391,14 @@ void VGui_Shutdown( void )
 	s_pVGuiSupport = NULL;
 
 	vgui.initialized = false;
+#ifdef XASH_SDL
+	for( int i = 0; i < dc_last; ++i )
+	{
+		if( s_pDefaultCursor[i] )
+			SDL_FreeCursor( s_pDefaultCursor[i] );
+		s_pDefaultCursor[i] = NULL;
+	}
+#endif
 }
 
 
@@ -421,7 +473,7 @@ void VGUI_InitKeyTranslationTable( void )
 	s_pVirtualKeyTrans['`'] = KEY_BACKQUOTE;
 	s_pVirtualKeyTrans[','] = KEY_COMMA;
 	s_pVirtualKeyTrans['.'] = KEY_PERIOD;
-	s_pVirtualKeyTrans[K_KP_SLASH] = KEY_SLASH;
+	s_pVirtualKeyTrans['/'] = KEY_SLASH;
 	s_pVirtualKeyTrans['\\'] = KEY_BACKSLASH;
 	s_pVirtualKeyTrans['-'] = KEY_MINUS;
 	s_pVirtualKeyTrans['='] = KEY_EQUAL;
@@ -487,7 +539,7 @@ void VGui_KeyEvent( int key, int down )
 	if( !vgui.initialized )
 		return;
 
-#ifdef XASH_SDL
+#if defined(XASH_SDL) && !defined(XASH_VGUI2)
 	if( host.mouse_visible )
 		SDLash_EnableTextInput( 1, false );
 #endif
@@ -495,7 +547,7 @@ void VGui_KeyEvent( int key, int down )
 	switch( key )
 	{
 	case K_MOUSE1:
-		vgui.Mouse( down?MA_PRESSED:MA_RELEASED, MOUSE_LEFT );
+		vgui.Mouse( down && down % 2 == 0 ? MA_DOUBLE : down ? MA_PRESSED : MA_RELEASED, MOUSE_LEFT );
 		return;
 	case K_MOUSE2:
 		vgui.Mouse( down?MA_PRESSED:MA_RELEASED, MOUSE_RIGHT );
@@ -504,14 +556,17 @@ void VGui_KeyEvent( int key, int down )
 		vgui.Mouse( down?MA_PRESSED:MA_RELEASED, MOUSE_MIDDLE );
 		return;
 	case K_MWHEELDOWN:
-		vgui.Mouse( MA_WHEEL, 1 );
+		if( down ) vgui.Mouse( MA_WHEEL, 1 );
 		return;
 	case K_MWHEELUP:
-		vgui.Mouse( MA_WHEEL, -1 );
+		if( down ) vgui.Mouse( MA_WHEEL, -1 );
 		return;
 	default:
 		break;
 	}
+
+	if( (int)VGUI_MapKey( key ) < 0 )
+		return;
 
 	if( down == 2 )
 		vgui.Key( KA_TYPED, VGUI_MapKey( key ) );
@@ -522,8 +577,8 @@ void VGui_KeyEvent( int key, int down )
 
 void VGui_MouseMove( int x, int y )
 {
-	float xscale = scr_width->value / (float)clgame.scrInfo.iWidth;
-	float yscale = scr_height->value / (float)clgame.scrInfo.iHeight;
+	float xscale = clgame.scrInfo.iWidth > 0 ? scr_width->value / clgame.scrInfo.iWidth : 1.0f;
+	float yscale = clgame.scrInfo.iHeight > 0 ? scr_height->value / clgame.scrInfo.iHeight : 1.0f;
 	if( vgui.initialized )
 		vgui.MouseMove( x / xscale, y / yscale );
 }
@@ -736,8 +791,8 @@ generic method to fill rectangle
 */
 void GAME_EXPORT VGUI_DrawQuad( const vpoint_t *ul, const vpoint_t *lr )
 {
-	float xscale = scr_width->value / (float)clgame.scrInfo.iWidth;
-	float yscale = scr_height->value / (float)clgame.scrInfo.iHeight;
+	float xscale = clgame.scrInfo.iWidth > 0 ? scr_width->value / clgame.scrInfo.iWidth : 1.0f;
+	float yscale = clgame.scrInfo.iHeight > 0 ? scr_height->value / clgame.scrInfo.iHeight : 1.0f;
 
 	ASSERT( ul != NULL && lr != NULL );
 

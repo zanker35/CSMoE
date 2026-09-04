@@ -7,6 +7,9 @@
 // A growable memory class.
 //===========================================================================//
 
+#if defined(XASH_VGUI2)
+#include "../SourceSDK/public/tier1/utlmemory.h"
+#else
 #ifndef UTLMEMORY_H
 #define UTLMEMORY_H
 
@@ -600,3 +603,4 @@ void CUtlMemory<T, I>::Purge (int numElements)
 }
 
 #endif // UTLMEMORY_H
+#endif // XASH_VGUI2

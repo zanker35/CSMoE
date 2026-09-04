@@ -29,7 +29,7 @@
 #include <tier1/utlflags.h>
 #include <tier1/utlsymbol.h>
 
-#include <vgui/VGUI2.h>
+#include <vgui/VGUI.h>
 #include <vgui/Dar.h>
 #include <vgui/IClientPanel.h>
 #include <vgui/IScheme.h>
@@ -199,6 +199,9 @@ public:
 	Panel *FindChildByName(const char *childName, bool recurseDown = false);
 	Panel *FindSiblingByName(const char *siblingName);
 	void CallParentFunction(KeyValues *message);
+
+	template <class T>
+	T* FindControl(const char* pszName, bool recurseDown = false) { return dynamic_cast<T*>(FindChildByName(pszName, recurseDown)); }
 
 	virtual void SetAutoDelete(bool state);		// if set to true, panel automatically frees itself when parent is deleted
 	virtual bool IsAutoDeleteSet();
@@ -417,7 +420,7 @@ public:
 	// - override to 'swallow' the input
 	virtual void OnKeyCodePressed(KeyCode code);
 	virtual void OnKeyCodeTyped(KeyCode code);
-	virtual void OnKeyTyped(wchar_t unichar);
+	virtual void OnKeyTyped(uchar32 unichar);
 	virtual void OnKeyCodeReleased(KeyCode code);
 	virtual void OnKeyFocusTicked(); // every window gets key ticked events
 
@@ -450,6 +453,12 @@ public:
 	virtual void SetKeyBoardInputEnabled( bool state );
 	virtual bool IsMouseInputEnabled();
 	virtual bool IsKeyBoardInputEnabled();
+#ifndef DISABLE_MOE_VGUI2_EXT
+    virtual void SetTouchInputEnabled( bool state );
+    virtual void SetVirtualKeyBoardInputEnabled( bool state );
+    virtual bool IsTouchInputEnabled();
+    virtual bool IsVirtualKeyBoardInputEnabled();
+#endif
 
 	virtual void DrawTexturedBox( int x, int y, int wide, int tall, Color color, float normalizedAlpha );
 	virtual void DrawBox(int x, int y, int wide, int tall, Color color, float normalizedAlpha, bool hollow = false );
@@ -550,7 +559,7 @@ protected:
 	virtual void CreateDragData();
 
 protected:
-	MESSAGE_FUNC_ENUM_ENUM( OnRequestFocus, "OnRequestFocus", VPANEL, subFocus, VPANEL, defaultPanel);
+    MESSAGE_FUNC_HANDLE_HANDLE( OnRequestFocus, "OnRequestFocus", subFocus, defaultPanel);
 	MESSAGE_FUNC_INT_INT( OnScreenSizeChanged, "OnScreenSizeChanged", oldwide, oldtall );
 	virtual void *QueryInterface(EInterfaceID id);
 

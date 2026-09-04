@@ -72,6 +72,7 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 	char *sentence = reader.ReadString( );
 	int pitch = reader.ReadShort( );
 
+	gHUD.m_ShowWin.OnRadioMessage(sentence);
 	Broadcast( sentence, pitch );
 
 	if( SenderID <= MAX_PLAYERS )

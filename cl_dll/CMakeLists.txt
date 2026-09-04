@@ -274,6 +274,10 @@ else()
 endif()
 
 set (CLDLL_SOURCES
+	./r_texture.cpp
+	./hud/newhud/NewHud.cpp
+	./hud/showwin.cpp
+	../dlls/player/player_model.cpp
 	./cdll_int.cpp
     ./demo.cpp
     ./entity.cpp
@@ -299,6 +303,31 @@ set (CLDLL_SOURCES
 	${STUDIORENDER_SRCS}
 	${IMGUI_SRCS}
 )
+
+if(XASH_VGUI2)
+	list(APPEND CLDLL_SOURCES
+		vgui2/CBackGroundPanel.cpp
+		vgui2/CBaseViewport.cpp
+		vgui2/CClientMOTD.cpp
+		vgui2/CClientVGUI.cpp
+		vgui2/CHudViewPort.cpp
+		vgui2/CGameUITestPanel.cpp
+		vgui2/game_controls/buymenu.cpp
+		vgui2/game_controls/buysubmenu.cpp
+		vgui2/game_controls/teammenu.cpp
+		vgui2/game_controls/classmenu.cpp
+		vgui2/csmoe/CSBackGroundPanel.cpp
+		vgui2/csmoe/vgui_int.cpp
+		vgui2/csmoe/cstriketeammenu.cpp
+		vgui2/csmoe/cstrikeclassmenu.cpp
+		vgui2/csmoe/BuyMenu/buypresetbutton.cpp
+		vgui2/csmoe/BuyMenu/cstrikebuymenu.cpp
+		vgui2/csmoe/BuyMenu/cstrikebuymouseoverpanel.cpp
+		vgui2/csmoe/BuyMenu/cstrikebuymouseoverpanelbutton.cpp
+		vgui2/csmoe/BuyMenu/cstrikebuysubmenu.cpp
+		vgui2/csmoe/BuyMenu/WeaponImagePanel.cpp)
+	add_definitions(-DXASH_VGUI2=1)
+endif()
 
 include_directories (
 	hud/
@@ -352,6 +381,14 @@ add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	 )
 
 target_link_libraries( ${CLIENT_LIBRARY} ${CMAKE_DL_LIBS} )
+
+if(XASH_VGUI2)
+	target_link_libraries(${CLIENT_LIBRARY} vgui_controls cso_controls)
+	target_include_directories(${CLIENT_LIBRARY} PRIVATE vgui2/
+		${CMAKE_SOURCE_DIR}
+		${CMAKE_SOURCE_DIR}/SourceSDK/public
+		${CMAKE_SOURCE_DIR}/SourceSDK/public/tier1)
+endif()
 
 if(XASH_IMGUI)
 	target_link_libraries( ${CLIENT_LIBRARY} imgui imgui_ext )

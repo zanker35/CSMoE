@@ -128,6 +128,7 @@ int CHudHealth::VidInit(void)
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;
 	m_HUD_cross = gHUD.GetSpriteIndex( "cross" );
+	m_NEWHUD_cross = gHUD.GetSpriteIndex("cross_new");
 	R_InitTexture(m_pTexture_Black, "resource/hud/csgo/blackleft");
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
@@ -225,7 +226,7 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b, int& a)
 #else
 	if (m_iHealth > 25)
 	{
-		DrawUtils::UnpackRGB(r, g, b, gHUD.m_csgohud->value ? RGB_WHITE : RGB_YELLOWISH);
+		DrawUtils::UnpackRGB(r, g, b, (gHUD.m_hudstyle->value == 1) ? RGB_WHITE : RGB_YELLOWISH);
 	}
 	else
 	{
@@ -233,13 +234,13 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b, int& a)
 		g = 0;
 		b = 0;
 	}
-	if (gHUD.m_csgohud->value)
+	if ((gHUD.m_hudstyle->value == 1))
 		a = 255;
-	if (m_iHealth <= 15 && !gHUD.m_csgohud->value)
+	if (m_iHealth <= 15 && !(gHUD.m_hudstyle->value == 1))
 	{
 		a = 255; // If health is getting low, make it bright red
 	}
-	else if (m_iHealth <= 25 && gHUD.m_csgohud->value)
+	else if (m_iHealth <= 25 && (gHUD.m_hudstyle->value == 1))
 	{
 		a = 255;
 	}
@@ -253,12 +254,12 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b, int& a)
 			if (m_fFade <= 0)
 			{
 				m_fFade = 0;
-				if (!gHUD.m_csgohud->value)
+				if (!(gHUD.m_hudstyle->value == 1))
 					a = MIN_ALPHA;
 			}
 			else
 			{
-				if (gHUD.m_csgohud->value)
+				if ((gHUD.m_hudstyle->value == 1))
 				{
 					r = 255;
 					g = 255 - (m_fFade / FADE_TIME) * 255;
@@ -270,7 +271,7 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b, int& a)
 		}
 		else
 		{
-			if (!gHUD.m_csgohud->value)
+			if (!(gHUD.m_hudstyle->value == 1))
 				a = MIN_ALPHA;
 		}
 	}
@@ -284,12 +285,28 @@ int CHudHealth::Draw(float flTime)
 {
 	if( !(gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) && !gEngfuncs.IsSpectateOnly() )
 	{
-		DrawHealthBar( flTime );
+		if (gHUD.m_hudstyle->value == 2 && m_NEWHUD_cross >= 0 && gHUD.m_NEWHUD_number_0 >= 0)
+			DrawNewHudHealth(flTime);
+		else
+			DrawHealthBar(flTime);
 		DrawDamage( flTime );
 		DrawPain( flTime );
 	}
 
 	return 1;
+}
+
+void CHudHealth::DrawNewHudHealth(float flTime)
+{
+	if (!(gHUD.m_iWeaponBits & (1 << WEAPON_SUIT)))
+		return;
+	const wrect_t &cross = gHUD.GetSpriteRect(m_NEWHUD_cross);
+	const int x = 10;
+	const int y = ScreenHeight - 15 - gHUD.m_NEWHUD_iFontHeight;
+	const int green = m_iHealth <= 25 ? 0 : 255;
+	SPR_Set(gHUD.GetSprite(m_NEWHUD_cross), 255, green, green);
+	SPR_DrawAdditive(0, x, y + abs(gHUD.m_NEWHUD_iFontHeight - (cross.bottom - cross.top)) / 2, &cross);
+	DrawUtils::DrawNEWHudNumber(0, x + cross.right - cross.left + 3, y, m_iHealth, 255, green, green, 255, false, 5);
 }
 
 void CHudHealth::DrawHealthBar( float flTime )
@@ -312,7 +329,7 @@ void CHudHealth::DrawHealthBar( float flTime )
 		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 		x = CrossWidth /2;
 
-		if (gHUD.m_csgohud->value)
+		if ((gHUD.m_hudstyle->value == 1))
 		{
 			gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 			if(m_iHealth <= 25)
@@ -333,7 +350,7 @@ void CHudHealth::DrawHealthBar( float flTime )
 
 		
 
-		if (gHUD.m_csgohud->value)
+		if ((gHUD.m_hudstyle->value == 1))
 		{
 			float f = (float)m_iHealth / (float)m_iMaxHealth;
 			x = DrawBar(x + HealthWidth / 2, y + 2.5, HealthWidth * 5, HealthHeight * 0.8, f, r, g, b, a); //  height 20 number 25

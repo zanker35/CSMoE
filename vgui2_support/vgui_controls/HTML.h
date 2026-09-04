@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI2.h>
+#include <vgui/VGUI.h>
 #include <vgui/IImage.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/PHandle.h>
@@ -42,6 +42,9 @@ public:
 
 	HTML(Panel *parent,const char *name, bool allowJavaScript = false, bool bPopupWindow = false);
 	~HTML();
+
+	// A layout may contain HTML even when this runtime has no browser backend.
+	bool IsBrowserAvailable() const { return m_Serializer != nullptr; }
 
 	// IHTML pass through functions
 	virtual void OpenURL( const char *URL, const char *pchPostData, bool bForce = false );
@@ -88,7 +91,7 @@ public:
 	virtual void OnMouseReleased(MouseCode code);
 	virtual void OnCursorMoved(int x,int y);
 	virtual void OnMouseDoublePressed(MouseCode code);
-	virtual void OnKeyTyped(wchar_t unichar);
+	virtual void OnKeyTyped(uchar32 unichar);
 	virtual void OnKeyCodeTyped(KeyCode code);
 	virtual void OnKeyCodeReleased(KeyCode code);
 	virtual void PerformLayout();
@@ -104,6 +107,9 @@ public:
 			"postdata"
 
 		"OnFinishRequest"		- indicates all url loaded has completed
+
+		"HTMLUnavailable"		- a URL could not be opened because no browser exists
+			"url"
 
 		"HTMLBackRequested"		- mouse4 has been pressed on the dialog
 		"HTMLForwardRequested"  - mouse5 has been pressed on the dialog
@@ -200,6 +206,7 @@ private:
 	void UpdateCachedHTMLValues();
 
 	vgui2::Panel *m_pInteriorPanel;
+	vgui2::Label *m_pUnavailableLabel;
 	vgui2::ScrollBar *_hbar,*_vbar;
 	vgui2::DHANDLE<vgui2::FileOpenDialog> m_hFileOpenDialog;
 	class CHTMLFindBar : public vgui2::EditablePanel

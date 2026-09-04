@@ -119,7 +119,7 @@ void PlaceDirectory::Load(SteamFile *file)
 const char *GetBspFilename(const char *navFilename)
 {
 	static char bspFilename[256];
-	Q_sprintf(bspFilename, "maps\\%s.bsp", STRING(gpGlobals->mapname));
+	Q_sprintf(bspFilename, "maps/%s.bsp", STRING(gpGlobals->mapname));
 
 	size_t len = Q_strlen(bspFilename);
 	if (len < 3)

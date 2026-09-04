@@ -26,6 +26,10 @@ GNU General Public License for more details.
 #include "vgui_draw.h"
 #include "library.h"
 
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
+
 #ifdef XASH_IMGUI
 #include "imgui_impl_xash.h"
 #endif
@@ -2384,6 +2388,10 @@ void CL_Init( void )
 
 	if( loaded )
 	{
+#ifdef XASH_VGUI2
+		VGui2_Startup();
+		VGui2_VidInit();
+#endif
 		cls.initialized = true;
 		cls.keybind_changed = false;
 		cl.maxclients = 1; // allow to drawing player in menu

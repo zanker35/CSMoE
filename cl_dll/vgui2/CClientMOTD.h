@@ -8,7 +8,7 @@ class IViewport;
 
 namespace vgui2
 {
-class HTML;
+class Button;
 class Label;
 class RichText;
 }
@@ -16,80 +16,36 @@ class RichText;
 class CClientMOTD : public vgui2::Frame, public IViewportPanel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CClientMOTD, Frame );
+    DECLARE_CLASS_SIMPLE(CClientMOTD, Frame);
 
-	static const size_t MAX_HTML_FILENAME_LENGTH = 4096;
-	
-public:
-	CClientMOTD( IViewport* pParent );
-	virtual ~CClientMOTD();
+    explicit CClientMOTD(IViewport* viewport);
+    ~CClientMOTD() override;
 
-	void SetLabelText( const char* textEntryName, const wchar_t* text );
+    void PerformLayout() override;
+    void OnKeyCodeTyped(vgui2::KeyCode key) override;
+    void OnCommand(const char* command) override;
+    void Close() override;
+    void Activate(const char* title, const char* message);
 
-	virtual bool IsURL( const char* str );
+    const char* GetName() override { return "ClientMOTD"; }
+    void SetData(KeyValues*) override {}
+    void Reset() override;
+    void Update() override {}
+    bool NeedsUpdate() override { return false; }
+    bool HasInputElements() override { return true; }
+    void ShowPanel(bool state) override;
 
-	void PerformLayout() override;
-	void OnKeyCodeTyped( vgui2::KeyCode key ) override;
-	void OnCommand( const char* command ) override;
-
-	void Close() override;
-
-	virtual void Activate( const char* title, const char* msg );
-	virtual void ActivateHtml( const char* title, const char* msg );
-	//virtual void Activate( const wchar_t* title, const wchar_t* msg );
-
-	//IViewportPanel overrides
-	const char *GetName() override
-	{
-		return "ClientMOTD";
-	}
-
-	void SetData( KeyValues *data ) override {}
-
-	void Reset() override;
-
-	void Update() override {}
-
-	bool NeedsUpdate() override
-	{
-		return false;
-	}
-
-	bool HasInputElements() override
-	{
-		return true;
-	}
-
-	void ShowPanel( bool state ) override;
-
-	// VGUI functions:
-	vgui2::VPANEL GetVPanel() override final
-	{
-		return BaseClass::GetVPanel();
-	}
-
-	bool IsVisible() override final
-	{
-		return BaseClass::IsVisible();
-	}
-
-	void SetParent( vgui2::VPANEL parent ) override final
-	{
-		BaseClass::SetParent( parent );
-	}
+    vgui2::VPANEL GetVPanel() override final { return BaseClass::GetVPanel(); }
+    bool IsVisible() override final { return BaseClass::IsVisible(); }
+    void SetParent(vgui2::VPANEL parent) override final { BaseClass::SetParent(parent); }
+    void Init() override final { ShowPanel(false); }
+    void VidInit() override final { ShowPanel(false); }
 
 private:
-	void RemoveTempFile();
-
-private:
-	IViewport* m_pViewport;
-
-	vgui2::RichText* m_pMessage;
-	vgui2::HTML* m_pMessageHtml;
-	vgui2::Label* m_pServerName;
-	bool m_bFileWritten;
-	char m_szTempFileName[ MAX_HTML_FILENAME_LENGTH ];
-	int m_iScoreBoardKey;
+    IViewport* m_pViewport;
+    vgui2::RichText* m_pMessage;
+    vgui2::Label* m_pServerName;
+    vgui2::Button* m_pOkayButton;
 };
 
-#endif //GAME_CLIENT_UI_VGUI2_CCLIENTMOTD_H
+#endif

@@ -47,6 +47,10 @@ int CHudBattery::VidInit( void )
 	m_hFull[Vest].SetSpriteByName("suit_full");
 	m_hEmpty[VestHelm].SetSpriteByName("suithelmet_empty");
 	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
+	m_NEWHUD_hEmpty[Vest].SetSpriteByName("suit_empty_new");
+	m_NEWHUD_hFull[Vest].SetSpriteByName("suit_full_new");
+	m_NEWHUD_hEmpty[VestHelm].SetSpriteByName("suithelmet_empty_new");
+	m_NEWHUD_hFull[VestHelm].SetSpriteByName("suithelmet_full_new");
 	R_InitTexture(m_pTexture_Black, "resource/hud/csgo/blackright");
 	m_iHeight = m_hFull[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
 	m_fFade = 0;
@@ -99,6 +103,8 @@ int CHudBattery::Draw( float flTime )
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
+	if (gHUD.m_hudstyle->value == 2 && gHUD.m_NEWHUD_number_0 >= 0 && m_NEWHUD_hEmpty[m_enArmorType].spr)
+		return DrawNewHudArmor(flTime);
 
 	int r, g, b, x, y, a, x1;
 	int ArmorWidth, ArmorHeight;
@@ -109,8 +115,8 @@ int CHudBattery::Draw( float flTime )
 	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 	rc.top += m_iHeight * ((float)( 100 - ( min( 100, m_iBat ))) * 0.01f );
 
-	DrawUtils::UnpackRGB( r, g, b, gHUD.m_csgohud->value? RGB_WHITE : RGB_YELLOWISH );
-	if (gHUD.m_csgohud->value)
+	DrawUtils::UnpackRGB( r, g, b, (gHUD.m_hudstyle->value == 1)? RGB_WHITE : RGB_YELLOWISH );
+	if ((gHUD.m_hudstyle->value == 1))
 		a = 255;
 	// Has health changed? Flash the health #
 	if( m_fFade )
@@ -127,13 +133,13 @@ int CHudBattery::Draw( float flTime )
 		}
 
 		// Fade the health number back to dim
-		if (!gHUD.m_csgohud->value)
+		if (!(gHUD.m_hudstyle->value == 1))
 			a = MIN_ALPHA +  (m_fFade / FADE_TIME) * 128;
 
 	}
 	else
 	{
-		if (!gHUD.m_csgohud->value)
+		if (!(gHUD.m_hudstyle->value == 1))
 			a = MIN_ALPHA;
 	}
 
@@ -144,7 +150,7 @@ int CHudBattery::Draw( float flTime )
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	x = ScreenWidth / 5;
 
-	if (gHUD.m_csgohud->value)
+	if ((gHUD.m_hudstyle->value == 1))
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 		gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 100);
@@ -168,13 +174,35 @@ int CHudBattery::Draw( float flTime )
 
 	x += (m_hEmpty[m_enArmorType].rect.right - m_hEmpty[m_enArmorType].rect.left);
 	x = DrawUtils::DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
-	if (gHUD.m_csgohud->value)
+	if ((gHUD.m_hudstyle->value == 1))
 	{
 		
 		float f = (float)m_iBat / (float)100;
 		x = DrawBar(x + ArmorWidth / 2, y + 2.5, ArmorWidth * 5, ArmorHeight * 0.8, f, r, g, b, a);
 	}
 
+	return 1;
+}
+
+int CHudBattery::DrawNewHudArmor(float flTime)
+{
+	const auto &empty = m_NEWHUD_hEmpty[m_enArmorType];
+	const auto &full = m_NEWHUD_hFull[m_enArmorType];
+	const int width = empty.rect.right - empty.rect.left;
+	const int height = empty.rect.bottom - empty.rect.top;
+	const int x = 29 + gHUD.m_NEWHUD_iFontWidth * 8;
+	const int y = ScreenHeight - 15 - gHUD.m_NEWHUD_iFontHeight;
+	const int offsetY = abs(gHUD.m_NEWHUD_iFontHeight - height) / 2;
+	SPR_Set(empty.spr, 100, 100, 100);
+	SPR_DrawAdditive(0, x, y + offsetY, &empty.rect);
+	wrect_t rect = full.rect;
+	rect.top += height * (100 - max(0, min(100, m_iBat))) / 100;
+	if (rect.bottom > rect.top)
+	{
+		SPR_Set(full.spr, 255, 255, 255);
+		SPR_DrawAdditive(0, x, y + offsetY + rect.top - full.rect.top, &rect);
+	}
+	DrawUtils::DrawNEWHudNumber(0, x + width + 3, y, m_iBat, 255, 255, 255, 255, false, 5);
 	return 1;
 }
 

@@ -57,6 +57,7 @@ public:
 	int m_iMaxHealth;
 	int m_HUD_dmg_bio;
 	int m_HUD_cross;
+	int m_NEWHUD_cross;
 	//float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	float m_fAttack[4];
 	void GetPainColor(int &r, int &g, int &b , int &a);
@@ -65,6 +66,7 @@ private:
 	void DrawPain( float fTime );
 	void DrawDamage( float fTime );
 	void DrawHealthBar( float flTime );
+	void DrawNewHudHealth(float flTime);
 	void CalcDamageDirection( Vector vecFrom );
 	void UpdateTiles( float fTime, long bits );
 	void DrawPlayerLocation( void );

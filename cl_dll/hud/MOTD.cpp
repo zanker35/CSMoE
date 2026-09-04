@@ -30,6 +30,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#ifdef XASH_VGUI2
+#include "vgui2/CHudViewPort.h"
+#endif
 
 DECLARE_MESSAGE( m_MOTD, MOTD )
 
@@ -135,6 +138,10 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 {
 	if( cl_hide_motd->value )
 		return 1;
+#ifdef XASH_VGUI2
+	if (g_pViewport)
+		return static_cast<CHudViewport *>(g_pViewport)->MsgFunc_MOTD(pszName, iSize, pbuf);
+#endif
 
 	if ( m_iFlags & HUD_DRAW )
 	{

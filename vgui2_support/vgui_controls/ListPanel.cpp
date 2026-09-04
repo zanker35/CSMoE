@@ -352,8 +352,9 @@ static int __cdecl DefaultSortFunc(
 	}
 	else    // its an imagePanel column
 	{
-	   	const ImagePanel *s1 = reinterpret_cast<ImagePanel *>(p1->kv->GetPtr(col, ""));
-		const ImagePanel *s2 = reinterpret_cast<ImagePanel *>(p2->kv->GetPtr(col, ""));
+		char s[] = "";
+	   	const ImagePanel *s1 = reinterpret_cast<ImagePanel *>(p1->kv->GetPtr(col, s));
+		const ImagePanel *s2 = reinterpret_cast<ImagePanel *>(p2->kv->GetPtr(col, s));
 
 		if (s1 < s2)
 		{
@@ -1606,7 +1607,7 @@ void ListPanel::PerformLayout()
 
 	//!! need to make it recalculate scroll positions
 	m_vbar->SetVisible(true);
-	m_vbar->SetEnabled(false);
+	m_vbar->SetEnabled(visibleItemCount > rowsperpage);
 	m_vbar->SetRangeWindow( rowsperpage );
 	m_vbar->SetRange( 0, visibleItemCount);	
 	m_vbar->SetButtonPressedScrollValue( 1 );

@@ -147,6 +147,7 @@ static void SDLash_KeyEvent( SDL_KeyboardEvent key, int down )
 		return;
 #endif
 
+#ifndef XASH_VGUI2
 	if (SDL_IsTextInputActive() && down)
 	{
 		if (SDL_GetModState() & KMOD_CTRL)
@@ -159,6 +160,7 @@ static void SDLash_KeyEvent( SDL_KeyboardEvent key, int down )
 			return;
 		}
 	}
+#endif
 
 	Key_Event( keynum, down );
 }
@@ -171,7 +173,7 @@ SDLash_MouseEvent
 */
 static void SDLash_MouseEvent( SDL_MouseButtonEvent button )
 {
-	int down = button.type == SDL_MOUSEBUTTONDOWN ? 1 : 0;
+	int down = button.type == SDL_MOUSEBUTTONDOWN ? max( 1, button.clicks ) : 0;
 	if( in_mouseinitialized && !m_ignore->integer && button.which != SDL_TOUCH_MOUSEID )
 	{
 		Key_Event( K_MOUSE1 - 1 + button.button, down );

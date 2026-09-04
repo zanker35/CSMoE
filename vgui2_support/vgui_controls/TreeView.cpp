@@ -2323,7 +2323,7 @@ void TreeView::PerformLayout()
 
     	//!! need to make it recalculate scroll positions
     	m_pVertScrollBar->SetVisible(true);
-    	m_pVertScrollBar->SetEnabled(false);
+    	m_pVertScrollBar->SetEnabled(visibleItemCount > nodesVisible);
     	m_pVertScrollBar->SetRangeWindow( nodesVisible );
     	m_pVertScrollBar->SetRange( 0, visibleItemCount);	
     	m_pVertScrollBar->SetButtonPressedScrollValue( 1 );
@@ -2353,7 +2353,7 @@ void TreeView::PerformLayout()
             barSize -= sbvw;
         }
         m_pHorzScrollBar->SetVisible(true);
-        m_pHorzScrollBar->SetEnabled(false);
+        m_pHorzScrollBar->SetEnabled(maxWidth > barSize);
         m_pHorzScrollBar->SetRangeWindow( barSize );
         m_pHorzScrollBar->SetRange( 0, maxWidth);	
         m_pHorzScrollBar->SetButtonPressedScrollValue( 10 );

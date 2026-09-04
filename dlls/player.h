@@ -262,6 +262,8 @@ template<> struct PrivateData<class CBasePlayer, CBaseMonster>
 	bool m_bMissionBriefing;
 	bool m_bTeamChanged;
 	ModelName m_iModelName;
+	ModelName m_iHumanModelName = MODEL_UNASSIGNED;
+	bool m_bIsFemale = false;
 	int m_iTeamKills;
 	int m_iIgnoreGlobalChat;
 	bool m_bHasNightVision;

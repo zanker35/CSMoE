@@ -14,6 +14,9 @@ GNU General Public License for more details.
 */
 #ifndef XASH_DEDICATED
 #include "common.h"
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
 #include "client.h"
 #include "keydefs.h"
 #include "protocol.h"		// get the protocol version
@@ -124,6 +127,9 @@ Con_Clear_f
 */
 void Con_Clear( void )
 {
+#ifdef XASH_VGUI2
+	VGuiWrap2_ClearConsole();
+#endif
 #if XASH_IMGUI
 	ImGui_Console_Clear();
 #endif
@@ -275,6 +281,22 @@ void Con_ToggleConsole_f( void )
 
 	if( UI_CreditsActive( )) return; // disabled by final credits
 
+#ifdef XASH_VGUI2
+	Con_ClearTyping();
+	Con_ClearNotify();
+	if( VGuiWrap2_IsConsoleVisible() )
+	{
+		VGuiWrap2_HideConsole();
+		UI_SetActiveMenu( cls.state != ca_active || cl.background );
+	}
+	else
+	{
+		UI_SetActiveMenu( true );
+		VGuiWrap2_ToggleConsole();
+	}
+	return;
+#endif
+
 	// show console only in game or by special call from menu
 	if( cls.state != ca_active || cls.key_dest == key_menu )
 		return;
@@ -423,7 +445,11 @@ Con_Visible
 */
 qboolean GAME_EXPORT Con_Visible( void )
 {
+#ifdef XASH_VGUI2
+	return VGuiWrap2_IsConsoleVisible();
+#else
 	return (con.displayFrac != 0.0f);
+#endif
 }
 
 /*
@@ -905,6 +931,9 @@ If no console is visible, the text will appear at the top of the game window
 */
 void Con_Print( const char *txt )
 {
+#ifdef XASH_VGUI2
+	VGuiWrap2_ConPrintf( txt );
+#endif
 #if XASH_IMGUI
 	ImGui_Console_Print(txt);
 #endif
@@ -1869,6 +1898,9 @@ Con_DrawConsole
 
 void Con_DrawConsole( void )
 {
+#ifdef XASH_VGUI2
+	return; // GameUI owns the console panel and paints it with the other popups.
+#endif
 	// never draw console when changelevel in-progress
 	// mittorn: breaks console when downloading map, it may hang!
 	//if( cls.state != ca_disconnected && ( cls.changelevel || cls.changedemo ))

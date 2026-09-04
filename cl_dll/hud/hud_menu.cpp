@@ -26,6 +26,9 @@
 #include "draw_util.h"
 
 #include "gamemode/mods_const.h"
+#ifdef XASH_VGUI2
+#include "vgui2/CBaseViewport.h"
+#endif
 #ifdef XASH_IMGUI
 #include "imgui_cl/imgui_cl_menu.h"
 #endif
@@ -47,6 +50,7 @@ DECLARE_MESSAGE( m_Menu, AllowSpec )
 DECLARE_COMMAND( m_Menu, OldStyleMenuOpen )
 DECLARE_COMMAND( m_Menu, OldStyleMenuClose )
 DECLARE_COMMAND( m_Menu, ShowVGUIMenu )
+DECLARE_COMMAND( m_Menu, ShowVGUIMenu2 )
 
 int CHudMenu :: Init( void )
 {
@@ -59,6 +63,7 @@ int CHudMenu :: Init( void )
 	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
 	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
+	HOOK_COMMAND( "showvguimenu2", ShowVGUIMenu2 );
 
 	_extended_menus = CVAR_CREATE("_extended_menus", "1", FCVAR_ARCHIVE);
 
@@ -184,6 +189,10 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_DRAW;
 		ClientCmd("touch_removebutton _menu_*");
+#ifdef XASH_VGUI2
+		if (g_pViewport)
+			g_pViewport->HideAllVGUIMenu();
+#endif
 		return 1;
 	}
 
@@ -258,6 +267,10 @@ int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
 	UserCmd_OldStyleMenuClose();
 	gMobileAPI.pfnTouchRemoveButton("_menu_*");
+#ifdef XASH_VGUI2
+	if (g_pViewport)
+		g_pViewport->HideVGUIMenu(MENU_BUY);
+#endif
 	return 1;
 }
 
@@ -288,6 +301,14 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
+#ifdef XASH_VGUI2
+	if (g_pViewport && g_pViewport->ShowVGUIMenu(menuType))
+	{
+		m_fMenuDisplayed = 0;
+		m_iFlags &= ~HUD_DRAW;
+		return;
+	}
+#endif
 	const char *szCmd;
 
 	switch(menuType)
@@ -378,4 +399,17 @@ void CHudMenu::UserCmd_ShowVGUIMenu()
 
 	int menuType = atoi(gEngfuncs.Cmd_Argv(1));
 	ShowVGUIMenu(menuType);
+}
+
+void CHudMenu::UserCmd_ShowVGUIMenu2()
+{
+#ifdef XASH_VGUI2
+	if (gEngfuncs.Cmd_Argc() < 2)
+	{
+		ConsolePrint("usage: showvguimenu2 <panel-name>\n");
+		return;
+	}
+	if (g_pViewport && !g_pViewport->ShowVGUIMenuByName(gEngfuncs.Cmd_Argv(1)))
+		ConsolePrint("Unknown VGUI panel\n");
+#endif
 }

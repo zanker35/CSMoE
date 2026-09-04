@@ -117,8 +117,21 @@ int CHudRadarLegacy::VidInit(void)
 	m_hRadarBombTarget[0].SetSpriteByName("radar_a");
 	m_hRadarBombTarget[1].SetSpriteByName("radar_b");
 	m_hRadarSupplybox.SetSpriteByName("radar_item");
+	if (!m_iMapTitleBG)
+		m_iMapTitleBG = R_LoadTextureUnique("resource/hud/hud_maptitle_bg");
 	iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
 	return 1;
+}
+
+int CHudRadarLegacy::GetRadarSize() const
+{
+	return m_hRadarOpaque.rect.right - m_hRadarOpaque.rect.left;
+}
+
+int CHudRadarLegacy::GetRadarTop() const
+{
+	return gHUD.m_hudstyle && gHUD.m_hudstyle->value == 2 && m_iMapTitleBG ?
+		m_iMapTitleBG->h() + 1 : 0;
 }
 
 int CHudRadarLegacy::InitBuiltinTextures(void)
@@ -318,7 +331,7 @@ Vector CHudRadarLegacy::WorldToRadar(const Vector vPlayerOrigin, const Vector vO
 
 	// transform origin difference to radar source
 	Vector ret((float)(iRadius * sin(flOffset)),
-		(float)(iRadius * -cos(flOffset)),
+		(float)(iRadius * -cos(flOffset)) + GetRadarTop(),
 		(float)(vPlayerOrigin.z - vObjectOrigin.z));
 
 	return ret;
@@ -339,24 +352,36 @@ int CHudRadarLegacy::Draw(float flTime)
 
 	int iTeamNumber = g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber;
 	int r, g, b;
+	const int radarTop = GetRadarTop();
+	if (radarTop)
+	{
+		m_iMapTitleBG->Draw2DQuadScaled(0, 0, GetRadarSize(), m_iMapTitleBG->h());
+		if (g_szLocation[0])
+		{
+			int textWidth, textHeight;
+			gEngfuncs.pfnDrawSetTextColor(0.8f, 0.8f, 0.8f);
+			gEngfuncs.pfnDrawConsoleStringLen(g_szLocation, &textWidth, &textHeight);
+			gEngfuncs.pfnDrawConsoleString(5, max(0, (m_iMapTitleBG->h() - textHeight) / 2), g_szLocation);
+		}
+	}
 
 	if (cl_radartype->value)
 	{
 		SPR_Set(m_hRadarOpaque.spr, 200, 200, 200);
-		SPR_DrawHoles(0, 0, 0, &m_hRadarOpaque.rect);
+		SPR_DrawHoles(0, 0, radarTop, &m_hRadarOpaque.rect);
 	}
 	else
 	{
 		SPR_Set(m_hRadar.spr, 25, 75, 25);
-		SPR_DrawAdditive(0, 0, 0, &m_hRadarOpaque.rect);
+		SPR_DrawAdditive(0, 0, radarTop, &m_hRadarOpaque.rect);
 	}
 
-	if (strlen(g_szLocation))
+	if (!radarTop && g_szLocation[0])
 	{
 		int iLength, iHeight;
 		gEngfuncs.pfnDrawSetTextColor(0.0f, 0.8f, 0.0f);
 		gEngfuncs.pfnDrawConsoleStringLen(g_szLocation, &iLength, &iHeight);
-		gEngfuncs.pfnDrawConsoleString(64 - iLength / 2, m_hRadarOpaque.rect.bottom + iHeight, g_szLocation);
+		gEngfuncs.pfnDrawConsoleString((GetRadarSize() - iLength) / 2, m_hRadarOpaque.rect.bottom + iHeight, g_szLocation);
 	}
 
 	if (bUseRenderAPI)

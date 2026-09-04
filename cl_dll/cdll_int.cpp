@@ -27,6 +27,9 @@
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
+#ifdef XASH_VGUI2
+#include "vgui2/CBaseViewport.h"
+#endif
 
 #include "entity_state.h"
 #include "usercmd.h"
@@ -182,6 +185,10 @@ bool isLoaded = false;
 int DLLEXPORT HUD_VidInit( void )
 {
 	gHUD.VidInit();
+#ifdef XASH_VGUI2
+	if (g_pViewport)
+		g_pViewport->VidInit();
+#endif
 
 	isLoaded = true;
 
@@ -207,6 +214,10 @@ void DLLEXPORT HUD_Init( void )
 #endif
 	InitInput();
 	gHUD.Init();
+#ifdef XASH_VGUI2
+	if (g_pViewport)
+		g_pViewport->Init();
+#endif
 	//Scheme_Init();
 }
 

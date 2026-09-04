@@ -24,6 +24,7 @@ GNU General Public License for more details.
 #include "client.h"
 
 #include "mod_decryptor.h"
+#include "mod_extend_seq.h"
 
 #define MAX_SIDE_VERTS		512	// per one polygon
 
@@ -3008,6 +3009,7 @@ Loads a model into the cache
 model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 {
 	byte	*buf;
+	fs_offset_t filesize;
 	char	tempname[64];
 	qboolean	loaded;
 
@@ -3026,7 +3028,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 	Q_strncpy( tempname, mod->name, sizeof( tempname ));
 	COM_FixSlashes( tempname );
 
-	buf = FS_LoadFile( tempname, NULL, false );
+	buf = FS_LoadFile( tempname, &filesize, false );
 
 	if( !buf )
 	{
@@ -3050,6 +3052,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 	{
 	case IDSTUDIOHEADER:
 		Mod_DecryptModel(mod, buf);
+		buf = Mod_LoadExtendSeq( mod->name, buf, &filesize );
 		Mod_LoadStudioModel( mod, buf, &loaded );
 		break;
 	case IDSPRITEHEADER:

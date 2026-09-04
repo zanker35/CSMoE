@@ -25,6 +25,10 @@ GNU General Public License for more details.
 #include "legacy/hud_radar_legacy.h"
 #include "modern/hud_radar_modern.h"
 
+#if XASH_VGUI2
+#include "vgui_controls/Controls.h"
+#include "vgui/ILocalize.h"
+#endif
 
 DECLARE_COMMAND( m_Radar, ShowRadar )
 DECLARE_COMMAND( m_Radar, HideRadar )
@@ -65,6 +69,7 @@ int CHudRadar::Init()
 
 void CHudRadar::Reset()
 {
+	g_szLocation[0] = '\0';
 	// make radar don't draw old players after new map
 	for( int i = 0; i < 34; i++ )
 	{
@@ -101,7 +106,7 @@ int CHudRadar::Draw(float time)
 	//pimpl->for_each(&IBaseHudSub::Draw, time);
 	auto& modern = pimpl->get<CHudRadarModern>();
 	auto& legacy = pimpl->get<CHudRadarLegacy>();
-	if (modern.Available() && gHUD.m_iModRunning != MOD_NONE)
+	if (UseModernRadar())
 	{	
 		modern.Draw(time);
 		gHUD.m_bMordenRadar = TRUE;
@@ -220,15 +225,47 @@ int CHudRadar::MsgFunc_Location(const char * pszName, int iSize, void * pbuf)
 	BufferReader reader(pszName, pbuf, iSize);
 	int iPlayerID = reader.ReadByte();
 	if (iPlayerID == gEngfuncs.GetLocalPlayer()->index)
-		strcpy(g_szLocation, reader.ReadString());
+	{
+		strncpy(g_szLocation, reader.ReadString(), sizeof(g_szLocation) - 1);
+		g_szLocation[sizeof(g_szLocation) - 1] = '\0';
+#if XASH_VGUI2
+		if (g_szLocation[0] == '#' && vgui2::localize())
+		{
+			if (const wchar_t *localized = vgui2::localize()->Find(g_szLocation))
+				vgui2::localize()->ConvertUnicodeToANSI(localized, g_szLocation, sizeof(g_szLocation));
+		}
+#endif
+	}
 
 	return 1;
 }
 
+bool CHudRadar::UseModernRadar() const
+{
+	return pimpl && pimpl->get<CHudRadarModern>().Available() &&
+		(gHUD.m_iModRunning != MOD_NONE || (gHUD.m_hudstyle && gHUD.m_hudstyle->value == 2));
+}
+
 int CHudRadar::GetRadarSize() const
 {
-	if (ScreenWidth >= 640)
-		return 128;
-	else
-		return 64;
+	if (!pimpl)
+		return ScreenWidth >= 640 ? 128 : 64;
+	return UseModernRadar() ? pimpl->get<CHudRadarModern>().GetRadarSize() :
+		pimpl->get<CHudRadarLegacy>().GetRadarSize();
+}
+
+int CHudRadar::GetRadarBottom() const
+{
+	if (!pimpl)
+		return GetRadarSize();
+	const int top = UseModernRadar() ? pimpl->get<CHudRadarModern>().GetRadarTop() :
+		pimpl->get<CHudRadarLegacy>().GetRadarTop();
+	int bottom = top + GetRadarSize();
+	if (!top && g_szLocation[0])
+	{
+		int textWidth, textHeight;
+		gEngfuncs.pfnDrawConsoleStringLen(g_szLocation, &textWidth, &textHeight);
+		bottom += 2 * textHeight;
+	}
+	return bottom;
 }

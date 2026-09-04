@@ -47,8 +47,8 @@ int CHudScenarioStatus::Draw(float fTime)
 
 	if (m_iFlags & HUD_ACTIVE)
 	{
-		int r, g, b;
-		if (gHUD.m_csgohud->value && m_hSprite == gHUD.GetSprite(gHUD.GetSpriteIndex("bombticking")))
+		int r = 255, g = 255, b = 255;
+		if ((gHUD.m_hudstyle->value == 1) && m_hSprite == gHUD.GetSprite(gHUD.GetSpriteIndex("bombticking")))
 		{
 			int x = ScreenWidth / 2;	
 			int w = m_rect.right - m_rect.left;
@@ -76,6 +76,12 @@ int CHudScenarioStatus::Draw(float fTime)
 			int x = gHUD.m_Timer.m_closestRight;
 			int y = ScreenHeight + (3 * gHUD.m_iFontHeight) / -2 - (m_rect.bottom - m_rect.top - gHUD.m_iFontHeight) / 2;
 			int w = m_rect.right - m_rect.left;
+			if (gHUD.m_hudstyle->value == 2)
+			{
+				x = (ScreenWidth - m_iRepeatTimes * w) / 2;
+				y = 85;
+				DrawUtils::UnpackRGB(r, g, b, RGB_WHITE);
+			}
 
 			DrawUtils::ScaleColors(r, g, b, m_alpha);
 

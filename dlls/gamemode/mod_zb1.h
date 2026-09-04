@@ -41,6 +41,7 @@ public: // CHalfLifeMultiplay
 	void UpdateGameMode(CBasePlayer *pPlayer) override;
 	void RestartRound() override;
 	void PlayerSpawn(CBasePlayer *pPlayer) override;
+	BOOL FPlayerCanRespawn(CBasePlayer *pPlayer) override;
 	void Think() override;
 	BOOL ClientConnected(edict_t *pEntity, const char *pszName, const char *pszAddress, char *szRejectReason) override;
 	void ClientDisconnected(edict_t *pClient) override;
@@ -67,6 +68,7 @@ protected:
 	void ZombieWin();
 
 	BOOL FInfectionStarted();
+	bool m_bInfectionStarted = false;
 
 	void MakeZombie(CBasePlayer *player, ZombieLevel iEvolutionLevel) { m_eventBecomeZombie.dispatch(player, iEvolutionLevel); }
 
@@ -98,6 +100,7 @@ private:
 public:
 	virtual void BecomeZombie(ZombieLevel iEvolutionLevel);
 	virtual void BecomeHuman();
+	bool EquipZombie();
 
 	std::shared_ptr<IZombieModeCharacter> m_pCharacter;
 };

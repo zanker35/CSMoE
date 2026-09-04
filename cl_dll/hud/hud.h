@@ -117,6 +117,8 @@ struct HUDLIST {
 #include "zb3/zb3.h"
 #include "retina.h"
 #include "moe/moe_touch.h"
+#include "newhud/NewHud.h"
+#include "showwin.h"
 
 //
 //-----------------------------------------------------
@@ -141,6 +143,8 @@ public:
 
 	int DrawWList(float flTime);
 	int DrawWpnList(float flTime);
+	int DrawNEWHudAmmo(float flTime);
+	void DrawNEWHudCurrentWpn();
 	CHudMsgFunc(CurWeapon);
 	CHudMsgFunc(WeaponList);
 	CHudMsgFunc(AmmoX);
@@ -179,6 +183,7 @@ public:
 	int	m_HUD_bucket0;
 	int m_HUD_selection;
 	UniqueTexture m_pTexture_Black;
+	UniqueTexture m_iWeapon_OffBG;
 	int m_iAlpha;
 	int m_R, m_G, m_B;
 	int m_cvarR, m_cvarG, m_cvarB;
@@ -412,6 +417,8 @@ private:
 private:
 	SharedTexture m_killBg[3];
 	SharedTexture m_deathBg[3];
+	SharedTexture m_NewHud_killBg[3];
+	SharedTexture m_NewHud_deathBg[3];
 	SharedTexture m_defaultBg[3];
 	int m_KM_Number0;
 	int m_KM_Number1;
@@ -444,6 +451,7 @@ public:
 	CHudUserCmd(OldStyleMenuClose);
 	CHudUserCmd(OldStyleMenuOpen);
 	CHudUserCmd(ShowVGUIMenu);
+	CHudUserCmd(ShowVGUIMenu2);
 
 	void ShowVGUIMenu( int menuType ); // cs16client extension
 
@@ -489,6 +497,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
+	int DrawNewHudArmor(float flTime);
 	int DrawBar(int x, int y, int width, int height, float f, int& r, int& g, int& b, int& a);
 	void InitHUDData( void );
 	CHudMsgFunc(Battery);
@@ -502,6 +511,8 @@ private:
 
 	CClientSprite m_hEmpty[VestHelm + 1];
 	CClientSprite m_hFull[VestHelm + 1];
+	CClientSprite m_NEWHUD_hEmpty[VestHelm + 1];
+	CClientSprite m_NEWHUD_hFull[VestHelm + 1];
 	int	  m_iBat;
 	float m_fFade;
 	UniqueTexture m_pTexture_Black;
@@ -648,6 +659,9 @@ private:
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
 	UniqueTexture m_tgaC4[2];
+	int m_NEWHUD_hC4_Off;
+	int m_NEWHUD_hC4_On;
+	int m_NEWHUD_hDefuser;
 };
 
 
@@ -660,8 +674,10 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	int DrawNewHudMoney(float flTime);
 	CHudMsgFunc(Money);
 	CHudMsgFunc(BlinkAcct);
+	int GetMoney() const { return m_iMoneyCount; }
 
 private:
 	int m_iMoneyCount;
@@ -673,6 +689,9 @@ private:
 	CClientSprite m_hDollar;
 	CClientSprite m_hPlus;
 	CClientSprite m_hMinus;
+	UniqueTexture m_iDollarBG;
+	int m_NEWHUD_hDollar;
+	int m_NEWHUD_hMinus;
 };
 //
 //-----------------------------------------------------
@@ -699,10 +718,12 @@ class CHudTimer: public CHudBase
 	friend class CHudSpectatorGui;
 	friend class CHudScenarioStatus;
 public:
+	CHudTimer();
 	int Init( void );
 	int VidInit( void );
 	void Reset(void);
 	int Draw(float fTime);
+	int DrawNEWHudTimer(float fTime);
 	// set up the timer.
 	// [short]
 	CHudMsgFunc(RoundTime);
@@ -717,6 +738,9 @@ private:
 	float m_flPanicTime;
 	int m_closestRight;
 	UniqueTexture m_pTexture_Black;
+	SharedTexture m_iNum_Bottom;
+	UniqueTexture m_iColon_Bottom;
+	wrect_t m_iNum_BottomC[10];
 };
 //
 //-----------------------------------------------------
@@ -909,6 +933,7 @@ public:
 	{
 		return m_bIsCZero;
 	}
+	bool IsZombieMod() const;
 
 
 	float   m_flTime;      // the current client time
@@ -924,7 +949,7 @@ public:
 	int		m_iRes;
 	cvar_t *m_pCvarDraw;
 	cvar_t *cl_shadows;
-	cvar_t *m_csgohud;
+	cvar_t *m_hudstyle;
 	cvar_t *fastsprites;
 	cvar_t *cl_predict;
 	cvar_t *cl_weapon_wallpuff;
@@ -950,6 +975,12 @@ public:
 	HSPRITE m_hGasPuff;
 
 	int m_iFontHeight;
+	int m_NEWHUD_iFontWidth;
+	int m_NEWHUD_iFontHeight;
+	int m_NEWHUD_iFontWidth_Dollar;
+	int m_NEWHUD_iFontHeight_Dollar;
+	CHudNewHud      m_NewHud;
+	CHudShowWin     m_ShowWin;
 	CHudAmmo        m_Ammo;
 	CHudHealth      m_Health;
 	CHudSpectator   m_Spectator;
@@ -1010,6 +1041,9 @@ public:
 
 	// sprite indexes
 	int m_HUD_number_0;
+	int m_NEWHUD_number_0;
+	int m_NEWHUD_dollar_number_0;
+	int m_NEWHUD_hPlus;
 
 
 	char m_szServerName[64];

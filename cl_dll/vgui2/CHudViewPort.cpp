@@ -1,112 +1,207 @@
-
+#include "hud.h"
 #include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 #include <IEngineVgui.h>
 
-#include "CHudViewport.h"
-#include "CGameUITestPanel.h"
+#include "CHudViewPort.h"
 #include "CClientMOTD.h"
-
-#include "hud.h"
 #include "parsemsg.h"
+#include "csmoe/BuyMenu/cstrikebuymenu.h"
+#include "csmoe/cstriketeammenu.h"
+#include "csmoe/cstrikeclassmenu.h"
 
-void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
+void CHudViewport::ApplySchemeSettings(vgui2::IScheme* scheme)
 {
-	BaseClass::ApplySchemeSettings(pScheme);
-
-	SetPaintBackgroundEnabled(false);
-
-	//extern vgui2::HFont g_HudTextVgui_TextFont;
-	//g_HudTextVgui_TextFont = pScheme->GetFont("Default");
+    BaseClass::ApplySchemeSettings(scheme);
+    SetPaintBackgroundEnabled(false);
 }
 
 void CHudViewport::Start()
 {
-	BaseClass::Start();
-
-	static CHudViewport * const s_pHudViewPort = this;
-
-	gEngfuncs.pfnHookUserMsg("VGUIMenu", [](const char *pszName, int iSize, void *pbuf) { return s_pHudViewPort->MsgFunc_MOTD(pszName, iSize, pbuf); });
-
-	gEngfuncs.pfnAddCommand("motd_open", []() { s_pHudViewPort->m_pMOTD->Activate(gHUD.m_szServerName, "wow"); });
+    BaseClass::Start();
+    gEngfuncs.pfnAddCommand("motd_open", []() {
+        auto* viewport = static_cast<CHudViewport*>(g_pViewport);
+        if (viewport && viewport->m_pMOTD)
+        {
+            viewport->ShowPanel(viewport->m_pMOTD, true);
+            viewport->m_pMOTD->Activate(gHUD.m_szServerName, viewport->m_szMOTD.c_str());
+        }
+    });
 }
 
-int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
+int CHudViewport::MsgFunc_MOTD(const char* name, int size, void* data)
 {
-	if (m_bGotAllMOTD)
-		m_szMOTD.clear();
-
-	BufferReader buf(pszName, pbuf, iSize);
-
-	m_bGotAllMOTD = buf.ReadByte();
-
-	m_szMOTD += buf.ReadString();
-
-	//CClientMOTD *panel = dynamic_cast<CClientMOTD *>(g_pViewport->FindPanelByName("ClientMOTD"));
-	CClientMOTD *panel = m_pMOTD;
-	if (panel)
-	{
-		panel->Activate(gHUD.m_szServerName, m_szMOTD.c_str());
-	}
-	else
-		gEngfuncs.Con_Printf("MsgFunc_MOTD() : Error! CClientMOTD is nullptr\n");
-
-	return 1;
+    if (m_bGotAllMOTD)
+        m_szMOTD.clear();
+    BufferReader reader(name, data, size);
+    m_bGotAllMOTD = reader.ReadByte() != 0;
+    m_szMOTD += reader.ReadString();
+    return 1;
 }
 
 void CHudViewport::HideScoreBoard()
 {
-	BaseClass::HideScoreBoard();
-	gHUD.m_Scoreboard.UserCmd_HideScores();
+    BaseClass::HideScoreBoard();
+    gHUD.m_Scoreboard.UserCmd_HideScores();
 }
 
 void CHudViewport::ActivateClientUI()
 {
-	BaseClass::ActivateClientUI();
-	if (gHUD.m_iIntermission)
-		gHUD.m_Scoreboard.UserCmd_ShowScores();
+    BaseClass::ActivateClientUI();
+    if (gHUD.m_iIntermission)
+        gHUD.m_Scoreboard.UserCmd_ShowScores();
 }
 
 void CHudViewport::HideClientUI()
 {
-	BaseClass::HideClientUI();
+    BaseClass::HideClientUI();
 }
 
 void CHudViewport::CreateDefaultPanels()
 {
-	AddNewPanel(CreatePanelByName("ClientMOTD"));
-	//AddNewPanel(CreatePanelByName(VIEWPORT_PANEL_SCORE));
-
-	AddNewGameUIPanel(CreateGameUIPanelByName("GameUITestPanel"));
+    AddNewPanel(CreatePanelByName("ClientMOTD"));
+    AddNewPanel(CreatePanelByName(PANEL_TEAM));
+    AddNewPanel(CreatePanelByName(PANEL_CLASS));
+    AddNewPanel(CreatePanelByName(PANEL_BUY));
+    HideAllVGUIMenu();
 }
 
-IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
+void CHudViewport::RemoveAllPanels()
 {
-	IViewportPanel* pPanel = nullptr;
-	
-	if (Q_strcmp("ClientMOTD", pszName) == 0)
-	{
-		if(!m_pMOTD)
-			m_pMOTD = new CClientMOTD(this);
-		pPanel = m_pMOTD;
-	}
-	/*else if (Q_strcmp(VIEWPORT_PANEL_SCORE, pszName) == 0)
-	{
-		pPanel = new CScorePanel(this);
-	}
-	*/
-	return pPanel;
+    BaseClass::RemoveAllPanels();
+    m_pMOTD = nullptr;
+    m_pTeamMenu = nullptr;
+    m_pClassMenu = nullptr;
+    m_pBuyMenu = nullptr;
 }
 
-IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
+IViewportPanel* CHudViewport::CreatePanelByName(const char* name)
 {
-	IGameUIPanel *pPanel = nullptr;
-	
-	if (Q_strcmp("GameUITestPanel", pszName) == 0)
-	{
-		//pPanel = new CGameUITestPanel(engineVgui()->GetPanel(PANEL_GAMEUIDLL));
-		pPanel = new CGameUITestPanel(this->GetVPanel());
-	}
-	
-	return pPanel;
+    if (!Q_strcmp("ClientMOTD", name))
+    {
+        if (!m_pMOTD)
+            m_pMOTD = new CClientMOTD(this);
+        return m_pMOTD;
+    }
+    if (!Q_strcmp(PANEL_TEAM, name))
+    {
+        if (!m_pTeamMenu)
+        {
+            m_pTeamMenu = new CCSTeamMenu(this);
+            m_pTeamMenu->UpdateGameMode();
+        }
+        return m_pTeamMenu;
+    }
+    if (!Q_strcmp(PANEL_CLASS, name))
+    {
+        if (!m_pClassMenu)
+            m_pClassMenu = new CCSClassMenu(this);
+        return m_pClassMenu;
+    }
+    if (!Q_strcmp(PANEL_BUY, name))
+    {
+        if (!m_pBuyMenu)
+        {
+            m_pBuyMenu = new CCSBaseBuyMenu(this);
+            m_pBuyMenu->UpdateGameMode();
+        }
+        return m_pBuyMenu;
+    }
+    return nullptr;
+}
+
+bool CHudViewport::ShowVGUIMenu(int menu)
+{
+    IViewportPanel* panel = nullptr;
+    switch (menu)
+    {
+    case MENU_TEAM:
+        panel = m_pTeamMenu;
+        break;
+    case MENU_CLASS_T:
+    case MENU_CLASS_CT:
+        if (!m_pClassMenu)
+            return false;
+        m_pClassMenu->SetTeam(menu == MENU_CLASS_T ? TERRORIST : CT);
+        panel = m_pClassMenu;
+        break;
+    case MENU_BUY:
+    case MENU_BUY_PISTOL:
+    case MENU_BUY_SHOTGUN:
+    case MENU_BUY_RIFLE:
+    case MENU_BUY_SUBMACHINEGUN:
+    case MENU_BUY_MACHINEGUN:
+    case MENU_BUY_ITEM:
+        if (!m_pBuyMenu)
+            return false;
+        m_pBuyMenu->SetTeam(g_iTeamNumber);
+        m_pBuyMenu->ActivateMenu(menu);
+        return true;
+    default:
+        return false;
+    }
+    if (!panel)
+        return false;
+    ShowPanel(panel, true);
+    return true;
+}
+
+bool CHudViewport::HideVGUIMenu(int menu)
+{
+    IViewportPanel* panel = nullptr;
+    switch (menu)
+    {
+    case MENU_TEAM:
+        panel = m_pTeamMenu;
+        break;
+    case MENU_CLASS_T:
+    case MENU_CLASS_CT:
+        panel = m_pClassMenu;
+        break;
+    case MENU_BUY:
+    case MENU_BUY_PISTOL:
+    case MENU_BUY_SHOTGUN:
+    case MENU_BUY_RIFLE:
+    case MENU_BUY_SUBMACHINEGUN:
+    case MENU_BUY_MACHINEGUN:
+    case MENU_BUY_ITEM:
+        panel = m_pBuyMenu;
+        break;
+    default:
+        return false;
+    }
+    if (!panel)
+        return false;
+    ShowPanel(panel, false);
+    return true;
+}
+
+void CHudViewport::UpdateGameMode()
+{
+    if (m_pBuyMenu)
+        m_pBuyMenu->UpdateGameMode();
+    if (m_pTeamMenu)
+        m_pTeamMenu->UpdateGameMode();
+    if (m_pClassMenu)
+        m_pClassMenu->UpdateGameMode();
+}
+
+int CHudViewport::GetAllowSpectators()
+{
+    return gHUD.m_Menu.m_bAllowSpec;
+}
+
+bool CHudViewport::ShowVGUIMenuByName(const char* name)
+{
+    auto* panel = FindPanelByName(name);
+    if (!panel)
+    {
+        panel = CreatePanelByName(name);
+        if (panel && !AddNewPanel(panel))
+            return false;
+    }
+    if (!panel)
+        return false;
+    ShowPanel(panel, true);
+    return true;
 }

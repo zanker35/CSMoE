@@ -26,6 +26,9 @@ GNU General Public License for more details.
 #include "sound.h"
 #include "dlight.h"
 #include "input.h"
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
 
 #define MAX_FORWARD		6
 
@@ -529,6 +532,15 @@ qboolean CL_UpdateEntityFields( cl_entity_t *ent )
 
 qboolean CL_AddVisibleEntity( cl_entity_t *ent, int entityType )
 {
+	qboolean menu_scene = CL_IsInMenu();
+
+#ifdef XASH_VGUI2
+	// GameUI overlays the running match. Its key destination must not make
+	// world players act as menu previews, including our own first-person body.
+	if( cls.state == ca_active && !cl.background )
+		menu_scene = false;
+#endif
+
 	if( !ent || !ent->model )
 		return false;
 
@@ -540,7 +552,7 @@ qboolean CL_AddVisibleEntity( cl_entity_t *ent, int entityType )
 		VectorCopy( ent->angles, ent->curstate.angles );
 	}
 
-	if( CL_IsInMenu( ) && ( ( !ui_renderworld->integer && !cl.background ) || ent->player ))
+	if( menu_scene && ( ( !ui_renderworld->integer && !cl.background ) || ent->player ))
 	{
 		// menu entities ignores client filter
 		if( !R_AddEntity( ent, entityType ))
@@ -553,7 +565,7 @@ qboolean CL_AddVisibleEntity( cl_entity_t *ent, int entityType )
 			return false;
 
 		// don't add himself on firstperson
-		if( RP_LOCALCLIENT( ent ) && !cl.thirdperson && cls.key_dest != key_menu && cl.refdef.viewentity == ( cl.playernum + 1 ))
+		if( RP_LOCALCLIENT( ent ) && !cl.thirdperson && !menu_scene && cl.refdef.viewentity == ( cl.playernum + 1 ))
 		{
 			if( gl_allow_mirrors->integer && world.has_mirrors )
 			{
@@ -1176,6 +1188,13 @@ int CL_ParsePacketEntities( sizebuf_t *msg, qboolean delta )
 
 		if(( cls.demoplayback || cls.disable_servercount != cl.servercount ) && cl.video_prepped )
 			SCR_EndLoadingPlaque(); // get rid of loading plaque
+
+#ifdef XASH_VGUI2
+		// The first accepted frame ends GameUI's modal loading phase.
+		// A background map must leave the main menu visible.
+		if( !cl.background )
+			VGui2_LoadingFinished( clgame.mapname );
+#endif
 	}
 	else
 	{

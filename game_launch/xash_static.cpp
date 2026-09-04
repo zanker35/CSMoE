@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <cstdio>
 #if _WIN32
 #include <Windows.h>
 #endif
@@ -30,10 +31,8 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int n
 int main(int argc, char **argv)
 {
 #endif
-	std::vector<const char*> av{ "-game", "csmoe", "-console", "-developer" };
-	std::copy_n(argv, argc, std::back_inserter(av));
-	
-	Host_Main(av.size(), av.data(), "csmoe", 0, NULL);
-
-	return 0;
+	// Keep argv[0] as the executable and preserve diagnostics when piped to a log.
+	std::setvbuf(stdout, NULL, _IOLBF, 0);
+	std::vector<const char*> av(argv, argv + argc);
+	return Host_Main(static_cast<int>(av.size()), av.data(), "csmoe", 0, NULL);
 }

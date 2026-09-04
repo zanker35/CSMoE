@@ -17,6 +17,7 @@
 
 #include "AnimationController.h"
 #include "EditablePanel.h"
+#include "Label.h"
 #include "Menu.h"
 #include "MessageBox.h"
 #include "QueryBox.h"
@@ -34,7 +35,7 @@
 #include "html/ichromehtmlwrapper.h"
 
 #include "FileSystem.h"
-#include "../vgui2/src/vgui_key_translation.h"
+#include "vgui2/vgui_key_translation.h"
 
 #undef PostMessage
 #undef MessageBox
@@ -87,7 +88,7 @@ public:
 	virtual void OnMouseReleased(MouseCode code);
 	virtual void OnCursorMoved(int x,int y);
 	virtual void OnMouseDoublePressed(MouseCode code);
-	virtual void OnKeyTyped(wchar_t unichar);
+	virtual void OnKeyTyped(uchar32 unichar);
 	virtual void OnKeyCodeTyped(KeyCode code);
 	virtual void OnKeyCodeReleased(KeyCode code);
 	virtual void OnMouseWheeled(int delta);
@@ -180,7 +181,8 @@ private:
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWindow) : Panel(parent, name)
+HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWindow)
+	: Panel(parent, name), m_Serializer(nullptr), m_pUnavailableLabel(nullptr)
 {
 	m_iHTMLTextureID = 0;
 	m_iComboBoxTextureID = 0;
@@ -200,11 +202,8 @@ HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWin
 
 		m_Serializer = pController->CreateSerializer( this );
 
-		pController->CreateBrowser( m_Serializer->GetResponseTarget(), bPopupWindow, "Valve Half-Life" );
-	}
-	else
-	{
-		Warning("Unable to access ChromeHTMLController");
+		if ( m_Serializer )
+			pController->CreateBrowser( m_Serializer->GetResponseTarget(), bPopupWindow, "Valve Half-Life" );
 	}
 	m_iScrollBorderX=m_iScrollBorderY=0;
 	m_bScrollBarEnabled = true;
@@ -243,6 +242,19 @@ HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWin
 	m_pContextMenu->AddMenuItem( "#TextEntry_Paste", new KeyValues( "Command", "command", "paste" ), this );
 	m_pContextMenu->AddSeparator();
 	m_nViewSourceAllowedIndex = m_pContextMenu->AddMenuItem( "#vgui_HTMLViewSource", new KeyValues( "Command", "command", "viewsource" ), this );
+
+	if ( !m_Serializer )
+	{
+		// Keep the resource-defined area visible without pretending that a page loaded.
+		Warning( "HTML control '%s': no browser backend is available.\n", name );
+		SetKeyBoardInputEnabled( false );
+		SetMouseInputEnabled( false );
+		m_bContextMenuEnabled = false;
+		m_pUnavailableLabel = new Label( this, "HTMLUnavailable", "Web content is unavailable." );
+		m_pUnavailableLabel->SetContentAlignment( Label::a_center );
+		m_pUnavailableLabel->SetMouseInputEnabled( false );
+		m_pUnavailableLabel->SetKeyBoardInputEnabled( false );
+	}
 }
 
 
@@ -253,11 +265,11 @@ HTML::~HTML()
 {
 	m_pContextMenu->MarkForDeletion();
 
-	if (surface()->AccessChromeHTMLController())
+	if ( m_Serializer && surface() && surface()->AccessChromeHTMLController() )
 	{
 		surface()->AccessChromeHTMLController()->RemoveBrowser( m_Serializer->GetResponseTarget() );
-		m_Serializer = NULL;
 	}
+	m_Serializer = nullptr;
 	
 	/*
 	FOR_EACH_VEC( m_vecHCursor, i )
@@ -369,8 +381,16 @@ void HTML::PerformLayout()
 	int vbarInset = _vbar->IsVisible() ? _vbar->GetWide() : 0;
 	int maxw = GetWide() - vbarInset;
 	m_pInteriorPanel->SetBounds( 0, 0, maxw, GetTall() );
+	if ( !m_Serializer )
+	{
+		if ( m_pUnavailableLabel )
+			m_pUnavailableLabel->SetBounds( 8, 0, max( 0, maxw - 16 ), GetTall() );
+		return;
+	}
 
 	IScheme *pClientScheme = vgui2::scheme()->GetIScheme( vgui2::scheme()->GetScheme( "ClientScheme" ) );
+	if ( !pClientScheme )
+		return;
 
 	int iSearchInsetY = 5;
 	int iSearchInsetX = 5;
@@ -407,6 +427,8 @@ void HTML::PerformLayout()
 void HTML::OnMove()
 {
 	BaseClass::OnMove();
+	if ( !m_Serializer )
+		return;
 
 	// tell cef where we are on the screen so plugins can correctly render
 	int nPanelAbsX, nPanelAbsY;
@@ -556,6 +578,12 @@ void HTML::OpenURL(const char *URL, const char *postData, bool force)
 //-----------------------------------------------------------------------------
 void HTML::PostURL(const char *URL, const char *pchPostData/*, bool force*/)
 {
+	if ( !m_Serializer )
+	{
+		PostActionSignal( new KeyValues( "HTMLUnavailable", "url", URL ? URL : "" ) );
+		return;
+	}
+
 	if ( m_Serializer->BrowserGetIndex() < 0 )
 	{
 		m_sPendingURLLoad = URL;
@@ -618,6 +646,8 @@ void HTML::PostURL(const char *URL, const char *pchPostData/*, bool force*/)
 //-----------------------------------------------------------------------------
 bool HTML::StopLoading()
 {
+	if ( !m_Serializer )
+		return false;
 	m_Serializer->StopLoad();
 	return true;
 }
@@ -628,6 +658,8 @@ bool HTML::StopLoading()
 //-----------------------------------------------------------------------------
 bool HTML::Refresh()
 {
+	if ( !m_Serializer )
+		return false;
 	m_Serializer->Reload();
 	return true;
 }
@@ -638,7 +670,8 @@ bool HTML::Refresh()
 //-----------------------------------------------------------------------------
 void HTML::GoBack()
 {
-	m_Serializer->GoBack();
+	if ( m_Serializer )
+		m_Serializer->GoBack();
 }
 
 
@@ -647,7 +680,8 @@ void HTML::GoBack()
 //-----------------------------------------------------------------------------
 void HTML::GoForward()
 {
-	m_Serializer->GoForward();
+	if ( m_Serializer )
+		m_Serializer->GoForward();
 }
 
 
@@ -656,7 +690,7 @@ void HTML::GoForward()
 //-----------------------------------------------------------------------------
 bool HTML::BCanGoBack()
 {
-	return m_bCanGoBack;
+	return m_Serializer && m_bCanGoBack;
 }
 
 
@@ -665,7 +699,7 @@ bool HTML::BCanGoBack()
 //-----------------------------------------------------------------------------
 bool HTML::BCanGoFoward()
 {
-	return m_bCanGoForward;
+	return m_Serializer && m_bCanGoForward;
 }
 
 
@@ -695,7 +729,7 @@ void HTML::OnSizeChanged(int wide,int tall)
 
 	InvalidateLayout();
 
-	m_Serializer->RequestBrowserSizes();
+	UpdateCachedHTMLValues();
 }
 
 
@@ -704,7 +738,8 @@ void HTML::OnSizeChanged(int wide,int tall)
 //-----------------------------------------------------------------------------
 void HTML::RunJavascript( const char *pchScript )
 {
-	m_Serializer->RunJavaScript( pchScript );
+	if ( m_Serializer )
+		m_Serializer->RunJavaScript( pchScript );
 }
 
 
@@ -736,6 +771,8 @@ int ConvertMouseCodeToCEFCode( MouseCode code )
 //-----------------------------------------------------------------------------
 void HTML::OnMousePressed(MouseCode code)
 {
+	if ( !m_Serializer )
+		return;
 	m_sDragURL = NULL;
 
 	// mouse4 = back button
@@ -791,6 +828,8 @@ void HTML::OnMousePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseReleased(MouseCode code)
 {
+	if ( !m_Serializer )
+		return;
 	if ( code == MOUSE_LEFT )
 	{
 		input()->SetMouseCapture( NULL_HANDLE );
@@ -821,6 +860,8 @@ void HTML::OnMouseReleased(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnCursorMoved(int x,int y)
 {
+	if ( !m_Serializer )
+		return;
 	// Only do this when we are over the current panel
 	if ( vgui2::input()->GetMouseOver() == GetVPanel() )
 	{
@@ -858,16 +899,18 @@ void HTML::OnCursorMoved(int x,int y)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseDoublePressed(MouseCode code)
 {
-	m_Serializer->MouseDoubleClick( ConvertMouseCodeToCEFCode( code ) );
+	if ( m_Serializer )
+		m_Serializer->MouseDoubleClick( ConvertMouseCodeToCEFCode( code ) );
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: passes key presses to the browser (we don't current do this)
 //-----------------------------------------------------------------------------
-void HTML::OnKeyTyped(wchar_t unichar)
+void HTML::OnKeyTyped(uchar32 unichar)
 {
-	m_Serializer->KeyChar( unichar );
+	if ( m_Serializer )
+		m_Serializer->KeyChar( unichar );
 }
 
 
@@ -876,6 +919,8 @@ void HTML::OnKeyTyped(wchar_t unichar)
 //-----------------------------------------------------------------------------
 void HTML::ShowFindDialog()
 {
+	if ( !m_Serializer )
+		return;
 	IScheme *pClientScheme = vgui2::scheme()->GetIScheme( vgui2::scheme()->GetScheme( "ClientScheme" ) );
 	if ( !pClientScheme )
 		return;
@@ -910,6 +955,8 @@ void HTML::ShowFindDialog()
 //-----------------------------------------------------------------------------
 void HTML::HideFindDialog()
 {
+	if ( !m_Serializer )
+		return;
 	IScheme *pClientScheme = vgui2::scheme()->GetIScheme( vgui2::scheme()->GetScheme( "ClientScheme" ) );
 	if ( !pClientScheme )
 		return;
@@ -969,6 +1016,11 @@ int GetKeyModifiers()
 //-----------------------------------------------------------------------------
 void HTML::OnKeyCodeTyped(KeyCode code)
 {
+	if ( !m_Serializer )
+	{
+		BaseClass::OnKeyCodeTyped( code );
+		return;
+	}
 	switch( code )
 	{
 	case KEY_PAGEDOWN:
@@ -1037,7 +1089,8 @@ void HTML::OnKeyCodeTyped(KeyCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnKeyCodeReleased(KeyCode code)
 {
-	m_Serializer->KeyUp( KeyCode_VGUIToVirtualKey( code ), GetKeyModifiers() );
+	if ( m_Serializer )
+		m_Serializer->KeyUp( KeyCode_VGUIToVirtualKey( code ), GetKeyModifiers() );
 }
 
 
@@ -1046,6 +1099,8 @@ void HTML::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseWheeled(int delta)
 {	
+	if ( !m_Serializer )
+		return;
 	if (_vbar && ( ( m_pComboBoxHost && !m_pComboBoxHost->IsVisible() ) ) )
 	{
 		int val = _vbar->GetValue();
@@ -1073,6 +1128,8 @@ void HTML::AddCustomURLHandler(const char *customProtocolName, vgui2::Panel *tar
 //-----------------------------------------------------------------------------
 void HTML::BrowserResize()
 {
+	if ( !m_Serializer )
+		return;
 	int w,h;
 	GetSize( w, h );
 	int right = 0, bottom = 0;
@@ -1114,6 +1171,8 @@ void HTML::BrowserResize()
 //-----------------------------------------------------------------------------
 void HTML::OnSliderMoved()
 {
+	if ( !m_Serializer )
+		return;
 	if(_hbar->IsVisible())
 	{
 		int scrollX =_hbar->GetValue();
@@ -1204,7 +1263,8 @@ void HTML::PostChildPaint()
 //-----------------------------------------------------------------------------
 void HTML::AddHeader( const char *pchHeader, const char *pchValue )
 {
-	m_Serializer->AddHeader( pchHeader, pchValue );
+	if ( m_Serializer )
+		m_Serializer->AddHeader( pchHeader, pchValue );
 }
 
 
@@ -1214,7 +1274,8 @@ void HTML::AddHeader( const char *pchHeader, const char *pchValue )
 void HTML::OnSetFocus()
 {
 	BaseClass::OnSetFocus();
-	m_Serializer->SetFocus( true );
+	if ( m_Serializer )
+		m_Serializer->SetFocus( true );
 }
 
 
@@ -1233,7 +1294,8 @@ void HTML::OnKillFocus()
 	if ( m_pComboBoxHost->HasFocus() )
 		return;
 
-	m_Serializer->SetFocus( false );
+	if ( m_Serializer )
+		m_Serializer->SetFocus( false );
 }
 
 
@@ -1242,6 +1304,8 @@ void HTML::OnKillFocus()
 //-----------------------------------------------------------------------------
 void HTML::OnCommand( const char *pchCommand )
 {
+	if ( !m_Serializer )
+		return;
 	if ( !Q_stricmp( pchCommand, "back" ) )
 	{
 		PostActionSignal( new KeyValues( "HTMLBackRequested" ) );
@@ -1301,7 +1365,8 @@ void HTML::OnFileSelected( const char *pchSelectedFile )
 	//CHTMLProtoBufMsg<CMsgFileLoadDialogResponse> cmd( eHTMLCommands_FileLoadDialogResponse );
 	//cmd.Body().add_files( pchSelectedFile );
 	//DISPATCH_MESSAGE( eHTMLCommands_FileLoadDialogResponse );
-	m_hFileOpenDialog->Close();
+	if ( m_hFileOpenDialog.Get() )
+		m_hFileOpenDialog->Close();
 }
 
 //-----------------------------------------------------------------------------
@@ -1311,7 +1376,8 @@ void HTML::OnFileSelectionCancelled()
 {
 	//CHTMLProtoBufMsg<CMsgFileLoadDialogResponse> cmd( eHTMLCommands_FileLoadDialogResponse );
 	//DISPATCH_MESSAGE( eHTMLCommands_FileLoadDialogResponse );
-	m_hFileOpenDialog->Close();
+	if ( m_hFileOpenDialog.Get() )
+		m_hFileOpenDialog->Close();
 }
 
 //-----------------------------------------------------------------------------
@@ -1319,6 +1385,8 @@ void HTML::OnFileSelectionCancelled()
 //-----------------------------------------------------------------------------
 void HTML::Find( const char *pchSubStr )
 {
+	if ( !m_Serializer )
+		return;
 	m_bInFind = false;
 	if ( m_sLastSearchString == pchSubStr ) // same string as last time, lets fine next
 		m_bInFind = true;
@@ -1410,7 +1478,7 @@ void HTMLComboBoxHost::OnMouseReleased(MouseCode code)
 void HTMLComboBoxHost::OnCursorMoved(int x,int y)
 {
 	// Only do this when we are over the current panel
-	if ( vgui2::input()->GetMouseOver() == GetVPanel() )
+	if ( m_pParent->m_Serializer && vgui2::input()->GetMouseOver() == GetVPanel() )
 	{
 		m_pParent->m_Serializer->MouseMove( x, y );
 	}
@@ -1429,7 +1497,7 @@ void HTMLComboBoxHost::OnMouseDoublePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 // Purpose: passes key presses to the browser (we don't current do this)
 //-----------------------------------------------------------------------------
-void HTMLComboBoxHost::OnKeyTyped(wchar_t unichar)
+void HTMLComboBoxHost::OnKeyTyped(uchar32 unichar)
 {
 	m_pParent->OnKeyTyped(unichar);
 }
@@ -1505,14 +1573,16 @@ void HTML::CHTMLFindBar::OnCommand( const char *pchCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserReady()
 {
+	if ( !m_Serializer )
+		return;
 	/*
-	const char *pchTitle = g_pVGuiLocalize->FindAsUTF8( "#cef_error_title" );
-	const char *pchHeader = g_pVGuiLocalize->FindAsUTF8( "#cef_error_header" );
-	const char *pchDetailCacheMiss = g_pVGuiLocalize->FindAsUTF8( "#cef_cachemiss" );
-	const char *pchDetailBadUURL = g_pVGuiLocalize->FindAsUTF8( "#cef_badurl" );
-	const char *pchDetailConnectionProblem = g_pVGuiLocalize->FindAsUTF8( "#cef_connectionproblem" );
-	const char *pchDetailProxyProblem = g_pVGuiLocalize->FindAsUTF8( "#cef_proxyconnectionproblem" );
-	const char *pchDetailUnknown = g_pVGuiLocalize->FindAsUTF8( "#cef_unknown" );
+	const char *pchTitle = vgui2::localize()->FindAsUTF8( "#cef_error_title" );
+	const char *pchHeader = vgui2::localize()->FindAsUTF8( "#cef_error_header" );
+	const char *pchDetailCacheMiss = vgui2::localize()->FindAsUTF8( "#cef_cachemiss" );
+	const char *pchDetailBadUURL = vgui2::localize()->FindAsUTF8( "#cef_badurl" );
+	const char *pchDetailConnectionProblem = vgui2::localize()->FindAsUTF8( "#cef_connectionproblem" );
+	const char *pchDetailProxyProblem = vgui2::localize()->FindAsUTF8( "#cef_proxyconnectionproblem" );
+	const char *pchDetailUnknown = vgui2::localize()->FindAsUTF8( "#cef_unknown" );
 
 	// tell it utf8 loc strings to use
 	CHTMLProtoBufMsg<CMsgBrowserErrorStrings> cmd( eHTMLCommands_BrowserErrorStrings );
@@ -1542,6 +1612,8 @@ void HTML::BrowserNeedsPaint( int textureid,
 							  int updatex, int updatey, int updatewide, int updatetall, 
 							  int combobox_wide, int combobox_tall, const unsigned char* combobox_rgba )
 {
+	if ( !m_Serializer )
+		return;
 	int tw = 0, tt = 0;
 	if ( m_iHTMLTextureID != 0 )
 	{
@@ -1634,6 +1706,8 @@ void HTML::BrowserNeedsPaint( int textureid,
 //-----------------------------------------------------------------------------
 bool HTML::OnStartRequest( const char *url, const char *target, const char *pchPostData, bool bIsRedirect )
 {
+	if ( !m_Serializer )
+		return false;
 	if ( !url || !Q_stricmp( url, "about:blank") )
 		return true ; // this is just webkit loading a new frames contents inside an existing page
 
@@ -1689,6 +1763,8 @@ bool HTML::OnStartRequest( const char *url, const char *target, const char *pchP
 //-----------------------------------------------------------------------------
 void HTML::BrowserStartRequest( const char *url, const char *target, const char *postdata, bool isredirect )
 {
+	if ( !m_Serializer )
+		return;
 	bool bRes = OnStartRequest( url, target, postdata, isredirect );
 
 	m_Serializer->StartRequestResponse( bRes );
@@ -1702,6 +1778,8 @@ void HTML::BrowserStartRequest( const char *url, const char *target, const char 
 //-----------------------------------------------------------------------------
 void HTML::BrowserURLChanged( const char *url, const char *postdata, bool isredirect )
 {
+	if ( !m_Serializer )
+		return;
 	m_sCurrentURL = url;
 
 	KeyValues *pMessage = new KeyValues( "OnURLChanged" );
@@ -1720,6 +1798,8 @@ void HTML::BrowserURLChanged( const char *url, const char *postdata, bool isredi
 //-----------------------------------------------------------------------------
 void HTML::BrowserFinishedRequest( const char *url, const char *pagetitle )
 {
+	if ( !m_Serializer )
+		return;
 	PostActionSignal( new KeyValues( "OnFinishRequest", "url", url ) );
 	if (  *pagetitle  )
 		PostActionSignal( new KeyValues( "PageTitleChange", "title", pagetitle ) );
@@ -1754,7 +1834,8 @@ void HTML::BrowserFinishedRequest( const char *url, const char *pagetitle )
 //-----------------------------------------------------------------------------
 void HTML::BrowserShowPopup()
 {
-	m_pComboBoxHost->SetVisible( true );
+	if ( m_Serializer )
+		m_pComboBoxHost->SetVisible( true );
 }
 
 
@@ -1866,6 +1947,8 @@ void HTML::BrowserCanGoBackandForward( bool bgoback, bool bgoforward )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSAlert( const char *message )
 {
+	if ( !m_Serializer )
+		return;
 	MessageBox *pDlg = new MessageBox( m_sCurrentURL, message, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetCommand( new KeyValues( "DismissJSDialog", "result", false ) );
@@ -1878,6 +1961,8 @@ void HTML::BrowserJSAlert( const char *message )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSConfirm( const char *message )
 {
+	if ( !m_Serializer )
+		return;
 	QueryBox *pDlg = new QueryBox( m_sCurrentURL, message, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetOKCommand( new KeyValues( "DismissJSDialog", "result", true ) );
@@ -1891,6 +1976,8 @@ void HTML::BrowserJSConfirm( const char *message )
 //-----------------------------------------------------------------------------
 void HTML::BrowserPopupHTMLWindow( const char *url, int wide, int tall, int x, int y )
 {
+	if ( !m_Serializer )
+		return;
 	HTMLPopup *p = new HTMLPopup( this, url, "" );
 	//int wide = pCmd->wide();
 	//int tall = pCmd->tall();
@@ -2080,7 +2167,8 @@ void HTML::BrowserLinkAtPositionResponse( const char *url, int x, int y )
 //-----------------------------------------------------------------------------
 void HTML::DismissJSDialog( int bResult )
 {
-	m_Serializer->JSDialogResponse( bResult == 1 );
+	if ( m_Serializer )
+		m_Serializer->JSDialogResponse( bResult == 1 );
 }
 
 
@@ -2090,7 +2178,8 @@ void HTML::DismissJSDialog( int bResult )
 void HTML::UpdateCachedHTMLValues()
 {
 	// request scroll bar sizes
-	m_Serializer->RequestBrowserSizes();
+	if ( m_Serializer )
+		m_Serializer->RequestBrowserSizes();
 }
 
 
@@ -2099,7 +2188,8 @@ void HTML::UpdateCachedHTMLValues()
 //-----------------------------------------------------------------------------
 void HTML::GetLinkAtPosition( int x, int y )
 {
-	m_Serializer->GetLinkAtPosition( x, y );
+	if ( m_Serializer )
+		m_Serializer->GetLinkAtPosition( x, y );
 }
 
 //-----------------------------------------------------------------------------
@@ -2117,5 +2207,3 @@ void HTML::UpdateSizeAndScrollBars()
 
 	InvalidateLayout();
 }
-
-

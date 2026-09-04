@@ -196,7 +196,7 @@ void CHud :: Init( void )
 	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
-	m_csgohud  = CVAR_CREATE( "hud_csgo", "0", FCVAR_ARCHIVE );
+	m_hudstyle = CVAR_CREATE("hud_style", "2", FCVAR_ARCHIVE);
 	m_bMordenRadar = FALSE;
 	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 	cl_gunsmoke  = CVAR_CREATE( "cl_gunsmoke", "0", FCVAR_ARCHIVE );
@@ -237,6 +237,8 @@ void CHud :: Init( void )
 
 
 	// Game HUD things
+	m_NewHud.Init();
+	m_Scoreboard.Init();
 	m_Ammo.Init();
 	m_Health.Init();
 	m_Radio.Init();
@@ -260,6 +262,7 @@ void CHud :: Init( void )
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
+	m_ShowWin.Init();
 	m_TextMessage.Init();
 	m_FollowIcon.Init();
 	m_MOTD.Init();
@@ -269,7 +272,6 @@ void CHud :: Init( void )
 	// all things that have own background and must be drawn last
 	m_ProgressBar.Init();
 	m_Menu.Init();
-	m_Scoreboard.Init();
 	
 
 	InitRain();
@@ -427,6 +429,13 @@ void CHud :: VidInit( void )
 	}
 
 	m_iFontHeight = GetSpriteRect(m_HUD_number_0).bottom - GetSpriteRect(m_HUD_number_0).top;
+	m_NEWHUD_number_0 = GetSpriteIndex("number_0_new");
+	m_NEWHUD_dollar_number_0 = GetSpriteIndex("dollarNum_0_new");
+	m_NEWHUD_hPlus = GetSpriteIndex("plus_new");
+	m_NEWHUD_iFontWidth = GetSpriteRect(m_NEWHUD_number_0).right - GetSpriteRect(m_NEWHUD_number_0).left;
+	m_NEWHUD_iFontHeight = GetSpriteRect(m_NEWHUD_number_0).bottom - GetSpriteRect(m_NEWHUD_number_0).top;
+	m_NEWHUD_iFontWidth_Dollar = GetSpriteRect(m_NEWHUD_dollar_number_0).right - GetSpriteRect(m_NEWHUD_dollar_number_0).left;
+	m_NEWHUD_iFontHeight_Dollar = GetSpriteRect(m_NEWHUD_dollar_number_0).bottom - GetSpriteRect(m_NEWHUD_dollar_number_0).top;
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
 

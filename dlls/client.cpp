@@ -491,6 +491,8 @@ void EXT_FUNC ClientPutInServer(edict_t *pEntity)
 	pPlayer->m_iTeam = UNASSIGNED;
 	pPlayer->pev->fixangle = 1;
 	pPlayer->m_iModelName = MODEL_URBAN;
+	pPlayer->m_iHumanModelName = MODEL_UNASSIGNED;
+	pPlayer->m_bIsFemale = false;
 	pPlayer->m_bContextHelp = true;
 	pPlayer->m_bHasNightVision = false;
 	pPlayer->m_iHostagesKilled = 0;
@@ -1548,99 +1550,41 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 {
 	CHalfLifeMultiplay *mp = g_pGameRules;
-	int numSkins = g_bIsCzeroGame ? CZ_NUM_SKIN : CS_NUM_SKIN;
+	if (player->m_iTeam != TERRORIST && player->m_iTeam != CT)
+		return;
+
+	auto &classes = PlayerClassManager();
+	const int numSkins = player->m_iTeam == TERRORIST ? classes.PlayerClass_GetNumTR() : classes.PlayerClass_GetNumCT();
 
 	struct
 	{
 		ModelName model_id;
 		const char *model_name;
-		int model_name_index;
 
 	} appearance;
 
 	Q_memset(&appearance, 0, sizeof(appearance));
 
-	if (player->m_iTeam == TERRORIST) {
-		if ((slot > numSkins || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !player->IsBot())) {
+	const char *customModel = player->IsBot() && TheBotProfiles ? TheBotProfiles->GetCustomSkinModelname(slot) : nullptr;
+	if (customModel)
+	{
+		appearance.model_id = static_cast<ModelName>(slot);
+		appearance.model_name = customModel;
+	}
+	else
+	{
+		// BOT profiles still use classic CS slots 1..5 and 6 for random.
+		if (player->IsBot())
+		{
+			if (slot >= 1 && slot <= 5)
+				slot += 7;
+			else if (slot == 6)
+				slot = 0;
+		}
+		if (slot < 1 || slot > numSkins)
 			slot = RANDOM_LONG(1, numSkins);
-		}
-
-		switch (slot) {
-			case 1:
-				appearance.model_id = MODEL_TERROR;
-				appearance.model_name = "terror";
-				break;
-			case 2:
-				appearance.model_id = MODEL_LEET;
-				appearance.model_name = "leet";
-				break;
-			case 3:
-				appearance.model_id = MODEL_ARCTIC;
-				appearance.model_name = "arctic";
-				break;
-			case 4:
-				appearance.model_id = MODEL_GUERILLA;
-				appearance.model_name = "guerilla";
-				break;
-			case 5:
-				if (g_bIsCzeroGame) {
-					appearance.model_id = MODEL_MILITIA;
-					appearance.model_name = "militia";
-					break;
-				}
-			default:
-				if (TheBotProfiles->GetCustomSkinModelname(slot) && player->IsBot()) {
-					appearance.model_name = (char *) TheBotProfiles->GetCustomSkinModelname(slot);
-				} else {
-					appearance.model_id = MODEL_TERROR;
-					appearance.model_name = "terror";
-				}
-				break;
-		}
-
-		// default T model models/player/terror/terror.mdl
-		appearance.model_name_index = 8;
-
-	} else if (player->m_iTeam == CT) {
-		if ((slot > numSkins || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !player->IsBot())) {
-			slot = RANDOM_LONG(1, numSkins);
-		}
-
-		switch (slot) {
-			case 1:
-				appearance.model_id = MODEL_URBAN;
-				appearance.model_name = "urban";
-				break;
-			case 2:
-				appearance.model_id = MODEL_GSG9;
-				appearance.model_name = "gsg9";
-				break;
-			case 3:
-				appearance.model_id = MODEL_SAS;
-				appearance.model_name = "sas";
-				break;
-			case 4:
-				appearance.model_id = MODEL_GIGN;
-				appearance.model_name = "gign";
-				break;
-			case 5:
-				if (g_bIsCzeroGame) {
-					appearance.model_id = MODEL_SPETSNAZ;
-					appearance.model_name = "spetsnaz";
-					break;
-				}
-			default:
-				if (TheBotProfiles->GetCustomSkinModelname(slot) && player->IsBot()) {
-					appearance.model_name = (char *) TheBotProfiles->GetCustomSkinModelname(slot);
-				} else {
-					appearance.model_id = MODEL_URBAN;
-					appearance.model_name = "urban";
-				}
-				break;
-		}
-
-		// default CT model models/player/urban/urban.mdl
-		appearance.model_name_index = 9;
+		appearance.model_id = classes.PlayerClass_FromTeamSlot(player->m_iTeam, slot);
+		appearance.model_name = classes.PlayerClass_GetModelName(appearance.model_id);
 	}
 
 	player->ResetMenu();
@@ -1660,9 +1604,13 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 
 	player->pev->body = 0;
 	player->m_iModelName = appearance.model_id;
+	player->m_iHumanModelName = appearance.model_id;
+	player->m_bIsFemale = classes.PlayerClass_IsFemale(appearance.model_id);
 
 	SET_CLIENT_KEY_VALUE(player->entindex(), GET_INFO_BUFFER(player->edict()), "model", appearance.model_name);
-	player->SetNewPlayerModel(Client_ApperanceToModel(appearance.model_name_index));
+	char modelPath[128];
+	Q_snprintf(modelPath, sizeof(modelPath), "models/player/%s/%s.mdl", appearance.model_name, appearance.model_name);
+	player->SetNewPlayerModel(modelPath);
 
 	if (mp->m_iMapHasVIPSafetyZone == MAP_VIP_SAFETYZONE_UNINITIALIZED) {
 		if ((UTIL_FindEntityByClassname(NULL, "func_vip_safetyzone")) != NULL)
@@ -1884,8 +1832,9 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 		}
 	}
 
-	// If we already died and changed teams once, deny
-	if (player->m_bTeamChanged) {
+	// Initial class selection can move between the CSO team tabs. The usual
+	// one-change-per-round limit applies once the player has chosen a class.
+	if (player->m_bTeamChanged && player->m_iJoiningState != PICKINGTEAM) {
 		if (player->pev->deadflag != DEAD_NO) {
 			ClientPrint(player->pev, HUD_PRINTCENTER, "#Only_1_Team_Change");
 			return FALSE;
@@ -3226,12 +3175,8 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 		}
 		else if (FStrEq(pcmd, "jointeam"))
 		{
-			if (player->m_iMenu == Menu_ChooseAppearance)
-			{
-				ClientPrint(player->pev, HUD_PRINTCENTER, "#Command_Not_Available");
-				return;
-			}
-
+			// CSO's class tabs may request another team before a class is picked.
+			// HandleMenu_ChooseTeam still enforces all team and round restrictions.
 			int slot = Q_atoi(CMD_ARGV_(1));
 			if (HandleMenu_ChooseTeam(player, slot))
 			{
@@ -3790,6 +3735,8 @@ void ClientPrecache()
 	PRECACHE_SOUND("player/die2.wav");
 	PRECACHE_SOUND("player/die3.wav");
 	PRECACHE_SOUND("player/death6.wav");
+	PRECACHE_SOUND("zombi/human_death_female_01.wav");
+	PRECACHE_SOUND("zombi/human_death_female_02.wav");
 	PRECACHE_SOUND("radio/locknload.wav");
 	PRECACHE_SOUND("radio/letsgo.wav");
 	PRECACHE_SOUND("radio/moveout.wav");

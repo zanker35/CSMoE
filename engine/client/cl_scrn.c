@@ -21,6 +21,9 @@ GNU General Public License for more details.
 #include "vgui_draw.h"
 #include "qfont.h"
 #include "library.h"
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
 #ifdef XASH_IMGUI
 #include "imgui_impl_xash.h"
 #endif
@@ -672,6 +675,10 @@ void SCR_VidInit( void )
 	// vid_state has changed
 	if( menu.hInstance ) menu.dllFuncs.pfnVidInit();
 	if( clgame.hInstance ) clgame.dllFuncs.pfnVidInit();
+
+#ifdef XASH_VGUI2
+	if( clgame.hInstance ) VGui2_VidInit();
+#endif
 
 	// restart console size
 	Con_VidInit ();

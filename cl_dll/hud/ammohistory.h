@@ -114,6 +114,7 @@ private:
 	};
 
 	HIST_ITEM rgAmmoHistory[MAX_HISTORY];
+	int m_weaponGetSprite = -1;
 
 public:
 
@@ -134,10 +135,11 @@ public:
 	void AddToHistory( int iType, const char *szName, int iCount = 0 );
 
 	void CheckClearHistory( void );
+	void VidInit();
 	int DrawAmmoHistory( float flTime );
+	int DrawNEWHudAmmoHistory(float flTime);
 };
 
 extern HistoryResource gHR;
-
 
 

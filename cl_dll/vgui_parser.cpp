@@ -78,7 +78,7 @@ void Localize_Init( )
 	int unicodeLength = ftell( wf );
 	fseek( wf, 0L, SEEK_SET );
 
-	uchar16 *unicodeBuf = new uchar16[unicodeLength];
+	cl::uchar16 *unicodeBuf = new cl::uchar16[unicodeLength];
 	int totalRead = fread( unicodeBuf, 1, unicodeLength, wf );
 	if( totalRead == unicodeLength ) // no problem, so read it.
 	{

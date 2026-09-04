@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI2.h>
+#include <vgui/VGUI.h>
 
 #include "Controls.h"
 
@@ -42,6 +42,8 @@ public:
 	void SetTooltipFormatToMultiLine();
 	void SetTooltipDelay(int tooltipDelayMilliseconds);
 	int GetTooltipDelay();
+
+	void SetBackgroundSkin(IScheme* pScheme, const char* szSkin);
 
 private:
 	virtual void ApplySchemeSettings(IScheme *pScheme);

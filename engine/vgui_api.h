@@ -15,6 +15,7 @@ GNU General Public License for more details.
 #ifndef VGUI_API_H
 #define VGUI_API_H
 
+#include <stddef.h>
 #include "xash3d_types.h"
 
 // VGUI generic vertex
@@ -25,9 +26,14 @@ typedef struct
 	vec2_t	coord;
 } vpoint_t;
 
-// C-Style VGUI enums
+// Keep the engine's C ABI while avoiding collisions with VGUI2's C++ key names.
+#ifdef __cplusplus
+#define VGUI_ENUM(name) enum class name
+#else
+#define VGUI_ENUM(name) enum name
+#endif
 
-enum VGUI_MouseCode
+VGUI_ENUM(VGUI_MouseCode)
 {
 	MOUSE_LEFT=0,
 	MOUSE_RIGHT,
@@ -35,7 +41,7 @@ enum VGUI_MouseCode
 	MOUSE_LAST
 };
 
-enum VGUI_KeyCode
+VGUI_ENUM(VGUI_KeyCode)
 {
 	KEY_0=0,
 	KEY_1,
@@ -143,13 +149,13 @@ enum VGUI_KeyCode
 	KEY_LAST
 };
 
-enum VGUI_KeyAction
+VGUI_ENUM(VGUI_KeyAction)
 {
 	KA_TYPED=0,
 	KA_PRESSED,
 	KA_RELEASED
 };
-enum VGUI_MouseAction
+VGUI_ENUM(VGUI_MouseAction)
 {
 	MA_PRESSED=0,
 	MA_RELEASED,
@@ -157,7 +163,7 @@ enum VGUI_MouseAction
 	MA_WHEEL
 };
 
-enum VGUI_DefaultCursor
+VGUI_ENUM(VGUI_DefaultCursor)
 {
 	dc_user,
 	dc_none,
@@ -176,6 +182,7 @@ enum VGUI_DefaultCursor
 	dc_last
 };
 
+#undef VGUI_ENUM
 
 
 
@@ -211,5 +218,6 @@ typedef struct  vguiapi_s
 	void	(*Mouse)(enum VGUI_MouseAction action, int code );
 	void	(*Key)(enum VGUI_KeyAction action,enum VGUI_KeyCode code );
 	void	(*MouseMove)( int x, int y );
+	void	(*SetCursorPos)( int x, int y );
 } vguiapi_t;
 #endif // VGUI_API_H

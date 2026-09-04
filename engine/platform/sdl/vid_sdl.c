@@ -391,13 +391,19 @@ Change window size fastly to custom values, without setting vid mode
 */
 void R_ChangeDisplaySettingsFast( int width, int height )
 {
+	// SDL resize events report logical points; keep the framebuffer size in pixels.
+	if( host.hWnd )
+		GL_GetDrawableSize( host.hWnd, &width, &height );
 	//Cvar_SetFloat("vid_mode", VID_NOMODE);
 	Cvar_SetFloat("width", width);
 	Cvar_SetFloat("height", height);
 
 	// as we don't recreate window here, update center positions by hand
-	host.window_center_x = width / 2;
-	host.window_center_y = height / 2;
+	int window_width = width, window_height = height;
+	if( host.hWnd )
+		SDL_GetWindowSize( host.hWnd, &window_width, &window_height );
+	host.window_center_x = window_width / 2;
+	host.window_center_y = window_height / 2;
 
 	if( glState.width != width || glState.height != height )
 	{
@@ -480,6 +486,9 @@ rserr_t R_ChangeDisplaySettings( int width, int height, qboolean fullscreen )
 
 #endif
 
+	// The initial create path still has logical window dimensions here.
+	// Rendering and HUD coordinates must retain the drawable pixel dimensions.
+	GL_GetDrawableSize( host.hWnd, &width, &height );
 	MsgDev(D_INFO, "R_ChangeDisplaySettings: Setting video mode to %dx%d %s\n", width, height, fullscreen ? "fullscreen" : "windowed");
 	R_SaveVideoMode( width, height );
 

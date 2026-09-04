@@ -34,6 +34,10 @@ GNU General Public License for more details.
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#ifdef __APPLE__
+#include <ifaddrs.h>
+#include <net/if.h>
+#endif
 // Errors handling
 #include <errno.h>
 #include <fcntl.h>
@@ -1552,6 +1556,31 @@ NET_GetLocalAddress
 Returns the servers' ip address as a string.
 ================
 */
+#ifdef __APPLE__
+static qboolean NET_GetLocalInterfaceAddress( netadr_t *address )
+{
+	struct ifaddrs *interfaces, *current;
+	qboolean found = false;
+
+	if( getifaddrs( &interfaces ) != 0 )
+		return false;
+
+	for( current = interfaces; current; current = current->ifa_next )
+	{
+		if( !current->ifa_addr || current->ifa_addr->sa_family != AF_INET ||
+			!(current->ifa_flags & IFF_UP) || !(current->ifa_flags & IFF_RUNNING) ||
+			(current->ifa_flags & (IFF_LOOPBACK | IFF_POINTOPOINT)) )
+			continue;
+
+		NET_SockadrToNetadr( current->ifa_addr, address );
+		found = true;
+		break;
+	}
+	freeifaddrs( interfaces );
+	return found;
+}
+#endif
+
 void NET_GetLocalAddress( void )
 {
 	char		buff[512];
@@ -1566,20 +1595,32 @@ void NET_GetLocalAddress( void )
 	}
 	else
 	{
-		// If we have changed the ip var from the command line, use that instead.
-		if( Q_strcmp( net_ip->string, "localhost" ))
+#ifdef __APPLE__
+		if( !Q_strcmp( net_ip->string, "localhost" ))
 		{
-			Q_strcpy( buff, net_ip->string );
+			// The socket is already bound. Resolving the Mac's .local hostname
+			// can block the game thread for an mDNS timeout just to display its IP.
+			if( !NET_GetLocalInterfaceAddress( &net_local ))
+				NET_StringToAdr( "127.0.0.1", &net_local );
 		}
 		else
+#endif
 		{
-			pGetHostName( buff, 512 );
+			// If we have changed the ip var from the command line, use that instead.
+			if( Q_strcmp( net_ip->string, "localhost" ))
+			{
+				Q_strcpy( buff, net_ip->string );
+			}
+			else
+			{
+				pGetHostName( buff, 512 );
+			}
+
+			// ensure that it doesn't overrun the buffer
+			buff[511] = 0;
+
+			NET_StringToAdr( buff, &net_local );
 		}
-
-		// ensure that it doesn't overrun the buffer
-		buff[511] = 0;
-
-		NET_StringToAdr( buff, &net_local );
 		namelen = sizeof( address );
 
 		if( pGetSockName( ip_sockets[NS_SERVER], (struct sockaddr *)&address, &namelen ) != 0 )

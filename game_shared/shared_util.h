@@ -32,6 +32,8 @@
 #pragma once
 #endif
 
+#include "../dlls/maintypes.h"
+
 #ifndef _WIN32
 #include <string.h>
 #include <wchar.h>

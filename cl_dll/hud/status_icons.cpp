@@ -49,6 +49,9 @@ int CHudStatusIcons::VidInit( void )
 {
 	R_InitTexture(m_tgaC4[0], "resource/helperhud/c4_left_default");
 	R_InitTexture(m_tgaC4[1], "resource/helperhud/c4_left_install");
+	m_NEWHUD_hC4_Off = gHUD.GetSpriteIndex("c4_off_new");
+	m_NEWHUD_hC4_On = gHUD.GetSpriteIndex("c4_on_new");
+	m_NEWHUD_hDefuser = gHUD.GetSpriteIndex("defuser_new");
 	return 1;
 }
 
@@ -77,6 +80,30 @@ int CHudStatusIcons::Draw( float flTime )
 	{
 		if ( m_IconList[i].spr )
 		{
+			if (gHUD.m_hudstyle->value == 2)
+			{
+				if (!strcmp(m_IconList[i].szSpriteName, "buyzone"))
+				{
+					SPR_Set(m_IconList[i].spr, 255, 255, 255);
+					SPR_DrawAdditive(0, 4, gHUD.m_Radar.GetRadarBottom() + 7, &m_IconList[i].rc);
+					continue;
+				}
+				int sprite = -1;
+				int iconX = ScreenWidth - 150;
+				if (!strcmp(m_IconList[i].szSpriteName, "c4"))
+					sprite = g_bInBombZone && (static_cast<int>(flTime * 10) % 2) ? m_NEWHUD_hC4_On : m_NEWHUD_hC4_Off;
+				else if (!strcmp(m_IconList[i].szSpriteName, "defuser"))
+				{
+					sprite = m_NEWHUD_hDefuser;
+					iconX = ScreenWidth - 185;
+				}
+				if (sprite >= 0)
+				{
+					SPR_Set(gHUD.GetSprite(sprite), 255, 255, 255);
+					SPR_DrawAdditive(0, iconX, ScreenHeight - 82, &gHUD.GetSpriteRect(sprite));
+					continue;
+				}
+			}
 			y -= ( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + 5;
 			
 			/*if( g_bInBombZone && !strcmp(m_IconList[i].szSpriteName, "c4") && ((int)(flTime * 10) % 2))
@@ -93,7 +120,7 @@ int CHudStatusIcons::Draw( float flTime )
 
 				DrawUtils::Draw2DQuadScaled(x, y, x + 58, y + 55);
 			}
-			else if (gHUD.m_csgohud->value && !strcmp(m_IconList[i].szSpriteName, "buyzone"))
+			else if ((gHUD.m_hudstyle->value == 1) && !strcmp(m_IconList[i].szSpriteName, "buyzone"))
 			{
 					SPR_Set(m_IconList[i].spr, 255, 255, 255);
 					if(gHUD.m_bMordenRadar)

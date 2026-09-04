@@ -135,9 +135,9 @@ char *CHudTextMessage::LookupString( char *msg, int *msg_dest )
 
 void StripEndNewlineFromString( char *str )
 {
-	int s = strlen( str ) - 1;
-	if ( str[s] == '\n' || str[s] == '\r' )
-		str[s] = 0;
+	const size_t length = strlen(str);
+	if (length && (str[length - 1] == '\n' || str[length - 1] == '\r'))
+		str[length - 1] = 0;
 }
 
 // converts all '\r' characters to '\n', so that the engine can deal with the properly
@@ -170,22 +170,29 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	int msg_dest = reader.ReadByte();
 
 	static char szBuf[6][MAX_TEXTMSG_STRING];
-	char *msg_text = LookupString( reader.ReadString(), &msg_dest );
-	msg_text = strncpy( szBuf[0], msg_text, MAX_TEXTMSG_STRING );
+	char *raw_message = reader.ReadString();
+	if (msg_dest == HUD_PRINTCENTER && gHUD.m_ShowWin.OnTextMessage(raw_message))
+		return 1;
+	char *msg_text = LookupString( raw_message, &msg_dest );
+	snprintf(szBuf[0], MAX_TEXTMSG_STRING, "%s", msg_text);
+	msg_text = szBuf[0];
 
-	// keep reading strings and using C format strings for substituting the strings into the localised text string
-	char *sstr1 = LookupString( reader.ReadString() );
-	sstr1 = strncpy( szBuf[1], sstr1, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	char *sstr2 = LookupString( reader.ReadString() );
-	sstr2 = strncpy( szBuf[2], sstr2, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr2 );
-	char *sstr3 = LookupString( reader.ReadString() );
-	sstr3 = strncpy( szBuf[3], sstr3, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr3 );
-	char *sstr4 = LookupString( reader.ReadString() );
-	sstr4 = strncpy( szBuf[4], sstr4, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr4 );
+	// UTIL_ClientPrintAll/ClientPrint omit absent parameters. Read only the
+	// strings present on the wire and clear the remaining substitution slots.
+	for (int parameter = 1; parameter <= 4; ++parameter)
+	{
+		szBuf[parameter][0] = 0;
+		if (!reader.Eof())
+		{
+			const char *value = LookupString(reader.ReadString());
+			snprintf(szBuf[parameter], MAX_TEXTMSG_STRING, "%s", value);
+			StripEndNewlineFromString(szBuf[parameter]);
+		}
+	}
+	char *sstr1 = szBuf[1];
+	char *sstr2 = szBuf[2];
+	char *sstr3 = szBuf[3];
+	char *sstr4 = szBuf[4];
 	char *psz = szBuf[5];
 
 	// Remove numbers after %s.
@@ -199,8 +206,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 				char *first = &msg_text[i + 2];
 				char *second = &msg_text[i + 3];
 
-				memmove( first, second, strlen( second ));
-				first[strlen(first)] = '\0';
+				memmove(first, second, strlen(second) + 1);
 			}
 		}
 	}

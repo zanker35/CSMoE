@@ -59,11 +59,15 @@ namespace sv {
 		PRECACHE_MODEL("models/p_janus7xmas.mdl");
 		PRECACHE_SOUND("weapons/janus7-1.wav");
 		PRECACHE_SOUND("weapons/janus7-2.wav");
-		PRECACHE_SOUND("weapons/janus7xmas_clipout.wav");
-		PRECACHE_SOUND("weapons/janus7xmas_clipin.wav");
-		PRECACHE_SOUND("weapons/janus7xmas_cliplock.wav");
-		PRECACHE_SOUND("weapons/janus7xmas_open.wav");
-		PRECACHE_SOUND("weapons/janus7xmas_close.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_clipout1.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_clipout2.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_clipin1.wav");
+		PRECACHE_SOUND("weapons/m60e4_clipin2.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_clipin3.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_chage1.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_idle2_1.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_idle2_2.wav");
+		PRECACHE_SOUND("weapons/janus7xmas_chage2.wav");
 
 		m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 		m_usFireJanus7xmas = PRECACHE_EVENT(1, "events/janus7xmas.sc");
@@ -408,7 +412,7 @@ namespace sv {
 		if (m_iWeaponState & WPNSTATE_M4A1_SILENCED)
 		{
 			SendWeaponAnim(ANIM_IDLEB, UseDecrement() != FALSE);
-			EMIT_SOUND_DYN(this->edict(), CHAN_WEAPON, "weapons/null.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
+			STOP_SOUND(this->edict(), CHAN_WEAPON, "weapons/janus7-2.wav");
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20s;
 		}
 		else if (IsSignal())

@@ -195,8 +195,10 @@ CSupplyBox *CMod_ZombieMod2::CreateSupplybox()
 
 void CMod_ZombieMod2::HumanInfectionByZombie(CBasePlayer *player, CBasePlayer *attacker)
 {
+	const bool wasZombie = player->m_bIsZombie;
 	CMod_Zombi::HumanInfectionByZombie(player, attacker);
-	m_eventInfection.dispatch(player, attacker);
+	if (!wasZombie && player->m_bIsZombie)
+		m_eventInfection.dispatch(player, attacker);
 }
 
 int CMod_ZombieMod2::AddToFullPack_Post(struct entity_state_s* state, int e, edict_t* ent, edict_t* host, int hostflags, int player, unsigned char* pSet)
@@ -317,7 +319,8 @@ void CPlayerModStrategy_ZB2::BecomeZombie(ZombieLevel iEvolutionLevel)
 	auto sp = ZombieClassFactory(m_pPlayer, iEvolutionLevel, "random");
 	m_pCharacter_ZB2 = sp;
 	m_pCharacter = sp;
-	m_pPlayer->SwitchWeapon(m_pPlayer->m_pActiveItem);
+	if (!EquipZombie())
+		return;
 
 	sp->InitHUD();
 	sp->ResetMaxSpeed();

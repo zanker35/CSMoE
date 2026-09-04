@@ -657,8 +657,10 @@ void ImGui_ImplGL_Render(void)
 void Engine_OnGUI(struct ImGuiContext *context)
 {
 	ImGui::SetCurrentContext(context);
+#ifndef XASH_VGUI2
 	ImGui_LCSM_OnGUI();
 	ImGui_Console_OnGUI();
+#endif
 	ImGui_ImeWindow_OnGUI();
 	ImGui_SprView_OnGUI();
 	if(g_bShowDemoWindow)

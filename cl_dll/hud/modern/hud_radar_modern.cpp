@@ -18,11 +18,8 @@
 #endif
 
 
-CHudRadarModern::CHudRadarModern(void) : m_OverviewData()
+CHudRadarModern::CHudRadarModern(void) : m_flNextBuild(0), m_pHostages{}, m_OverviewData(), m_MapSprite(nullptr)
 {
-	m_bCanRenderMapSprite = false;
-	m_iLastWide = 0;
-
 	m_bCanRenderMapSprite = false;
 	m_iLastWide = 0;
 
@@ -68,21 +65,48 @@ int CHudRadarModern::VidInit(void)
 
 	m_hRadar = gHUD.GetSprite(m_HUD_radar);
 	m_hRadaropaque = gHUD.GetSprite(m_HUD_radaropaque);
+	if (!m_iMapTitleBG)
+		m_iMapTitleBG = R_LoadTextureUnique("resource/hud/hud_maptitle_bg");
 	return 1;
+}
+
+int CHudRadarModern::GetRadarSize() const
+{
+	return cl_newradar_size->value * ScreenWidth;
+}
+
+int CHudRadarModern::GetRadarTop() const
+{
+	return gHUD.m_hudstyle && gHUD.m_hudstyle->value == 2 && m_iMapTitleBG ?
+		m_iMapTitleBG->h() + 1 : 0;
 }
 
 void CHudRadarModern::Reset(void)
 {
-	for (int i = 1; i <= MAX_HOSTAGES; i++)
+	for (int i = 0; i <= MAX_HOSTAGES; i++)
 		m_pHostages[i] = NULL;
+	m_flNextBuild = 0;
 
-	if (strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
+	const char *levelName = gEngfuncs.pfnGetLevelName();
+	if (!levelName || !levelName[0])
+	{
+		m_OverviewData = {};
+		m_MapSprite = nullptr;
+		return;
+	}
+
+	if (strcmp(m_OverviewData.map, levelName))
 	{
 		// update level overview if level changed
-		std::string map = gEngfuncs.pfnGetLevelName();
-		map.erase(map.rfind('.'));
+		std::string map = levelName;
+		const size_t extension = map.rfind('.');
+		if (extension != std::string::npos)
+			map.erase(extension);
 		map.erase(0, map.find_last_of("/\\") + 1);
-		LoadOverviewInfo((std::string("overviews/") + std::move(map) + ".txt").c_str(), &m_OverviewData);
+		m_OverviewData = {};
+		if (!LoadOverviewInfo((std::string("overviews/") + map + ".txt").c_str(), &m_OverviewData))
+			m_OverviewData = {};
+		strncpy(m_OverviewData.map, levelName, sizeof(m_OverviewData.map) - 1);
 		LoadMapSprites();
 	}
 
@@ -189,13 +213,12 @@ error:
 		gEngfuncs.COM_FreeFile(buffer);
 	}
 
-	strncpy(data->map, gEngfuncs.pfnGetLevelName(), sizeof(data->map));
 	return parseSuccess;
 }
 
 int CHudRadarModern::Draw(float time)
 {
-	if (!m_MapSprite)
+	if (!Available())
 		return 0;
 
 	if (!gHUD.m_pCvarDraw->value)
@@ -225,8 +248,20 @@ int CHudRadarModern::Draw(float time)
 #endif
 
 	int sx, sy, wide, tall;
-	sx = sy = 0;
-	tall = wide = cl_newradar_size->value * ScreenWidth * gHUD.m_flScale;
+	sx = 0;
+	sy = GetRadarTop() * gHUD.m_flScale;
+	tall = wide = GetRadarSize() * gHUD.m_flScale;
+	if (sy)
+	{
+		m_iMapTitleBG->Draw2DQuadScaled(0, 0, GetRadarSize(), m_iMapTitleBG->h());
+		if (g_szLocation[0])
+		{
+			int textWidth, textHeight;
+			gEngfuncs.pfnDrawSetTextColor(0.8f, 0.8f, 0.8f);
+			gEngfuncs.pfnDrawConsoleStringLen(g_szLocation, &textWidth, &textHeight);
+			gEngfuncs.pfnDrawConsoleString(5, max(0, (m_iMapTitleBG->h() - textHeight) / 2), g_szLocation);
+		}
+	}
 	
 	{
 		float angles, xTemp, yTemp, viewzoom;
@@ -245,8 +280,8 @@ int CHudRadarModern::Draw(float time)
 
 		screenaspect = 4.0f / 3.0f;
 		angles = (gHUD.m_vecAngles[1] + 90.0) * (M_PI / 180.0);
-		xs = gHUD.m_Spectator.m_OverviewData.origin[0];
-		ys = gHUD.m_Spectator.m_OverviewData.origin[1];
+		xs = m_OverviewData.originX;
+		ys = m_OverviewData.originY;
 		z = 0;
 
 		frame = 0;
@@ -255,13 +290,13 @@ int CHudRadarModern::Draw(float time)
 		if (m_OverviewData.rotated)
 		{
 			angles -= M_PI / 2.0;
-			xTemp = 3 + gHUD.m_Spectator.m_OverviewData.zoom * (1.0 / 1024.0) * ys - (1.0 / 1024) * gHUD.m_Spectator.m_OverviewData.zoom * gHUD.m_vecOrigin[1];
-			yTemp = -(-4 + gHUD.m_Spectator.m_OverviewData.zoom * (1.0 / 1024.0) * xs - (1.0 / 1024) * gHUD.m_Spectator.m_OverviewData.zoom * gHUD.m_vecOrigin[0]);
+			xTemp = 3 + m_OverviewData.zoom * (1.0 / 1024.0) * ys - (1.0 / 1024) * m_OverviewData.zoom * gHUD.m_vecOrigin[1];
+			yTemp = -(-4 + m_OverviewData.zoom * (1.0 / 1024.0) * xs - (1.0 / 1024) * m_OverviewData.zoom * gHUD.m_vecOrigin[0]);
 		}
 		else
 		{
-			xTemp = 3 + gHUD.m_Spectator.m_OverviewData.zoom * (1.0 / 1024.0) * xs - (1.0 / 1024) * gHUD.m_Spectator.m_OverviewData.zoom * gHUD.m_vecOrigin[0];
-			yTemp = 4 + gHUD.m_Spectator.m_OverviewData.zoom * (1.0 / 1024.0) * ys - (1.0 / 1024) * gHUD.m_Spectator.m_OverviewData.zoom * gHUD.m_vecOrigin[1];
+			xTemp = 3 + m_OverviewData.zoom * (1.0 / 1024.0) * xs - (1.0 / 1024) * m_OverviewData.zoom * gHUD.m_vecOrigin[0];
+			yTemp = 4 + m_OverviewData.zoom * (1.0 / 1024.0) * ys - (1.0 / 1024) * m_OverviewData.zoom * gHUD.m_vecOrigin[1];
 		}
 
 		xStep = (2 * 4096.0f / viewzoom) / xTiles;
@@ -272,8 +307,8 @@ int CHudRadarModern::Draw(float time)
 		xRightStep = cos(angles) * xStep;
 		yRightStep = sin(angles) * xStep;
 
-		xOut = wide * 0.5 - (xTemp * xRightStep) - (yTemp * xUpStep);
-		yOut = tall * 0.5 - (xTemp * yRightStep) - (yTemp * yUpStep);
+		xOut = sx + wide * 0.5 - (xTemp * xRightStep) - (yTemp * xUpStep);
+		yOut = sy + tall * 0.5 - (xTemp * yRightStep) - (yTemp * yUpStep);
 
 		//glScissor(x, ScreenHeight - tall - y, wide, tall);
 		//glEnable(GL_SCISSOR_TEST);
@@ -325,26 +360,34 @@ int CHudRadarModern::Draw(float time)
 
 	DrawUtils::DrawOutlinedRect(sx / gHUD.m_flScale, sy / gHUD.m_flScale, wide / gHUD.m_flScale, tall / gHUD.m_flScale, 0, 0, 0, 255);
 
-	// TODO : localization
+	if (!sy && g_szLocation[0])
+	{
+		int textWidth, textHeight;
+		gEngfuncs.pfnDrawSetTextColor(0.0f, 0.8f, 0.0f);
+		gEngfuncs.pfnDrawConsoleStringLen(g_szLocation, &textWidth, &textHeight);
+		gEngfuncs.pfnDrawConsoleString((GetRadarSize() - textWidth) / 2, GetRadarSize() + textHeight, g_szLocation);
+	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
 	gEngfuncs.pTriAPI->Color4f(1, 0.62745f, 0, 1.0f);
 
 	struct model_s* model = (struct model_s*)gEngfuncs.GetSpritePointer(m_hsprCamera);
-	gEngfuncs.pTriAPI->SpriteTexture(model, 0);
-	
-	float cameraScale = 2;
-	int cameraWide = gEngfuncs.pfnSPR_Width(m_hsprCamera, 0) * cameraScale;
-	int cameraHeight = gEngfuncs.pfnSPR_Height(m_hsprCamera, 0) * cameraScale;
+	if (model)
+	{
+		gEngfuncs.pTriAPI->SpriteTexture(model, 0);
+		float cameraScale = 2 * gHUD.m_flScale;
+		int cameraWide = gEngfuncs.pfnSPR_Width(m_hsprCamera, 0) * cameraScale;
+		int cameraHeight = gEngfuncs.pfnSPR_Height(m_hsprCamera, 0) * cameraScale;
 
-	gEngfuncs.pTriAPI->Begin(TRI_TRIANGLES);
-	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2 + cameraWide * 0.7, tall / 2 - cameraHeight * 0.7, 0);
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2 - cameraWide * 0.7, tall / 2 - cameraHeight * 0.7, 0);
-	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2, tall / 2, 0);
-	gEngfuncs.pTriAPI->End();
+		gEngfuncs.pTriAPI->Begin(TRI_TRIANGLES);
+		gEngfuncs.pTriAPI->TexCoord2f(1, 1);
+		gEngfuncs.pTriAPI->Vertex3f(sx + wide / 2 + cameraWide * 0.7, sy + tall / 2 - cameraHeight * 0.7, 0);
+		gEngfuncs.pTriAPI->TexCoord2f(0, 0);
+		gEngfuncs.pTriAPI->Vertex3f(sx + wide / 2 - cameraWide * 0.7, sy + tall / 2 - cameraHeight * 0.7, 0);
+		gEngfuncs.pTriAPI->TexCoord2f(0, 1);
+		gEngfuncs.pTriAPI->Vertex3f(sx + wide / 2, sy + tall / 2, 0);
+		gEngfuncs.pTriAPI->End();
+	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 
@@ -353,9 +396,11 @@ int CHudRadarModern::Draw(float time)
 	char szTeamName[MAX_TEAM_NAME];
 	strcpy(szTeamName, g_PlayerExtraInfo[idx].teamname);
 
-	for (int i = 0; i < MAX_CLIENTS + 1; i++)
+	// Radar messages use slot 33 for the dropped/planted bomb; slot 32 is a player.
+	const int bombIndex = MAX_PLAYERS;
+	for (int i = 1; i <= bombIndex; i++)
 	{
-		if (i != 32 && (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0]))
+		if (i != bombIndex && (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0]))
 			continue;
 
 		if (strcmp(szTeamName, g_PlayerExtraInfo[i].teamname) || g_PlayerExtraInfo[i].dead)
@@ -400,7 +445,7 @@ int CHudRadarModern::Draw(float time)
 		int rx, ry;
 		float yaw = 0;
 
-		if (i != 32)
+		if (i != bombIndex)
 		{
 			if (hspr == 0)
 				continue;
@@ -441,7 +486,7 @@ int CHudRadarModern::Draw(float time)
 
 		if (g_PlayerExtraInfo[i].nextflash == true && g_PlayerExtraInfo[i].radarflashes > 0)
 		{
-			if (i == 32)
+			if (i == bombIndex)
 			{
 				if (g_iTeamNumber == TEAM_TERRORIST)
 				{
@@ -528,11 +573,11 @@ int CHudRadarModern::Draw(float time)
 				}
 				//DrawSprite(rx, ry, hspr, yaw, scale, 200, 200, 200, 255);
 				SPR_Set(hspr, 133, 247, 255);
-				SPR_DrawAdditive(0, rx, ry, &m_hRadarSupplybox.rect);
+				SPR_DrawAdditive(0, rx / gHUD.m_flScale, ry / gHUD.m_flScale, &m_hRadarSupplybox.rect);
 			}
 		}
 	}
-	else
+	else if (g_iTeamNumber == TEAM_CT)
 	{
 		for (int i = 0; i <= MAX_HOSTAGES; i++)
 		{
@@ -620,7 +665,7 @@ void CHudRadarModern::BuildHostageList(void)
 			if (model->name[0] == '*')
 				continue;
 
-			if (!strcmp(model->name, "models/hostage.mdl"))
+			if (index <= MAX_HOSTAGES && !strcmp(model->name, "models/hostage.mdl"))
 			{
 				m_pHostages[index] = entity;
 				index++;
@@ -647,7 +692,7 @@ bool CHudRadarModern::IsValidEntity(cl_entity_s *pEntity)
 bool CHudRadarModern::CalcPoint(float *origin, int &screenX, int &screenY, int &scale)
 {
 	int wide, tall;
-	tall = wide = cl_newradar_size->value * ScreenWidth * gHUD.m_flScale;
+	tall = wide = GetRadarSize() * gHUD.m_flScale;
 
 	float dx = origin[0] - gHUD.m_vecOrigin[0];
 	float dy = origin[1] - gHUD.m_vecOrigin[1];
@@ -668,25 +713,28 @@ bool CHudRadarModern::CalcPoint(float *origin, int &screenX, int &screenY, int &
 
 	bool result = false;
 	float scalleRate = (1 / 1.2);
+	int border = scale * gHUD.m_flScale;
 
-	if (screenX < 0 + scale)
+	if (screenX < border)
 	{
 		screenX = 0;
 		result = true;
 		scale *= scalleRate;
 		scaled = true;
-		screenX += scale + 1;
+		border = scale * gHUD.m_flScale;
+		screenX += border + 1;
 	}
-	else if (screenX >= wide - scale)
+	else if (screenX >= wide - border)
 	{
 		screenX = wide;
 		result = true;
 		scale *= scalleRate;
 		scaled = true;
-		screenX -= scale + 1;
+		border = scale * gHUD.m_flScale;
+		screenX -= border + 1;
 	}
 
-	if (screenY < 0 + scale)
+	if (screenY < border)
 	{
 		screenY = 0;
 		result = true;
@@ -694,19 +742,23 @@ bool CHudRadarModern::CalcPoint(float *origin, int &screenX, int &screenY, int &
 		if (!scaled)
 			scale *= scalleRate;
 
-		screenY += scale + 1;
+		border = scale * gHUD.m_flScale;
+		screenY += border + 1;
 	}
-	else if (screenY >= tall - scale)
+	else if (screenY >= tall - border)
 	{
-		screenY = wide;
+		screenY = tall;
 		result = true;
 
 		if (!scaled)
 			scale *= scalleRate;
 
-		screenY -= scale + 1;
+		border = scale * gHUD.m_flScale;
+		screenY -= border + 1;
 	}
 
+	// Clamp within the map first, then apply the same title offset as the map and camera.
+	screenY += static_cast<int>(GetRadarTop() * gHUD.m_flScale);
 	return result;
 }
 
@@ -716,16 +768,17 @@ bool CHudRadarModern::CalcPoint(float *origin, int &screenX, int &screenY, int &
 
 void CHudRadarModern::DrawSprite(int x, int y, HSPRITE hspr, float yaw, int scale, int r, int g, int b, int a)
 {
+	int wide, tall;
+	tall = wide = GetRadarSize() * gHUD.m_flScale;
+	const int top = GetRadarTop() * gHUD.m_flScale;
+	if (x < 0 || x > wide || y < top || y > top + tall)
+		return;
+
 	if (hspr == 0)
 	{
-		gEngfuncs.pfnFillRGBA(x - 10, y - 10, 20, 20, r, g, b, a);
+		gEngfuncs.pfnFillRGBA(x / gHUD.m_flScale - 10, y / gHUD.m_flScale - 10, 20, 20, r, g, b, a);
 		return;
 	}
-
-	int wide, tall;
-	tall = wide = cl_newradar_size->value * ScreenWidth * gHUD.m_flScale;
-	if (x < 0 || x > wide || y < 0 || y > tall)
-		return;
 
 	scale *= gHUD.m_flScale;
 
@@ -733,13 +786,15 @@ void CHudRadarModern::DrawSprite(int x, int y, HSPRITE hspr, float yaw, int scal
 	gEngfuncs.pTriAPI->Color4ub(r, g, b, a);
 
 	struct model_s *model = (struct model_s *)gEngfuncs.GetSpritePointer(hspr);
+	if (!model)
+		return;
 	gEngfuncs.pTriAPI->SpriteTexture(model, 0);
 
-	vec3_t forward, right, sub;
+	vec3_t forward, right, up, sub;
 	sub[0] = sub[2] = 0;
 	sub[1] = yaw - 90.0;
 
-	gEngfuncs.pfnAngleVectors(sub, forward, right, NULL);
+	gEngfuncs.pfnAngleVectors(sub, forward, right, up);
 
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 	gEngfuncs.pTriAPI->TexCoord2f(1, 0);

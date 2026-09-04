@@ -2,6 +2,7 @@
 #pragma once
 
 #include "hud_sub.h"
+#include "r_texture.h"
 
 class CClientSprite;
 
@@ -12,6 +13,8 @@ public:
 	~CHudRadarLegacy() override;
 	int VidInit(void) override;
 	int Draw(float time) override;
+	int GetRadarSize() const;
+	int GetRadarTop() const;
 
 private:
 	CClientSprite m_hRadar;
@@ -39,4 +42,5 @@ private:
 	bool bUseRenderAPI, bTexturesInitialized;
 	int hDot, hCross, hT, hFlippedT;
 	int iMaxRadius;
+	UniqueTexture m_iMapTitleBG;
 };

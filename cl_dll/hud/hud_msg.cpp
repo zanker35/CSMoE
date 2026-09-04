@@ -32,6 +32,9 @@
 #include "events.h"
 
 #include "gamemode/mods_const.h"
+#ifdef XASH_VGUI2
+#include "vgui2/CBaseViewport.h"
+#endif
 
 using namespace cl;
 
@@ -106,6 +109,10 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 	m_Teamplay = 1;
 
 	m_iModRunning = static_cast<GameMode_e>(reader.ReadByte());
+#ifdef XASH_VGUI2
+	if (g_pViewport)
+		g_pViewport->UpdateGameMode();
+#endif
 
 	if (m_iModRunning == MOD_SINGLEPLAY || m_iModRunning == MOD_MULTIPLAY)
 		return 1;
@@ -173,6 +180,11 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 	}
 
 	return 1;
+}
+
+bool CHud::IsZombieMod() const
+{
+	return m_iModRunning == MOD_ZB1 || m_iModRunning == MOD_ZB2 || m_iModRunning == MOD_ZB3;
 }
 
 int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )

@@ -21,6 +21,9 @@ GNU General Public License for more details.
 #include "entity_types.h"
 #include "gl_local.h"
 #include "vgui_draw.h"
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
 
 #include "touch.h" // IN_TouchDraw( )
 #include "joyinput.h" // Joy_DrawOnScreenKeyboard( )
@@ -437,6 +440,9 @@ void V_PostRender( void )
 		CL_DrawHUD( CL_CHANGELEVEL );
 
 		Con_DrawConsole();
+#ifdef XASH_VGUI2
+		VGui2_Paint();
+#endif
 #ifdef XASH_IMGUI
 		ImGui_ImplGL_Menu_OnGUI();
 #endif

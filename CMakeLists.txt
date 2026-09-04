@@ -55,11 +55,20 @@ endif()
 
 if(NOT XASH_DEDICATED)
 	option(XASH_IMGUI "Imgui support for CSMoE" ON)
+	option(XASH_VGUI2 "Build the CSO-style menus and viewport" ON)
 else()
 	set(XASH_IMGUI OFF)
+	set(XASH_VGUI2 OFF)
 endif()
 
 option(XASH_LUASH "LUA support for CSMoE. Expected lua 5.3" ON)
+
+if(APPLE)
+	add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-error=incompatible-function-pointer-types>
+		$<$<COMPILE_LANGUAGE:C>:-Wno-error=int-conversion>
+		$<$<COMPILE_LANGUAGE:C>:-Wno-error=implicit-function-declaration>
+		$<$<COMPILE_LANGUAGE:C>:-Wno-error=incompatible-pointer-types>)
+endif()
 
 if (APPLE OR ANDROID)
 	add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-invalid-offsetof)
@@ -148,6 +157,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 
+if(XASH_VGUI2)
+	set(HLSDK_PATH ${CMAKE_SOURCE_DIR})
+	set(HL2SDK_PATH ${CMAKE_SOURCE_DIR}/SourceSDK)
+	include(cmake/cso_platform.cmake)
+	add_subdirectory(SourceSDK)
+	add_subdirectory(vgui2_support)
+endif()
+
 if(XASH_IMGUI)
 	# TODO : since vcpkg doesn't provide with imgui_internal.h, just use our own one
     if(XASH_VCPKG AND FALSE)
@@ -183,7 +200,9 @@ endif()
 
 if(NOT XASH_DEDICATED)
 	ADD_SUBDIRECTORY(cl_dll)
-	ADD_SUBDIRECTORY(mainui_cpp)
+	if(NOT XASH_VGUI2)
+		ADD_SUBDIRECTORY(mainui_cpp)
+	endif()
 #	ADD_SUBDIRECTORY(hymenu)
 endif()
 ADD_SUBDIRECTORY(dlls)

@@ -21,6 +21,9 @@ GNU General Public License for more details.
 #include "joyinput.h"
 #include "touch.h"
 #include "vgui_draw.h"
+#ifdef XASH_VGUI2
+#include "vgui2_surface.h"
+#endif
 
 #ifdef XASH_IMGUI
 #include "imgui_impl_xash.h"
@@ -577,6 +580,8 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 {
 	const char	*kb;
 	char		cmd[1024];
+	int clicks = down;
+	down = down != 0;
 	//Con_Printf( "Keycode %d\n", key );
 	if ( key > 255 || key < 0) 
 	{
@@ -592,7 +597,7 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 
 		if( key != K_BACKSPACE && key != K_PAUSE && keys[key].repeats > 1 )
 		{
-			if( cls.key_dest == key_game )
+			if( cls.key_dest == key_game && !host.mouse_visible )
 			{
 				// ignore most autorepeats
 				return;
@@ -604,7 +609,7 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 		keys[key].repeats = 0;
 	}
 
-	VGui_KeyEvent( key, down );
+	VGui_KeyEvent( key, clicks );
 	Touch_KeyEvent( key, down );
 
 	// console key is hardcoded, so the user can never unbind it
@@ -639,9 +644,14 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 			Key_Message( key );
 			return;
 		case key_console:
+#ifdef XASH_VGUI2
+			VGuiWrap2_HideConsole();
+			UI_SetActiveMenu( cls.state != ca_active || cl.background );
+#else
 			if( cls.state == ca_active && !cl.background )
 				Key_SetKeyDest( key_game );
 			else UI_SetActiveMenu( true );
+#endif
 			return;
 		case key_menu:
 			UI_KeyEvent( key, true );
@@ -758,7 +768,11 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 	}
 	else if( cls.key_dest == key_console )
 	{
+#ifdef XASH_VGUI2
+		UI_KeyEvent( key, down );
+#else
 		Key_Console( key );
+#endif
 	}
 	else if( cls.key_dest == key_message )
 	{
@@ -868,15 +882,26 @@ void CL_CharEvent( int ch )
 #endif
 	// distribute the key down event to the apropriate handler
 
+#ifndef XASH_VGUI2
 	Con_CharEvent( ch ); // a1ba: no need for checks, as Con_CharEvent already it does
+#else
+	if( cls.key_dest == key_message )
+		Con_CharEvent( ch );
+#endif
 
-	if( cls.key_dest == key_menu )
+	if( cls.key_dest == key_menu
+#ifdef XASH_VGUI2
+		|| cls.key_dest == key_console || (cls.key_dest == key_game && host.mouse_visible)
+#endif
+	)
 	{
 		UI_CharEvent( ch );
 	}
 	else if( cls.key_dest == key_game ) // typing support for VGUI
 	{
+#ifndef XASH_VGUI2
 		VGui_KeyEvent( ch, 2 );
+#endif
 	}
 
 }
@@ -894,7 +919,12 @@ void CL_CharEventUTF(const char* str)
 	{
 		int ch;
 
-		if (!Q_stricmp(cl_charset->string, "utf-8"))
+		if (!Q_stricmp(cl_charset->string, "utf-8")
+#ifdef XASH_VGUI2
+			|| cls.key_dest == key_menu || cls.key_dest == key_console
+			|| (cls.key_dest == key_game && host.mouse_visible)
+#endif
+		)
 			ch = (unsigned char)str[i];
 		else
 			ch = Con_UtfProcessCharForce((unsigned char)str[i]);

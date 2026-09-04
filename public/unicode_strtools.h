@@ -29,6 +29,14 @@
 #ifndef UNICODE_STR_TOOLS_H
 #define UNICODE_STR_TOOLS_H
 
+#if defined(CLIENT_DLL)
+namespace cl {
+#elif defined(SERVER_DLL)
+namespace sv {
+#elif defined(__cplusplus)
+extern "C++" {
+#endif
+
 
 #ifdef _WIN32
 
@@ -56,14 +64,6 @@ enum EStringConvertErrorPolicy
 	STRINGCONVERT_ASSERT_SKIP = 5,
 	STRINGCONVERT_ASSERT_FAIL = 6,
 };
-
-#if defined(CLIENT_DLL)
-namespace cl {
-#elif defined(SERVER_DLL)
-namespace sv {
-#elif defined(__cplusplus)
-extern "C++" {
-#endif
 
 bool Q_IsValidUChar32(uchar32 uVal);
 int Q_UTF32ToUChar32(const uchar32 *pUTF32, uchar32 &uVal, bool &bErr);

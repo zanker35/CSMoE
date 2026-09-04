@@ -41,9 +41,13 @@ typedef struct
 		char    *filenamesbuffer;
 } search_t;
 
+// This structure crosses the engine/UI boundary. System headers can redefine
+// PATH_MAX, so its storage size must not depend on include order.
+#define FS_PATH_MAX 4096
+
 typedef struct searchpath_s
 {
-	    char            filename[PATH_MAX];
+	    char            filename[FS_PATH_MAX];
 		struct pack_s   *pack;
 		struct wfile_s  *wad;
 		int             flags;
@@ -138,4 +142,3 @@ typedef int (*pfnFS_GetAPI)( fs_api_t *g_api );
 
 
 #endif // FS_INT_H
-

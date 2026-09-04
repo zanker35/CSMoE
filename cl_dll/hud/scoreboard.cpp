@@ -621,15 +621,21 @@ int CHudScoreboard::MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 }
 
 // Message handler for TeamScore message
-// accepts three values:
+// Counter-Strike sends two values:
 //		string: team name
-//		short: teams kills
-//		short: teams deaths 
+//		short: team score (round wins, or the active mode's score)
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudScoreboard::MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader(pszName, pbuf, iSize);
 	char *TeamName = reader.ReadString();
+	const int score = reader.ReadShort();
+
+	// The initial score can arrive before TeamInfo has populated the roster.
+	if (!stricmp(TeamName, "TERRORIST"))
+		m_iTeamScore_T = score;
+	else if (!stricmp(TeamName, "CT"))
+		m_iTeamScore_CT = score;
 	int i;
 
 	// find the team matching the name
@@ -643,17 +649,7 @@ int CHudScoreboard::MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf
 
 	// use this new score data instead of combined player scores
 	g_TeamInfo[i].scores_overriden = TRUE;
-	g_TeamInfo[i].frags = reader.ReadShort();
-	g_TeamInfo[i].deaths = reader.ReadShort();
-
-	if (TeamName[0] == 'T')
-	{
-		m_iTeamScore_T = g_TeamInfo[i].frags;
-	}
-	else if (TeamName[0] == 'C')
-	{
-		m_iTeamScore_CT = g_TeamInfo[i].frags;
-	}
+	g_TeamInfo[i].frags = score;
 
 	return 1;
 }

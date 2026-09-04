@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
+#include "weapons.h"
 #include "game.h"
 #include "client.h"
 #include "bmodels.h"
@@ -35,6 +36,24 @@ GNU General Public License for more details.
 
 
 namespace sv {
+
+namespace {
+
+bool IsZombieRoundParticipant(const CBasePlayer *player)
+{
+	return player->m_iJoiningState == JOINED && !player->m_bJustConnected
+		&& (player->m_iTeam == CT || player->m_iTeam == TERRORIST)
+		&& !(player->pev->flags & (FL_DORMANT | FL_SPECTATOR));
+}
+
+bool CanBecomeZombieOrigin(CBasePlayer *player)
+{
+	return IsZombieRoundParticipant(player) && player->IsAlive()
+		&& player->pev->solid == SOLID_SLIDEBOX && !player->IsObserver()
+		&& !player->m_bIsZombie;
+}
+
+}
 
 CMod_Zombi::CMod_Zombi() // precache
 	: m_Countdown (this, std::unique_ptr<CZB1CountdownDelegate>(new CZB1CountdownDelegate(this)) )
@@ -99,9 +118,9 @@ void CMod_Zombi::ClientDisconnected(edict_t *pClient)
 
 void CMod_Zombi::Think()
 {
-	m_Countdown.Think();
-	if(!m_Countdown.IsExpired())
-		TeamCheck();
+	TeamCheck();
+	if (!FInfectionStarted())
+		m_Countdown.Think();
 
 	if (CheckGameOver())   // someone else quit the game already
 		return;
@@ -125,6 +144,10 @@ void CMod_Zombi::Think()
 	{
 		CheckRestartRound();
 		m_tmNextPeriodicThink = gpGlobals->time + 1.0s;
+		// A server may reach the countdown while everyone is still choosing a
+		// team. Start infection only after real, spawned participants arrive.
+		if (!FInfectionStarted() && m_Countdown.IsExpired() && !m_bRoundTerminating && !IsFreezePeriod())
+			PickZombieOrigin();
 
 		if (g_psv_accelerate->value != 5.0f)
 		{
@@ -158,7 +181,7 @@ void CMod_Zombi::Think()
 		}
 	}
 
-	if (TimeRemaining() <= 0s && !m_bRoundTerminating && !m_bFreezePeriod)
+	if (FInfectionStarted() && TimeRemaining() <= 0s && !m_bRoundTerminating && !m_bFreezePeriod)
 		HumanWin();
 }
 
@@ -217,7 +240,7 @@ void CMod_Zombi::CheckWinConditions()
 
 BOOL CMod_Zombi::FInfectionStarted()
 {
-	return m_Countdown.IsExpired();
+	return m_bInfectionStarted;
 }
 
 void CMod_Zombi::RoundEndScore(int iWinStatus)
@@ -315,16 +338,44 @@ void CPlayerModStrategy_ZB1::OnSpawn()
 
 void CPlayerModStrategy_ZB1::Event_OnBecomeZombie(CBasePlayer *who, ZombieLevel iEvolutionLevel)
 {
-	if (m_pPlayer != who)
+	if (m_pPlayer != who || !IsZombieRoundParticipant(who) || !who->IsAlive())
 		return;
 
 	BecomeZombie(iEvolutionLevel);
-	m_pPlayer->OnBecomeZombie(iEvolutionLevel);
+	if (m_pPlayer->m_bIsZombie)
+		m_pPlayer->OnBecomeZombie(iEvolutionLevel);
 }
 
 void CPlayerModStrategy_ZB1::BecomeZombie(ZombieLevel iEvolutionLevel)
 {
 	m_pCharacter = std::make_shared<CZombie_ZB1>(m_pPlayer, iEvolutionLevel);
+	EquipZombie();
+}
+
+bool CPlayerModStrategy_ZB1::EquipZombie()
+{
+	// Install the new character before GiveDefaultItems can auto-deploy a
+	// weapon through the strategy's virtual OnWeaponDeploy hook.
+	m_pPlayer->GiveDefaultItems();
+	CBasePlayerItem *knife = m_pPlayer->m_rgpPlayerItems[KNIFE_SLOT];
+	if (!knife || knife->m_iId != WEAPON_KNIFE || !m_pPlayer->SwitchWeapon(knife))
+	{
+		ALERT(at_error, "ZB: aborting infection of %s: zombie knife delivery failed (join=%d dead=%d team=%d)\n",
+			STRING(m_pPlayer->pev->netname), m_pPlayer->m_iJoiningState,
+			m_pPlayer->pev->deadflag, m_pPlayer->m_iTeam);
+		// An unarmed zombie is not a successful infection. Restore a playable
+		// human; the round selector can retry once participants are ready.
+		BecomeHuman();
+		m_pPlayer->GiveDefaultItems();
+		m_pPlayer->SetPlayerModel(false);
+		return false;
+	}
+	m_pPlayer->m_bNightVisionOn = false;
+	m_pPlayer->ClientCommand("nightvision");
+	UTIL_LogPrintf("\"%s<%i><%s>\" triggered \"Became_ZOMBIE\" (weapon \"%s\")\n",
+		STRING(m_pPlayer->pev->netname), GETPLAYERUSERID(m_pPlayer->edict()),
+		GETPLAYERAUTHID(m_pPlayer->edict()), STRING(knife->pev->classname));
+	return true;
 }
 
 void CPlayerModStrategy_ZB1::BecomeHuman()
@@ -362,30 +413,55 @@ void CPlayerModStrategy_ZB1::DeathSound()
 size_t CMod_Zombi::ZombieOriginNum()
 {
 	moe::range::PlayersList list;
-	return static_cast<size_t>(std::distance(list.begin(), list.end()) / 10 + 1);
+	const size_t participants = std::count_if(list.begin(), list.end(), CanBecomeZombieOrigin);
+	return participants ? participants / 10 + 1 : 0;
 }
 
 void CMod_Zombi::PickZombieOrigin()
 {
-	auto iNumZombies = ZombieOriginNum();
-	auto iNumPlayers = this->m_iNumTerrorist + this->m_iNumCT;
+	if (FInfectionStarted() || m_bRoundTerminating || IsFreezePeriod())
+		return;
 
 	// build alive player list
 	moe::range::PlayersList list;
 	std::vector<CBasePlayer *> players {list.begin(), list.end()};
-	players.erase(std::remove_if(players.begin(), players.end(), [](CBasePlayer *player) { return !player->IsAlive() || player->m_iTeam != TEAM_CT || player->m_bIsZombie; }), players.end());
+	players.erase(std::remove_if(players.begin(), players.end(), [](CBasePlayer *player) { return !CanBecomeZombieOrigin(player); }), players.end());
+	// One participant cannot form opposing sides. Keep waiting without awarding
+	// a round; Think retries after additional players finish joining/spawning.
+	if (players.size() < 2)
+		return;
+	const size_t iNumPlayers = players.size();
+	const size_t iNumZombies = std::min(ZombieOriginNum(), iNumPlayers - 1);
+	if (!iNumZombies)
+		return;
 
 	// randomize player list
 	std::shuffle(players.begin(), players.end(), std::random_device());
 
 	// pick them
+	bool infected = false;
 	for (size_t i = 0; i < iNumZombies; ++i)
 	{
 		MakeZombie(players[i], ZOMBIE_LEVEL_ORIGIN);
+		if (!players[i]->m_bIsZombie)
+			continue;
 		players[i]->pev->health = players[i]->pev->max_health = 1000.0f * iNumPlayers / iNumZombies + 1000.0f;
 		players[i]->pev->armorvalue = 1100;
+		infected = true;
 	}
+	if (!infected)
+		return;
 
+	TeamCheck();
+	if (m_Countdown.IsExpired())
+	{
+		// Time spent waiting in the menus must not consume the playable round.
+		m_fRoundCount = gpGlobals->time;
+		for (CBasePlayer *player : moe::range::PlayersList())
+			if (IsZombieRoundParticipant(player))
+				player->SyncRoundTimer();
+	}
+	m_bInfectionStarted = true;
 	// sound effect
 	InfectionSound();
 	CheckWinConditions();
@@ -393,7 +469,11 @@ void CMod_Zombi::PickZombieOrigin()
 
 void CMod_Zombi::HumanInfectionByZombie(CBasePlayer *player, CBasePlayer *attacker)
 {
+	if (!CanBecomeZombieOrigin(player) || !IsZombieRoundParticipant(attacker) || !attacker->IsAlive() || !attacker->m_bIsZombie)
+		return;
 	MakeZombie(player, ZOMBIE_LEVEL_HOST);
+	if (!player->m_bIsZombie)
+		return;
 	player->pev->health = player->pev->max_health = std::max(1000, static_cast<int>(attacker->pev->health * 0.5f));
 	player->pev->armorvalue = std::max(100, static_cast<int>(attacker->pev->armorvalue * 0.5f));
 
@@ -421,6 +501,7 @@ void CMod_Zombi::InfectionSound()
 
 void CMod_Zombi::RestartRound()
 {
+	m_bInfectionStarted = false;
 	for(CBasePlayer *player : moe::range::PlayersList())
 		player->m_bIsZombie = false;
 
@@ -436,6 +517,9 @@ void CMod_Zombi::TeamCheck()
 {
 	for(CBasePlayer *player : moe::range::PlayersList())
 	{
+		// Team assignment must not bypass the team/class selection lifecycle.
+		if (!IsZombieRoundParticipant(player))
+			continue;
 		if ((player->m_bIsZombie && player->m_iTeam != TERRORIST) || (!player->m_bIsZombie && player->m_iTeam != CT))
 		{
 			player->m_iTeam = player->m_bIsZombie ? TERRORIST :CT;
@@ -456,6 +540,19 @@ void CMod_Zombi::PlayerSpawn(CBasePlayer *pPlayer)
 	// Open buy menu on spawn
 	//ShowVGUIMenu(pPlayer, VGUI_Menu_Buy, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_0), "#Buy");
 	//pPlayer->m_iMenu = Menu_Buy;
+}
+
+BOOL CMod_Zombi::FPlayerCanRespawn(CBasePlayer *pPlayer)
+{
+	if (!FInfectionStarted())
+	{
+		// The classic CS twenty-second late-join limit must not strand a
+		// player in spectator mode while this round is still waiting to start.
+		return pPlayer->m_iJoiningState == JOINED && !pPlayer->m_bJustConnected
+			&& pPlayer->m_iNumSpawns == 0 && pPlayer->m_iMenu != Menu_ChooseAppearance
+			&& (pPlayer->m_iTeam == CT || pPlayer->m_iTeam == TERRORIST);
+	}
+	return CHalfLifeMultiplay::FPlayerCanRespawn(pPlayer);
 }
 
 BOOL CMod_Zombi::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)

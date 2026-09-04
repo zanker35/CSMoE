@@ -313,7 +313,7 @@ namespace sv {
 
 		void Precache() override
 		{
-			PRECACHE_MODEL("models/ef_blackhole_projectile.spr");
+			PRECACHE_MODEL("models/ef_blackhole_projectile.mdl");
 		}
 
 		void OnThink()

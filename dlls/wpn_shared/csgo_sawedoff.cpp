@@ -52,10 +52,10 @@ void CSawedoff::Precache(void)
 	PRECACHE_MODEL("models/p_sawedoff.mdl");
 	m_iShellId = m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 
-	PRECACHE_SOUND("weapons/csgo_ports/sawedoff-1.wav");
-	PRECACHE_SOUND("weapons/csgo_ports/sawedoff_insertshell.wav");
-	PRECACHE_SOUND("weapons/csgo_ports/sawedoff_draw.wav");
-	PRECACHE_SOUND("weapons/csgo_ports/sawedoff_pump.wav");
+	PRECACHE_SOUND("weapons/csgo_ports/sawedoff/sawedoff-1.wav");
+	PRECACHE_SOUND("weapons/csgo_ports/sawedoff/sawedoff_insertshell.wav");
+	PRECACHE_SOUND("weapons/csgo_ports/sawedoff/sawedoff_draw.wav");
+	PRECACHE_SOUND("weapons/csgo_ports/sawedoff/sawedoff_pump.wav");
 
 	m_usFireSawedoff = PRECACHE_EVENT(1, "events/sawedoff.sc");
 }

@@ -2,6 +2,8 @@
 #ifndef XASH_TYPES_H
 #define XASH_TYPES_H
 
+#include <stdint.h>
+
 typedef unsigned char byte;
 typedef int		sound_t;
 typedef float		vec_t;
@@ -36,10 +38,8 @@ typedef int qboolean;
 
 #if _MSC_VER == 1200
 typedef __int64 integer64; //msvc6
-#elif defined (XASH_SDL)
-typedef Uint64 integer64;
 #else
-typedef unsigned long long integer64;
+typedef uint64_t integer64;
 #endif
 typedef integer64 longtime_t;
 #endif // XASH_TYPES_H

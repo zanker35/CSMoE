@@ -105,7 +105,9 @@ typedef int BOOL;
 #define HUMAN_GIB_COUNT		6
 #define ALIEN_GIB_COUNT		4
 
+#if !defined(XASH_VGUI2)
 template<class T> class CUtlVector;
+#endif
 
 #ifdef CLIENT_DLL
 namespace cl {

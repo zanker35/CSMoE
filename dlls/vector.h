@@ -36,4 +36,13 @@ using Vector = cl::moe::VectorBase<float, 3>;
 static_assert(sizeof(Vector2D) == sizeof(float[2]), "Vector2D should be compatible with engine");
 static_assert(sizeof(Vector) == sizeof(float[3]), "Vector should be compatible with engine");
 
+#if defined(XASH_VGUI2)
+// VGUI vertices contain two pairs of floats. Keep the gameplay vector type
+// when SourceSDK's surface headers are included in the same translation unit.
+static_assert(std::is_standard_layout<Vector2D>::value, "VGUI coordinates require standard layout");
+#ifndef VECTOR2D_H
+#define VECTOR2D_H
+#endif
+#endif
+
 #endif // VECTOR_H

@@ -42,6 +42,7 @@
 #include "player/player_spawnpoint.h"
 #include "player/player_knockback.h"
 #include "player/player_mod_strategy.h"
+#include "player/player_model.h"
 
 #include <chrono>
 #include <algorithm>
@@ -169,93 +170,42 @@ CBasePlayer::~CBasePlayer() = default;
 
 void CBasePlayer::SetPlayerModel(BOOL HasC4)
 {
+	// Zombie classes own their model until the next human spawn.
+	if (m_bIsZombie)
+		return;
+
 	char *infobuffer = GET_INFO_BUFFER(edict());
-	const char *model;
-
-	if (m_iTeam == CT)
+	auto &classes = PlayerClassManager();
+	const char *model = nullptr;
+	if (m_bIsVIP && m_iTeam == CT)
 	{
-		switch (m_iModelName)
-		{
-		case MODEL_URBAN:
-			model = "urban";
-			break;
-		case MODEL_GSG9:
-			model = "gsg9";
-			break;
-		case MODEL_GIGN:
-			model = "gign";
-			break;
-		case MODEL_SAS:
-			model = "sas";
-			break;
-		case MODEL_VIP:
-			model = "vip";
-			break;
-		case MODEL_SPETSNAZ:
-			if (g_bIsCzeroGame)
-			{
-				model = "spetsnaz";
-				break;
-			}
-		default:
-		{
-			if (IsBot())
-			{
-				model = (char *)TheBotProfiles->GetCustomSkinModelname(m_iModelName);
-				if (!model)
-					model = "urban";
-			}
-			else
-				model = "urban";
-
-			break;
-		}
-		}
-	}
-	else if (m_iTeam == TERRORIST)
-	{
-		switch (m_iModelName)
-		{
-		case MODEL_TERROR:
-			model = "terror";
-			break;
-		case MODEL_LEET:
-			model = "leet";
-			break;
-		case MODEL_ARCTIC:
-			model = "arctic";
-			break;
-		case MODEL_GUERILLA:
-			model = "guerilla";
-			break;
-		case MODEL_MILITIA:
-			if (g_bIsCzeroGame)
-			{
-				model = "militia";
-				break;
-			}
-		default:
-		{
-			if (IsBot())
-			{
-				model = (char *)TheBotProfiles->GetCustomSkinModelname(m_iModelName);
-				if (!model)
-					model = "terror";
-			}
-			else
-				model = "terror";
-
-			break;
-		}
-		}
+		m_iModelName = MODEL_VIP;
+		model = "vip";
 	}
 	else
-		model = "urban";
+	{
+		if (!classes.PlayerClass_GetInfo(m_iModelName).model_name)
+			m_iModelName = m_iHumanModelName;
+		if (IsBot() && TheBotProfiles)
+			model = TheBotProfiles->GetCustomSkinModelname(m_iModelName);
+		if (!model)
+		{
+			if (!classes.PlayerClass_GetInfo(m_iModelName).model_name)
+				m_iModelName = m_iTeam == TERRORIST ? MODEL_TERROR : MODEL_URBAN;
+			model = classes.PlayerClass_GetModelName(m_iModelName);
+		}
+		m_iHumanModelName = m_iModelName;
+	}
+	m_bIsFemale = classes.PlayerClass_IsFemale(m_iModelName);
 
 	if (Q_strcmp(GET_KEY_VALUE(infobuffer, "model"), model))
 	{
 		SET_CLIENT_KEY_VALUE(entindex(), infobuffer, "model", model);
 	}
+	char modelPath[128];
+	Q_snprintf(modelPath, sizeof(modelPath), "models/player/%s/%s.mdl", model, model);
+	if (Q_strcmp(STRING(pev->model), modelPath))
+		SetNewPlayerModel(modelPath);
 }
 
 CBasePlayer *CBasePlayer::GetNextRadioRecipient(CBasePlayer *pStartPlayer)
@@ -459,6 +409,12 @@ int TrainSpeed(int iSpeed, int iMax)
 
 void CBasePlayer::DeathSound()
 {
+	if (!m_bIsZombie && m_bIsFemale)
+	{
+		const char *sound = RANDOM_LONG(0, 1) ? "zombi/human_death_female_01.wav" : "zombi/human_death_female_02.wav";
+		EMIT_SOUND(ENT(pev), CHAN_VOICE, sound, VOL_NORM, ATTN_NORM);
+		return;
+	}
 	return m_pModStrategy->DeathSound();
 }
 
@@ -2318,6 +2274,10 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 					m_Activity = ACT_WALK;
 
 					animDesired = LookupSequence(szAnim);
+					// The original tank models have one crouched upper-body
+					// pose; movement still comes from the crouch gait below.
+					if (animDesired == -1 && (pev->flags & FL_DUCKING))
+						animDesired = LookupSequence("crouch_aim_knife");
 
 					if (speed > 200.0f)
 						pev->gaitsequence = LookupActivity(ACT_RUN);
@@ -3129,6 +3089,7 @@ void CBasePlayer::MakeVIP()
 {
 	pev->body = 0;
 	m_iModelName = MODEL_VIP;
+	m_bIsFemale = false;
 
 	SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "vip");
 	UTIL_LogPrintf("\"%s<%i><%s><CT>\" triggered \"Became_VIP\"\n", STRING(pev->netname), GETPLAYERUSERID(edict()), GETPLAYERAUTHID(edict()));
@@ -4432,6 +4393,10 @@ void CBasePlayer::CheckPowerups(entvars_t *pev)
 void CBasePlayer::SetNewPlayerModel(const char *modelName)
 {
 	SET_MODEL(edict(), modelName);
+	if (pev->flags & FL_DUCKING)
+		UTIL_SetSize(pev, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
+	else
+		UTIL_SetSize(pev, VEC_HULL_MIN, VEC_HULL_MAX);
 	m_modelIndexPlayer = pev->modelindex;
 }
 
@@ -7190,73 +7155,18 @@ void CBasePlayer::SwitchTeam()
 	if (m_iTeam == CT)
 	{
 		m_iTeam = TERRORIST;
-
-		switch (m_iModelName)
-		{
-		case MODEL_URBAN:
-			m_iModelName = MODEL_LEET;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "leet");
-			break;
-		case MODEL_GIGN:
-			m_iModelName = MODEL_GUERILLA;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "guerilla");
-			break;
-		case MODEL_SAS:
-			m_iModelName = MODEL_ARCTIC;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "arctic");
-			break;
-		case MODEL_SPETSNAZ:
-			if (g_bIsCzeroGame)
-			{
-				m_iModelName = MODEL_MILITIA;
-				SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "militia");
-				break;
-			}
-		default:
-			if (m_iModelName == MODEL_GSG9 || !IsBot() || !TheBotProfiles->GetCustomSkinModelname(m_iModelName))
-			{
-				m_iModelName = MODEL_TERROR;
-				SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "terror");
-			}
-			break;
-		}
 	}
 	else if (m_iTeam == TERRORIST)
 	{
 		m_iTeam = CT;
-
-		switch (m_iModelName)
-		{
-		case MODEL_TERROR:
-			m_iModelName = MODEL_GSG9;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "gsg9");
-			break;
-
-		case MODEL_ARCTIC:
-			m_iModelName = MODEL_SAS;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "sas");
-			break;
-
-		case MODEL_GUERILLA:
-			m_iModelName = MODEL_GIGN;
-			SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "gign");
-			break;
-
-		case MODEL_MILITIA:
-			if (g_bIsCzeroGame)
-			{
-				m_iModelName = MODEL_SPETSNAZ;
-				SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "spetsnaz");
-				break;
-			}
-		default:
-			if (m_iModelName == MODEL_LEET || !IsBot() || !TheBotProfiles->GetCustomSkinModelname(m_iModelName))
-			{
-				m_iModelName = MODEL_URBAN;
-				SET_CLIENT_KEY_VALUE(entindex(), GET_INFO_BUFFER(edict()), "model", "urban");
-			}
-			break;
-		}
+	}
+	if (m_iTeam == CT || m_iTeam == TERRORIST)
+	{
+		auto &classes = PlayerClassManager();
+		int slot = classes.PlayerClass_GetTeamSlot(m_iHumanModelName);
+		if (slot)
+			m_iModelName = m_iHumanModelName = classes.PlayerClass_FromTeamSlot(m_iTeam, slot);
+		SetPlayerModel(m_bHasC4);
 	}
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);

@@ -114,10 +114,14 @@ GNU General Public License for more details.
 	#define tell( a )					lseek(a, 0, SEEK_CUR)
 
 	typedef unsigned char	BYTE;
-	typedef short int	    WORD;
+	typedef unsigned short WORD;
 	typedef unsigned int    DWORD;
 	typedef int	    LONG;
+#if defined(XASH_VGUI2) && defined(__cplusplus)
+	typedef unsigned long ULONG;
+#else
 	typedef unsigned int   ULONG;
+#endif
 	typedef int			WPARAM;
 	typedef unsigned int    LPARAM;
 

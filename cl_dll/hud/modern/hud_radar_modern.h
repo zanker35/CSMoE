@@ -31,7 +31,9 @@ public:
 	bool CalcPoint(float *origin, int &screenX, int &screenY, int &scale);
 	void DrawSprite(int x, int y, HSPRITE hspr, float yaw, int scale, int r, int g, int b, int a);
 
-	bool Available() const { return m_MapSprite != nullptr; }
+	bool Available() const { return m_MapSprite && m_MapSprite->numframes >= 12 && m_OverviewData.zoom > 0; }
+	int GetRadarSize() const;
+	int GetRadarTop() const;
 
 public:
 	cvar_t *cl_newradar_size;
@@ -86,6 +88,7 @@ private:
 	overview_t m_OverviewData;
 	model_t *m_MapSprite;
 	void LoadMapSprites(void);
+	UniqueTexture m_iMapTitleBG;
 };
 
 #endif

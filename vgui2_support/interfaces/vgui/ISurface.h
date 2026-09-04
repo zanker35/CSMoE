@@ -2,9 +2,10 @@
 #define ISURFACE_H
 
 #include <interface.h>
-#include "vgui/VGUI2.h"
+#include "vgui/VGUI.h"
 #include "vgui/IHTML.h"
 #include "Color.h"
+#include "mathlib/vector2d.h"  // must be before the namespace line
 
 class IHTMLChromeController;
 class IHTMLResponses;
@@ -20,53 +21,25 @@ namespace vgui2 {
 	typedef unsigned long HTexture;
 	typedef unsigned long HFont;
 
-	struct VGuiVertex
-	{
-		VGuiVertex() {}
-		VGuiVertex(int x, int y, float u = 0, float v = 0)
-			: x(x)
-			, y(y)
-			, u(u)
-			, v(v)
-		{
-		}
-		void Init(int xIn, int yIn, float uIn = 0, float vIn = 0)
-		{
-			this->x = xIn;
-			this->y = yIn;
-			this->u = uIn;
-			this->v = vIn;
-		}
-
-		int x, y;
-		float u, v;
-	};
-
-
 	//SRC only defines
-	//These types aren't used in GoldSource. - Solokiller
-	struct Vertex_t;
-	/*
-	struct Vertex_t
-	{
-		Vertex_t() {}
-		Vertex_t( const Vector2D &pos, const Vector2D &coord = Vector2D( 0, 0 ) )
-		{
-			m_Position = pos;
-			m_TexCoord = coord;
-		}
-		void Init( const Vector2D &pos, const Vector2D &coord = Vector2D( 0, 0 ) )
-		{
-			m_Position = pos;
-			m_TexCoord = coord;
-		}
+    struct Vertex_t
+    {
+        Vertex_t() {}
+        Vertex_t( const Vector2D &pos, const Vector2D &coord = Vector2D( 0, 0 ) )
+        {
+            m_Position = pos;
+            m_TexCoord = coord;
+        }
+        void Init( const Vector2D &pos, const Vector2D &coord = Vector2D( 0, 0 ) )
+        {
+            m_Position = pos;
+            m_TexCoord = coord;
+        }
 
-		Vector2D	m_Position;
-		Vector2D	m_TexCoord;
-	};
-	*/
+        Vector2D	m_Position;
+        Vector2D	m_TexCoord;
+    };
 
-	/*
 	enum FontDrawType_t
 	{
 		// Use the "additive" value from the scheme file
@@ -78,7 +51,6 @@ namespace vgui2 {
 
 		FONT_DRAW_TYPE_COUNT = 2,
 	};
-	*/
 
 
 	// Refactor these two
@@ -157,9 +129,12 @@ namespace vgui2 {
 		virtual void DrawSetTextPos(int x, int y) = 0;
 		virtual void DrawGetTextPos(int& x, int& y) = 0;
 		//Font draw types aren't used. - Solokiller
+#if defined( _MSC_VER ) || defined( WIN32 )
 		virtual void DrawPrintText(const wchar_t *text, int textLen/*, FontDrawType_t drawType = FONT_DRAW_DEFAULT*/) = 0;
-		virtual void DrawUnicodeChar(wchar_t wch/*, FontDrawType_t drawType = FONT_DRAW_DEFAULT*/) = 0;
-		virtual void DrawUnicodeCharAdd(wchar_t wch) = 0;
+#endif
+        virtual void DrawPrintText(const uchar32 *, int) = 0;
+		virtual void DrawUnicodeChar(uchar32 wch/*, FontDrawType_t drawType = FONT_DRAW_DEFAULT*/) = 0;
+		virtual void DrawUnicodeCharAdd(uchar32 wch) = 0;
 
 		virtual void DrawFlushText() = 0;		// flushes any buffered text (for rendering optimizations)
 		virtual IHTML *CreateHTMLWindow(vgui2::IHTMLEvents *events, VPANEL context) = 0;
@@ -253,6 +228,9 @@ namespace vgui2 {
 			FONTFLAG_OUTLINE = 0x200,
 			FONTFLAG_CUSTOM = 0x400,		// custom generated font - never fall back to asian compatibility mode
 			FONTFLAG_BITMAP = 0x800,		// compiled bitmap font - no fallbacks
+#ifndef DISABLE_MOE_VGUI2_EXT
+			FONTFLAG_EMOJI = 0x1000,		// compiled bitmap font - no fallbacks
+#endif
 		};
 
 		virtual bool AddGlyphSetToFont(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange) = 0;
@@ -312,8 +290,8 @@ namespace vgui2 {
 		//virtual void DrawOutlinedCircle(int x, int y, int radius, int segments) = 0;
 		//virtual void DrawTexturedPolyLine( const Vertex_t *p,int n ) = 0; // (Note: this connects the first and last points).
 		//virtual void DrawTexturedSubRect( int x0, int y0, int x1, int y1, float texs0, float text0, float texs1, float text1 ) = 0;
-		virtual void DrawTexturedPolygon(VGuiVertex *pVertices, int n) = 0;
-		virtual int GetFontAscent(HFont font, wchar_t wch) = 0;
+		virtual void DrawTexturedPolygon(Vertex_t *pVertices, int n) = 0;
+		virtual int GetFontAscent(HFont font, uchar32 wch) = 0;
 		//virtual const wchar_t *GetTitle(VPANEL panel) = 0;
 		//virtual bool IsCursorLocked( void ) const = 0;
 		//virtual void SetWorkspaceInsets( int left, int top, int right, int bottom ) = 0;
@@ -394,6 +372,11 @@ namespace vgui2 {
 	//virtual void DrawUnicodeString( const wchar_t *pwString, FontDrawType_t drawType = FONT_DRAW_DEFAULT ) = 0;
 	
 		//GoldSource doesn't use these, but provide the functions anyway so code is still there. - Solokiller
+
+#ifndef DISABLE_MOE_VGUI2_EXT
+    virtual bool IsEmojiChar(uchar32 ch) = 0;
+#endif
+
 	public:
 	// deadsurface.cpp
 	void DrawSetAlphaMultiplier(float alpha);
@@ -405,15 +388,15 @@ namespace vgui2 {
 	void DrawTexturedPolygon(int n, Vertex_t *pVertices);
 	void DrawTexturedSubRect(int x0, int y0, int x1, int y1, float texs0, float text0, float texs1, float text1);
 	IImage *GetIconImageForFullPath(char const *pFullPath);
-	void SetBlendEnabled(bool state);
-	void DumpFontTextures(void);
-	int GetCharWidth(HFont font, wchar_t ch);
-	void DrawSetTextureRGB(int id, const unsigned char *rgb, int wide, int tall, int hardwareFilter, bool forceReload);
-	void DrawSetTextureBGR(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload);
-	void DrawSetTextureBGRA(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload);
-	void DrawUpdateRegionTextureRGB(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
-	void DrawUpdateRegionTextureRGBA(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
-	void DrawUpdateRegionTextureBGR(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
+	//void SetBlendEnabled(bool state);
+	//void DumpFontTextures(void);
+	//int GetCharWidth(HFont font, wchar_t ch);
+	//void DrawSetTextureRGB(int id, const unsigned char *rgb, int wide, int tall, int hardwareFilter, bool forceReload);
+	//void DrawSetTextureBGR(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload);
+	//void DrawSetTextureBGRA(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload);
+	//void DrawUpdateRegionTextureRGB(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
+	//void DrawUpdateRegionTextureRGBA(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
+	//void DrawUpdateRegionTextureBGR(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
 	//void DrawUpdateRegionTextureBGRA(int nTextureID, int x, int y, const unsigned char *pchData, int wide, int tall);
 	//void DeleteTextureByID(int id);
 

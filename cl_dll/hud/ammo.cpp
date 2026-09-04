@@ -35,6 +35,10 @@
 #include "draw_util.h"
 #include "triangleapi.h"
 #include "weapons_const.h"
+#ifdef XASH_VGUI2
+#include "vgui_controls/Controls.h"
+#include "vgui/ILocalize.h"
+#endif
 
 using namespace cl;
 
@@ -388,6 +392,8 @@ int CHudAmmo::VidInit(void)
 
 	gHR.iHistoryGap = max( gHR.iHistoryGap, gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top);
 	R_InitTexture(m_pTexture_Black, "resource/hud/csgo/blacka");
+	R_InitTexture(m_iWeapon_OffBG, "resource/hud/hud_weapon_off_bg");
+	gHR.VidInit();
 	// If we've already loaded weapons, let's get new sprites
 	gWR.LoadAllWeaponSprites();
 
@@ -772,28 +778,40 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
+	// EjectBrass sends 17 bytes for CZ, or 25 with the legacy TE_MODEL,
+	// unused left vector and tenths-of-a-second lifetime fields.
+	if (iSize != 17 && iSize != 25)
+	{
+		gEngfuncs.Con_DPrintf("Brass: invalid message size %d (expected 17 or 25)\n", iSize);
+		return 0;
+	}
+	const bool legacy = iSize == 25;
 	BufferReader reader( pszName, pbuf, iSize );
-	reader.ReadByte(); // unused!
+	if (legacy)
+		reader.ReadByte(); // TE_MODEL, unused by this message handler
 
 	Vector origin, velocity;
 	origin.x = reader.ReadCoord();
 	origin.y = reader.ReadCoord();
 	origin.z = reader.ReadCoord();
-	reader.ReadCoord(); // unused!
-	reader.ReadCoord(); // unused!
-	reader.ReadCoord(); // unused!
+	if (legacy)
+	{
+		reader.ReadCoord(); // unused left vector
+		reader.ReadCoord();
+		reader.ReadCoord();
+	}
 	velocity.x = reader.ReadCoord();
 	velocity.y = reader.ReadCoord();
 	velocity.z = reader.ReadCoord();
 
-	float Rotation = M_PI * reader.ReadAngle() / 180.0f;
+	float Rotation = reader.ReadAngle();
 	int ModelIndex = reader.ReadShort();
 	int BounceSoundType = reader.ReadByte();
-	int Life = reader.ReadByte();
+	float Life = legacy ? reader.ReadByte() * 0.1f : 2.5f;
 	int Client = reader.ReadByte();
 
 	float sin, cos, x, y;
-	sincosf( fabs(Rotation), &sin, &cos );
+	sincosf(fabs(M_PI * Rotation / 180.0f), &sin, &cos);
 
 	if( gHUD.cl_righthand->value != 0.0f && EV_IsLocal( Client ) )
 	{
@@ -1172,18 +1190,24 @@ int CHudAmmo::Draw(float flTime)
 	}
 
 	// Draw ammo pickup history
-	if (!gHUD.m_csgohud->value)
+	if (gHUD.m_hudstyle->value == 2)
+		gHR.DrawNEWHudAmmoHistory(flTime);
+	else if (!(gHUD.m_hudstyle->value == 1))
 		gHR.DrawAmmoHistory( flTime );
 
 	if (!m_pWeapon)
 		return 0;
 	 
 	WEAPON *pw = m_pWeapon; // shorthand
-	if (gHUD.m_csgohud->value)
+	if (gHUD.m_hudstyle->value == 2)
+		DrawNEWHudCurrentWpn();
+	else if ((gHUD.m_hudstyle->value == 1))
 		DrawWpnList(flTime);
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
 		return 0;
+	if (gHUD.m_hudstyle->value == 2 && gHUD.m_NEWHUD_number_0 >= 0)
+		return DrawNEWHudAmmo(flTime);
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
 
@@ -1197,7 +1221,7 @@ int CHudAmmo::Draw(float flTime)
 	// Does this weapon have a clip?
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
 
-	if (gHUD.m_csgohud->value)
+	if ((gHUD.m_hudstyle->value == 1))
 	{
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 		x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
@@ -1209,7 +1233,7 @@ int CHudAmmo::Draw(float flTime)
 	// Does weapon have any ammo at all?
 	if (m_pWeapon->iAmmoType > 0)
 	{
-		DrawUtils::UnpackRGB(r, g, b, gHUD.m_csgohud->value ? RGB_WHITE : RGB_YELLOWISH);
+		DrawUtils::UnpackRGB(r, g, b, (gHUD.m_hudstyle->value == 1) ? RGB_WHITE : RGB_YELLOWISH);
 		DrawUtils::ScaleColors(r, g, b, a);
 
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
@@ -1226,7 +1250,7 @@ int CHudAmmo::Draw(float flTime)
 
 			x += AmmoWidth/2;
 
-			DrawUtils::UnpackRGB(r,g,b, gHUD.m_csgohud->value ? RGB_WHITE : RGB_YELLOWISH);
+			DrawUtils::UnpackRGB(r,g,b, (gHUD.m_hudstyle->value == 1) ? RGB_WHITE : RGB_YELLOWISH);
 
 			// draw the | bar
 			FillRGBA(x, y, iBarWidth, gHUD.m_iFontHeight, r, g, b, a);
@@ -1866,6 +1890,84 @@ int CHudAmmo::DrawWList(float flTime)
 //
 // Draw Weapon Menu
 //
+int CHudAmmo::DrawNEWHudAmmo(float flTime)
+{
+	const WEAPON &weapon = *m_pWeapon;
+	const int y = ScreenHeight - 15 - gHUD.m_NEWHUD_iFontHeight;
+	const int right = ScreenWidth - 5;
+	if (weapon.iAmmoType > 0)
+	{
+		const int iconWidth = weapon.rcAmmo.right - weapon.rcAmmo.left;
+		const int reserve = gWR.CountAmmo(weapon.iAmmoType);
+		const int reserveX = right - iconWidth - 5 - DrawUtils::GetNEWHudNumberWidth(0, reserve, false, 4);
+		const bool special = weapon.iClip < 0 && weapon.iSlot < 3;
+		int r, g, b;
+		DrawUtils::UnpackRGB(r, g, b, special ? RGB_LIGHTBLUE : RGB_WHITE);
+		DrawUtils::DrawNEWHudNumber(0, reserveX, y, reserve, r, g, b, 255, false, 4);
+		if (weapon.iClip >= 0)
+		{
+			const int separator = reserveX - 10;
+			FillRGBA(separator, y + 2, 1, gHUD.m_NEWHUD_iFontHeight - 4, 255, 255, 255, 192);
+			const int clipX = separator - 10 - DrawUtils::GetNEWHudNumberWidth(0, weapon.iClip, false, 3);
+			DrawUtils::DrawNEWHudNumber(0, clipX, y, weapon.iClip, 255, 255, 255, 255, false, 3);
+		}
+		SPR_Set(weapon.hAmmo, r, g, b);
+		SPR_DrawAdditive(0, right - iconWidth, y, &weapon.rcAmmo);
+	}
+	if (weapon.iAmmo2Type > 0 && gWR.CountAmmo(weapon.iAmmo2Type) > 0)
+	{
+		const int ammo = gWR.CountAmmo(weapon.iAmmo2Type);
+		const int x = ScreenWidth - 215;
+		DrawUtils::DrawNEWHudNumber(0, x - 5 - DrawUtils::GetNEWHudNumberWidth(0, ammo, false, 3), y,
+			ammo, 114, 197, 255, 255, false, 3);
+		SPR_Set(weapon.hAmmo2, 114, 197, 255);
+		SPR_DrawAdditive(0, x, y, &weapon.rcAmmo2);
+	}
+	return 1;
+}
+
+void CHudAmmo::DrawNEWHudCurrentWpn()
+{
+	if (!m_iWeapon_OffBG)
+		return;
+	const int right = ScreenWidth - 5;
+	const int bottom = ScreenHeight - 93;
+	const int x = right - m_iWeapon_OffBG->w();
+	const int y = bottom - m_iWeapon_OffBG->h();
+	m_iWeapon_OffBG->Draw2DQuadScaled(x, y, right, bottom);
+	const int width = m_pWeapon->rcInactive.right - m_pWeapon->rcInactive.left;
+	const int height = m_pWeapon->rcInactive.bottom - m_pWeapon->rcInactive.top;
+	SPR_Set(m_pWeapon->hInactive, 255, 255, 255);
+	SPR_DrawAdditive(0, right - width, bottom - height, &m_pWeapon->rcInactive);
+
+	const char *name = m_pWeapon->szName;
+	if (!strncmp(name, "weapon_", 7))
+		name += 7;
+	else if (!strncmp(name, "knife_", 6))
+		name += 6;
+	char translated[128];
+#ifdef XASH_VGUI2
+	const char *tokenName = name;
+	if (!strcmp(name, "usp")) tokenName = "USP45";
+	else if (!strcmp(name, "deagle")) tokenName = "DesertEagle";
+	else if (!strcmp(name, "hegrenade")) tokenName = "HE_Grenade";
+	char token[128];
+	snprintf(token, sizeof(token), "#CSO_%s", tokenName);
+	if (vgui2::localize())
+	{
+		if (const wchar_t *localized = vgui2::localize()->Find(token))
+		{
+			vgui2::localize()->ConvertUnicodeToANSI(localized, translated, sizeof(translated));
+			name = translated;
+		}
+	}
+#endif
+	char label[160];
+	snprintf(label, sizeof(label), "%d %s", m_pWeapon->iSlot + 1, name);
+	gEngfuncs.pfnDrawSetTextColor(1.0f, 1.0f, 1.0f);
+	gEngfuncs.pfnDrawConsoleString(x + 3, y + 1, label);
+}
+
 int CHudAmmo::DrawWpnList(float flTime)
 {
 	int r, g, b, x, y, a, i;

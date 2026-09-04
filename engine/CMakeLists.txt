@@ -78,6 +78,7 @@ set(XASH_ENGINE_SOURCES
 	common/mathlib.c
 	common/matrixlib.c
 	common/mod_studio.c
+	common/mod_extend_seq.c
 	common/model.c
 	common/net_buffer.c
 	common/net_chan.c
@@ -376,8 +377,12 @@ else()
 endif()
 
 if(XASH_STATIC_GAMELIB)
-	#target_link_libraries(${XASH_ENGINE} xashmenu)
-	target_link_libraries(${XASH_ENGINE} xashmenu client server)
+	if(XASH_VGUI2)
+		target_link_libraries(${XASH_ENGINE} client server vgui2_support vgui2 GameUI)
+		target_compile_definitions(${XASH_ENGINE} PRIVATE XASH_VGUI2=1)
+	else()
+		target_link_libraries(${XASH_ENGINE} xashmenu client server)
+	endif()
 endif()
 
 if(MSVC)

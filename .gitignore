@@ -29,6 +29,8 @@ DerivedData
 
 ### OSX ###
 .DS_Store
+__pycache__/
+*.pyc
 .AppleDouble
 .LSOverride
 
@@ -300,6 +302,7 @@ _Pvt_Extensions
 
 # QtCreator
 build-*
+!tools/build-cso-ui.sh
 
 # Android Build
 *.apk

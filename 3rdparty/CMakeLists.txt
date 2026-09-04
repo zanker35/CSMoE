@@ -42,6 +42,11 @@ if(LuaJit_FOUND AND FALSE) # we are using our own luajit and build from source.
 else()
 	set(LUAJIT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/LuaJIT")
 	include(luajit-cmake/LuaJIT.cmake)
+	if(APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+		# The bundled build helper applies x86 address-layout flags to all
+		# Darwin host tools. macOS rejects that executable layout on ARM64.
+		set_target_properties(minilua PROPERTIES LINK_FLAGS "")
+	endif()
 
 	add_library(luajit_3p INTERFACE)
 	target_link_libraries(luajit_3p INTERFACE libluajit)
@@ -61,3 +66,11 @@ target_link_libraries(nameof_3p INTERFACE nameof::nameof)
 add_library(qrcode INTERFACE)
 target_sources(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode/src/qrcode.c)
 target_include_directories(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode/src)
+
+if(XASH_VGUI2)
+	add_library(3rdparty-sdl2 INTERFACE)
+	target_link_libraries(3rdparty-sdl2 INTERFACE sdl2)
+	find_package(Freetype REQUIRED)
+	add_library(3rdparty-freetype INTERFACE)
+	target_link_libraries(3rdparty-freetype INTERFACE Freetype::Freetype)
+endif()

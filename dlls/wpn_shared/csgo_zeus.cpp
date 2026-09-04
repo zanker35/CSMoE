@@ -140,7 +140,7 @@ void CZeus::Precache(void)
 	m_iSprBeam = PRECACHE_MODEL("sprites/zbeam1.spr");
 	PRECACHE_SOUND("weapons/csgo_ports/zeus/zeus_draw.wav");
 	PRECACHE_SOUND("weapons/csgo_ports/zeus/zeus_hit.wav");
-	PRECACHE_SOUND("weapons/csgo_ports/zeus/zeus_shoot,wav");
+	PRECACHE_SOUND("weapons/csgo_ports/zeus/zeus_shoot.wav");
 }
 
 int CZeus::GetItemInfo(ItemInfo *p)

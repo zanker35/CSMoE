@@ -1,3 +1,4 @@
+#include "hud.h"
 #include <vgui_controls/RichText.h>
 #include "CGameUITestPanel.h"
 #include "IEngineVgui.h"
@@ -39,7 +40,7 @@ CGameUITestPanel::CGameUITestPanel(vgui2::VPANEL parent) : BaseClass(nullptr, "G
 
 	SetScheme("ClientScheme");
 	Reset();
-	HOOK_COMMAND("gameui_open_test_panel", OpenGameUITestPanel);
+    HOOK_COMMAND("gameui_open_test_panel", OpenGameUITestPanel);
 }
 
 CGameUITestPanel::~CGameUITestPanel() {}

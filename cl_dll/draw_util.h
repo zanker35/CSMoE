@@ -56,6 +56,10 @@ public:
 	static int DrawHudNumber2( int x, int y, int iNumber,
 						   int r, int g, int b);
 
+	static int DrawNEWHudNumber(int type, int x, int y, int number, int r, int g, int b, int a,
+		int drawZero, int digits, int spacing = 0);
+	static int GetNEWHudNumberWidth(int type, int number, int drawZero, int digits, int spacing = 0);
+
 	static int DrawHudString(int x, int y, int iMaxX, const char *szString,
 						 int r, int g, int b, float scale = 0.0f, bool drawing = false );
 

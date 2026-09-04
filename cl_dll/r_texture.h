@@ -40,6 +40,14 @@ public:
 		}
 	}
 
+	// citrus HUD quads, rendered through the existing master triangle API.
+	void Draw2DQuad(float x1, float y1, float x2, float y2,
+		float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1,
+		unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255) const noexcept;
+	void Draw2DQuadScaled(float x1, float y1, float x2, float y2,
+		float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1,
+		unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255) const noexcept;
+
 	int GetParm(int parm = PARM_TEX_TYPE) const noexcept 
 	{ 
 		if(g_iXash)

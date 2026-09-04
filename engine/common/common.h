@@ -821,7 +821,7 @@ cvar_t *pfnCvar_RegisterVariable( const char *szName, const char *szValue, int f
 char *COM_MemFgets( byte *pMemFile, int fileSize, int *filePos, char *pBuffer, int bufferSize );
 byte* COM_LoadFileForMe( const char *filename, int *pLength );
 cvar_t *pfnCVarGetPointer( const char *szVarName );
-int pfnDrawConsoleString( int x, int y, char *string );
+int pfnDrawConsoleString( int x, int y, const char *string );
 void pfnDrawSetTextColor( float r, float g, float b );
 void pfnDrawConsoleStringLen( const char *pText, int *length, int *height );
 int pfnAddClientCommand( const char *cmd_name, xcommand_t func );

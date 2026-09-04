@@ -1,6 +1,4 @@
-//TODO: Need to merge the vector classes - Solokiller
-#define VECTOR2D_H
-
+#include "hud.h"
 #include <vgui/IPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/AnimationController.h>
@@ -14,7 +12,6 @@
 
 #include "CBaseViewport.h"
 
-#include "hud.h"
 #include "cl_util.h"
 #include "demo_api.h"
 
@@ -76,6 +73,22 @@ void CBaseViewport::Start()
 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
 }
 
+void CBaseViewport::Init()
+{
+	for (int i = 0; i < m_Panels.Count(); i++)
+		m_Panels[i]->Init();
+
+	HideAllVGUIMenu();
+}
+
+void CBaseViewport::VidInit()
+{
+	for (int i = 0; i < m_Panels.Count(); i++)
+		m_Panels[i]->VidInit();
+
+	HideAllVGUIMenu();
+}
+
 void CBaseViewport::SetParent( vgui2::VPANEL parent )
 {
 	const bool bIsProportional = IsProportional();
@@ -85,7 +98,8 @@ void CBaseViewport::SetParent( vgui2::VPANEL parent )
 	//NOTE: the engine doesn't set the root to be proportional so it will override our settings. We must restore our settings here. - Solokiller
 	SetProportional( bIsProportional );
 
-	m_pBackGround->SetParent( parent );
+	if (m_pBackGround)
+		m_pBackGround->SetParent( parent );
 
 	for( int i = 0; i< m_Panels.Count(); i++ )
 	{
@@ -95,11 +109,14 @@ void CBaseViewport::SetParent( vgui2::VPANEL parent )
 	// restore proportionality on animation controller
 	// TODO: should all panels be restored to being proportional? 
 	m_pAnimController->SetProportional( true );
+
+	SetKeyBoardInputEnabled(false);
+	SetMouseInputEnabled(false);
 }
 
 bool CBaseViewport::UseVGUI1()
 {
-	return true;
+	return false;
 }
 
 void CBaseViewport::HideScoreBoard()
@@ -108,6 +125,15 @@ void CBaseViewport::HideScoreBoard()
 
 void CBaseViewport::HideAllVGUIMenu()
 {
+    m_pActivePanel = NULL;
+    m_pLastActivePanel = NULL;
+    for (int i = 0; i < m_Panels.Count(); i++)
+    {
+        if (m_Panels[i]->IsVisible())
+            m_Panels[i]->ShowPanel(false);
+    }
+    if (m_pBackGround)
+        m_pBackGround->SetVisible(false);
 }
 
 void CBaseViewport::ActivateClientUI()
@@ -184,17 +210,10 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 	// reload the script file, so the screen positions in it are correct for the new resolution
 	ReloadScheme( NULL );
 
-	// recreate all the default panels
-	RemoveAllPanels();
-
-	m_pBackGround = new CBackGroundPanel( nullptr );
-
-	m_pBackGround->SetZPos( -20 ); // send it to the back 
-	m_pBackGround->SetVisible( false );
-
-	CreateDefaultPanels();
-
-	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
+    // Existing panels receive the resize through VGUI. Keep the selected team,
+    // page and basket while their proportional layouts are recalculated.
+    Layout();
+    UpdateAllPanels();
 }
 
 void CBaseViewport::Paint()
@@ -335,7 +354,7 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 			{
 				// store a pointer to the currently active panel
 				// so we can restore it later
-				m_pLastActivePanel = m_pActivePanel;
+				m_pLastActivePanel = m_pActivePanel->IsVisible() ? m_pActivePanel : nullptr;
 				m_pActivePanel->ShowPanel( false );
 			}
 
@@ -446,8 +465,8 @@ void CBaseViewport::ReloadScheme( const char* pszFromFile )
 
 	InvalidateLayout( true, true );
 
-	// reset the hud
-	gHUD.MsgFunc_ResetHUD(nullptr, 0, nullptr);
+	// Scheme changes only relayout VGUI. HUD_Init / HUD_VidInit own gameplay
+	// state resets; resizing a menu must not clear the current weapon or money.
 }
 
 IGameUIPanel *CBaseViewport::CreateGameUIPanelByName(const char *pszName)

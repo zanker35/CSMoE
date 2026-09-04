@@ -17,7 +17,9 @@ public:
 	void InitHUDData(void) override;		// called every time a server is connected to
 	void Shutdown(void) override;
 
+	// HUD coordinates, before hud_scale is applied.
 	int GetRadarSize() const;
+	int GetRadarBottom() const;
 
 	void UserCmd_ShowRadar();
 	void UserCmd_HideRadar();
@@ -30,6 +32,7 @@ public:
 	int MsgFunc_Location(const char *pszName, int iSize, void *pbuf);
 
 private:
+	bool UseModernRadar() const;
 	struct impl_t;
 	std::unique_ptr<impl_t> pimpl;
 };

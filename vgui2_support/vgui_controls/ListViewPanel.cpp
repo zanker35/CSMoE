@@ -648,7 +648,7 @@ void ListViewPanel::PerformLayout()
 		itemsPerCol = GetItemsPerColumn();
 		cols = ( GetItemCount() + (itemsPerCol - 1) ) / (itemsPerCol > 0 ? itemsPerCol : 1 );
 
-		m_hbar->SetEnabled(false);
+		m_hbar->SetEnabled(cols > maxColVisible);
 		m_hbar->SetRangeWindow( maxColVisible );
 		m_hbar->SetRange( 0, cols);	
 		m_hbar->SetButtonPressedScrollValue( 1 );
@@ -1005,7 +1005,7 @@ void ListViewPanel::OnKeyCodeTyped( KeyCode code )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void ListViewPanel::OnKeyTyped(wchar_t unichar)
+void ListViewPanel::OnKeyTyped(uchar32 unichar)
 {
 	if (!iswcntrl(unichar))
 	{
@@ -1081,4 +1081,3 @@ int ListViewPanel::GetItemsPerColumn()
 
 	return tall / m_iRowHeight;	// should round down
 }
-

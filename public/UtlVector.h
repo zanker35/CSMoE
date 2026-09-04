@@ -1,3 +1,6 @@
+#if defined(XASH_VGUI2)
+#include "../SourceSDK/public/tier1/utlvector.h"
+#else
 #ifndef UTLVECTOR_H
 #define UTLVECTOR_H
 #ifdef _WIN32
@@ -563,3 +566,4 @@ void CUtlVector<T>::SetGrowSize(int size)
 }
 
 #endif // CCVECTOR_H
+#endif // XASH_VGUI2

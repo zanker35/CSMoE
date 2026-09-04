@@ -55,7 +55,7 @@ void CNegev::Precache(void)
 	PRECACHE_MODEL("models/alt/v_negev.mdl");
 	PRECACHE_MODEL("models/w_negev.mdl");
 	PRECACHE_MODEL("models/p_negev.mdl");
-	PRECACHE_SOUND("weapons/csgo_ports/negev/negv-1.wav");
+	PRECACHE_SOUND("weapons/csgo_ports/negev/negev-1.wav");
 	PRECACHE_SOUND("weapons/csgo_ports/negev/negev_boxin.wav");
 	PRECACHE_SOUND("weapons/csgo_ports/negev/negev_boxout.wav");
 	PRECACHE_SOUND("weapons/csgo_ports/negev/negev_chain.wav");

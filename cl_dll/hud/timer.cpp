@@ -38,9 +38,15 @@ version.
 #include "draw_util.h"
 #include "triangleapi.h"
 #include "gamemode/mods_const.h"
+#include "legacy/hud_scoreboard_legacy.h"
 
 DECLARE_MESSAGE( m_Timer, RoundTime )
 DECLARE_MESSAGE( m_Timer, ShowTimer )
+
+CHudTimer::CHudTimer()
+{
+	CHudScoreBoardLegacy::BuildNumberRC(m_iNum_BottomC, 8, 12);
+}
 
 int CHudTimer::Init()
 {
@@ -61,6 +67,8 @@ int CHudTimer::VidInit()
 {
 	m_HUD_timer = gHUD.GetSpriteIndex( "stopwatch" );
 	R_InitTexture(m_pTexture_Black, "resource/hud/csgo/black");
+	R_InitTexture(m_iNum_Bottom, "resource/hud/hud_sb_num_bottom");
+	R_InitTexture(m_iColon_Bottom, "resource/hud/hud_sb_num_bottom_colon");
 	return 1;
 }
 
@@ -71,6 +79,9 @@ int CHudTimer::Draw( float fTime )
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
+	if (gHUD.m_hudstyle->value == 2 && m_iNum_Bottom && m_iColon_Bottom &&
+		(gHUD.m_iModRunning == MOD_NONE || gHUD.m_iModRunning == MOD_TDM || gHUD.m_iModRunning == MOD_DM || gHUD.IsZombieMod()))
+		return DrawNEWHudTimer(fTime);
 	int r, g, b;
 	// time must be positive
 	int minutes = max( 0, (int)( m_iTime + m_fStartTime - gHUD.m_flTime ) / 60);
@@ -78,13 +89,13 @@ int CHudTimer::Draw( float fTime )
 
 	if( minutes * 60 + seconds > 20 )
 	{
-		DrawUtils::UnpackRGB(r,g,b, gHUD.m_csgohud->value? RGB_WHITE : RGB_YELLOWISH );
+		DrawUtils::UnpackRGB(r,g,b, (gHUD.m_hudstyle->value == 1)? RGB_WHITE : RGB_YELLOWISH );
 	}
 	else
 	{
 		m_flPanicTime += gHUD.m_flTimeDelta;
 		// add 0.1 sec, so it's not flicker fast
-		if (gHUD.m_csgohud->value)
+		if ((gHUD.m_hudstyle->value == 1))
 			DrawUtils::UnpackRGB(r, g, b, RGB_REDISH);
 		else
 		{
@@ -107,7 +118,7 @@ int CHudTimer::Draw( float fTime )
 	int x = ScreenWidth/2;
 	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight ;
     
-	if (gHUD.m_csgohud->value && gHUD.m_iModRunning == MOD_NONE)
+	if ((gHUD.m_hudstyle->value == 1) && gHUD.m_iModRunning == MOD_NONE)
 	{ 
 		y = 5;
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
@@ -251,6 +262,32 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 	m_fStartTime = gHUD.m_flTime;
 
 	m_iFlags = HUD_DRAW;
+	return 1;
+}
+
+int CHudTimer::DrawNEWHudTimer(float fTime)
+{
+	const int remaining = max(0, static_cast<int>(m_iTime + m_fStartTime - gHUD.m_flTime));
+	const int minutes = remaining / 60;
+	const int seconds = remaining % 60;
+	int r = 255, g = 255, b = 255;
+	if (remaining <= 20)
+	{
+		m_flPanicTime += gHUD.m_flTimeDelta;
+		if (m_flPanicTime > seconds / 40.0f + 0.1f)
+		{
+			m_flPanicTime = 0;
+			m_bPanicColorChange = !m_bPanicColorChange;
+		}
+		if (m_bPanicColorChange)
+			DrawUtils::UnpackRGB(r, g, b, RGB_REDISH);
+	}
+	const int y = 60;
+	const int colonX = ScreenWidth / 2 - 1;
+	CHudScoreBoardLegacy::DrawTexturedNumbers(*m_iNum_Bottom, m_iNum_BottomC, minutes, ScreenWidth / 2 - 20, y, DHN_2DIGITS, 1, 1.0, r, g, b);
+	m_iColon_Bottom->Draw2DQuadScaled(colonX, y, colonX + m_iColon_Bottom->w(), y + m_iColon_Bottom->h(), 0, 0, 1, 1, r, g, b);
+	CHudScoreBoardLegacy::DrawTexturedNumbers(*m_iNum_Bottom, m_iNum_BottomC, seconds, colonX + m_iColon_Bottom->w() + 1, y, DHN_2DIGITS, 1, 1.0, r, g, b);
+	m_closestRight = colonX + m_iColon_Bottom->w() + 23;
 	return 1;
 }
 

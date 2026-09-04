@@ -974,7 +974,7 @@ void Menu::CalculateWidth()
 void Menu::LayoutScrollBar()
 {
 	//!! need to make it recalculate scroll positions
-	m_pScroller->SetEnabled(false);
+	m_pScroller->SetEnabled(true);
 	m_pScroller->SetRangeWindow(m_VisibleSortedItems.Count());
 	m_pScroller->SetRange(0, CountVisibleItems());
 	m_pScroller->SetButtonPressedScrollValue(1);
@@ -1336,7 +1336,7 @@ void Menu::OnKeyCodeTyped(KeyCode code)
 // Purpose: Handle key presses, Activate shortcuts
 // Input  : code - 
 //-----------------------------------------------------------------------------
-void Menu::OnKeyTyped(wchar_t unichar)
+void Menu::OnKeyTyped(uchar32 unichar)
 {
 	//
 	// NOTE - if hotkeys are ever enabled you need to work out a way to differentiate between
@@ -2172,9 +2172,8 @@ int Menu::GetCurrentlyHighlightedItem()
 //-----------------------------------------------------------------------------
 // Purpose: Respond to cursor entering a menuItem.
 //-----------------------------------------------------------------------------
-void Menu::OnCursorEnteredMenuItem(int VPanel)
+void Menu::OnCursorEnteredMenuItem(VPANEL menuItem)
 {
-	VPANEL menuItem = (VPANEL)VPanel;
 	// if we are in mouse mode
 	if (m_iInputMode == MOUSE)
 	{
@@ -2190,9 +2189,8 @@ void Menu::OnCursorEnteredMenuItem(int VPanel)
 //-----------------------------------------------------------------------------
 // Purpose: Respond to cursor exiting a menuItem
 //-----------------------------------------------------------------------------
-void Menu::OnCursorExitedMenuItem(int VPanel)
+void Menu::OnCursorExitedMenuItem(VPANEL menuItem)
 {
-	VPANEL menuItem = (VPANEL)VPanel;
 	// only care if we are in mouse mode
 	if (m_iInputMode == MOUSE)
 	{
