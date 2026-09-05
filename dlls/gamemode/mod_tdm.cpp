@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "trains.h"
 #include "bmodels.h"
+#include "weapons.h"
 
 #include "mod_tdm.h"
 #include "player/player_mod_strategy.h"
@@ -222,6 +223,16 @@ void CMod_TeamDeathMatch::UpdateGameMode(CBasePlayer *pPlayer)
 
 void CMod_TeamDeathMatch::PlayerSpawn(CBasePlayer *pPlayer)
 {
+	// Keep death drops available during the respawn delay. Picked-up weapons
+	// have already been unlinked from their box and must remain with the taker.
+	CBaseEntity *entity = nullptr;
+	while ((entity = UTIL_FindEntityByClassname(entity, "weaponbox")) != nullptr)
+	{
+		auto *box = static_cast<CWeaponBox *>(entity);
+		if (!(box->pev->flags & FL_KILLME) && box->m_hDeathDropOwner == pPlayer)
+			box->Kill();
+	}
+
 	CHalfLifeMultiplay::PlayerSpawn(pPlayer);
 	pPlayer->AddAccount(16000);
 

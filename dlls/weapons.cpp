@@ -46,6 +46,7 @@ TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	DEFINE_ARRAY(CWeaponBox, m_rgiszAmmo, FIELD_STRING, MAX_AMMO_SLOTS),
 	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
 	DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
+	DEFINE_FIELD(CWeaponBox, m_hDeathDropOwner, FIELD_EHANDLE),
 };
 
 const char *g_pModelNameLaser = "sprites/laserbeam.spr";
@@ -1560,6 +1561,7 @@ void CWeaponBox::Spawn()
 	pev->solid = SOLID_TRIGGER;
 
 	m_bIsBomb = false;
+	m_hDeathDropOwner.Set(nullptr);
 
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");

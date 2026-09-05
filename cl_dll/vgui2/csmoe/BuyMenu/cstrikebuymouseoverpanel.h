@@ -15,6 +15,8 @@
 #include "game_controls/mouseoverpanelbutton.h"
 #include "../newmouseoverpanelbutton.h"
 
+class WeaponImagePanel;
+
 class CSBuyMouseOverPanel : public NewMouseOverPanel
 {
 	typedef NewMouseOverPanel BaseClass;
@@ -43,7 +45,7 @@ public:
 
 
 	vgui2::ImagePanel *imageBG;
-	vgui2::ImagePanel *classimage;
+	WeaponImagePanel *classimage;
 };
 
 #endif

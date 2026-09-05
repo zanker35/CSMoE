@@ -556,6 +556,7 @@ template<> struct PrivateData<class CWeaponBox, CBaseEntity>
 	int m_rgAmmo[ MAX_AMMO_SLOTS ];
 	int m_cAmmoTypes;
 	bool m_bIsBomb;
+	EHANDLE m_hDeathDropOwner; // Set only for weapons packed by PlayerDeathThink.
 };
 
 class CWeaponBox: public CBaseEntity, public PrivateData<class CWeaponBox, CBaseEntity>
@@ -582,7 +583,7 @@ public:
 	BOOL PackAmmo(int iszName, int iCount);
 
 public:
-	static TYPEDESCRIPTION m_SaveData[4];
+	static TYPEDESCRIPTION m_SaveData[5];
 };
 
 #ifdef ENABLE_SHIELD

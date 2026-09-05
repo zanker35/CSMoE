@@ -19,6 +19,7 @@
 
 #include "cstrikebuymouseoverpanel.h"
 #include "weaponcatalog.h"
+#include "WeaponImagePanel.h"
 
 #include <string>
 
@@ -46,7 +47,7 @@ CSBuyMouseOverPanel::CSBuyMouseOverPanel(vgui2::Panel *parent, const char *panel
 	imageBG = new ImagePanel(this, "imageBG");
 	imageBG->SetShouldScaleImage(true);
 
-	classimage = new ImagePanel(this, "classimage");
+	classimage = new WeaponImagePanel(this, "classimage");
 	classimage->SetShouldScaleImage(true);
 }
 
@@ -128,36 +129,5 @@ void CSBuyMouseOverPanel::UpdateWeapon(const char *weapon)
 		info[i]->SetVisible(false);
 	}
 	
-	// strip prefix
-	if (!strncmp(weapon, "weapon_", 7))
-	{
-		weapon += 7;
-	}
-	if (!strncmp(weapon, "z4b_", 4))
-	{
-		weapon += 4;
-	}
-	if (!strncmp(weapon, "csgo_", 5))
-	{
-		weapon += 5;
-	}
-	if (!strncmp(weapon, "knife_", 6))
-	{
-		weapon += 6;
-	}
-	if (!stricmp(weapon, "mp5navy"))
-	{
-		weapon = "mp5";
-	}
-	if (!stricmp(weapon, "scarl") || !stricmp(weapon, "scarh"))
-	{
-		weapon = "scar";
-	}
-	if (!stricmp(weapon, "xm8c") || !stricmp(weapon, "xm8s"))
-	{
-		weapon = "xm8";
-	}
-	char szBuffer[64];
-	snprintf(szBuffer, sizeof(szBuffer), "gfx/vgui/basket/%s", weapon);
-	classimage->SetImage(szBuffer);
+	classimage->SetWeapon(weapon);
 }

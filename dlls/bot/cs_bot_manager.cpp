@@ -383,7 +383,7 @@ void PrintAllEntities()
 	{
 		edict_t *edict = INDEXENT(i);
 
-		if (!edict || FStringNull(edict->v.classname))
+		if (!edict || edict->free || (edict->v.flags & FL_KILLME) || FStringNull(edict->v.classname))
 			continue;
 
 		CONSOLE_ECHO("  %s\n", STRING(edict->v.classname));
