@@ -30,6 +30,7 @@
 
 #include "csprite.h"
 #include "cvardef.h" // cvar_t
+#include "combat_report.h"
 
 enum GameMode_e : byte; // #include "gamemode/mods_const.h"
 
@@ -403,8 +404,19 @@ public:
 	void Shutdown(void);
 	int Draw( float flTime );
 	CHudMsgFunc(DeathMsg);
+	CHudMsgFunc(CombatReport);
 
 private:
+	struct CombatReport
+	{
+		std::string opponent;
+		int distance = 0;
+		float expires = 0;
+		combat_report::Weapons weapons;
+	};
+	CombatReport m_combatReports[2]; // last kill and last death remain independently visible
+	void DrawCombatReports(float time);
+
 	int m_HUD_d_skull;  // sprite index of skull icon
 	int m_HUD_d_headshot;
 	cvar_t *hud_deathnotice_time;

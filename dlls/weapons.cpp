@@ -105,6 +105,7 @@ void ClearMultiDamage()
 	gMultiDamage.pEntity = NULL;
 	gMultiDamage.amount = 0;
 	gMultiDamage.type = 0;
+	gMultiDamage.trace = {};
 }
 
 // ApplyMultiDamage - inflicts contents of global multi damage register on gMultiDamage.pEntity
@@ -118,11 +119,13 @@ void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker)
 	if (!gMultiDamage.pEntity)
 		return;
 
+	if (auto *player = dynamic_cast<CBasePlayer *>(gMultiDamage.pEntity))
+		player->m_combatReportTrace = gMultiDamage.trace;
 	gMultiDamage.pEntity->TakeDamage(pevInflictor, pevAttacker, gMultiDamage.amount, gMultiDamage.type);
 
 }
 
-void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType)
+void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType, int hitgroup)
 {
 	if (!pEntity)
 		return;
@@ -135,9 +138,11 @@ void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamag
 		ApplyMultiDamage(pevInflictor, pevInflictor);
 		gMultiDamage.pEntity = pEntity;
 		gMultiDamage.amount = 0;
+		gMultiDamage.trace = {};
 	}
 
 	gMultiDamage.amount += flDamage;
+	gMultiDamage.trace.Add(hitgroup, flDamage);
 }
 
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)

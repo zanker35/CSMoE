@@ -651,7 +651,7 @@ void CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 		MESSAGE_END();
 	}
 
-	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
+	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType, ptr->iHitgroup);
 }
 
 const char *GetWeaponName(entvars_t *pevInflictor, entvars_t *pKiller)
@@ -722,6 +722,75 @@ void LogAttack(CBasePlayer *pAttacker, CBasePlayer *pVictim, int teamAttack, int
 	}
 }
 
+void CBasePlayer::ResetCombatReport()
+{
+	m_combatReportTrace = {};
+	m_combatDamageReceived.clear();
+	// A new life (or a reused client slot) must also discard this player's
+	// outgoing damage from every other victim's ledger.
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
+	{
+		auto *player = dynamic_cast<CBasePlayer *>(UTIL_PlayerByIndex(i));
+		if (player && player != this)
+			player->m_combatDamageReceived.erase(entindex());
+	}
+}
+
+void CBasePlayer::RecordCombatDamage(entvars_t *inflictor, entvars_t *attacker,
+	int damage, const combat_report::Trace &trace)
+{
+	if (damage <= 0 || !IsAlive() || pev->takedamage == DAMAGE_NO || !attacker)
+		return;
+	auto *player = dynamic_cast<CBasePlayer *>(CBaseEntity::Instance(attacker));
+	if (!player || player == this)
+		return;
+	const char *weapon = GetWeaponName(inflictor, attacker);
+	// Bound each row so even eight body parts fit in one GoldSrc user message.
+	std::string name(weapon, strnlen(weapon, combat_report::kWeaponNameBytes - 1));
+	combat_report::Accumulate(m_combatDamageReceived[player->entindex()][name], trace.Resolve(damage));
+}
+
+void CBasePlayer::SendCombatReport(entvars_t *attacker)
+{
+	if (!attacker)
+		return;
+	auto *killer = dynamic_cast<CBasePlayer *>(CBaseEntity::Instance(attacker));
+	if (!killer || killer == this)
+		return;
+	const auto found = m_combatDamageReceived.find(killer->entindex());
+	if (found == m_combatDamageReceived.end())
+		return;
+	const int distance = static_cast<int>((pev->origin - killer->pev->origin).Length() * 0.254f + 0.5f);
+	for (int death = 0; death < 2; ++death)
+	{
+		auto *recipient = death ? this : killer;
+		auto *opponent = death ? killer : this;
+		if (recipient->IsBot())
+			continue;
+		char name[combat_report::kPlayerNameBytes];
+		snprintf(name, sizeof(name), "%s", STRING(opponent->pev->netname));
+		MESSAGE_BEGIN(MSG_ONE, gmsgCombatReport, NULL, recipient->pev);
+			WRITE_BYTE(combat_report::Begin);
+			WRITE_BYTE(death);
+			WRITE_STRING(name);
+			WRITE_LONG(distance); // tenths of a metre; one GoldSrc unit = 0.0254 m
+		MESSAGE_END();
+		for (const auto &weapon : found->second)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgCombatReport, NULL, recipient->pev);
+				WRITE_BYTE(combat_report::Weapon);
+				WRITE_BYTE(death);
+				WRITE_STRING(weapon.first.c_str());
+				for (const auto &part : weapon.second)
+				{
+					WRITE_LONG(part.hits);
+					WRITE_LONG(part.damage);
+				}
+			MESSAGE_END();
+		}
+	}
+}
+
 // Take some damage.
 // NOTE: each call to TakeDamage with bitsDamageType set to a time-based damage
 // type will cause the damage time countdown to be reset.  Thus the ongoing effects of poison, radiation
@@ -729,6 +798,8 @@ void LogAttack(CBasePlayer *pAttacker, CBasePlayer *pVictim, int teamAttack, int
 
 int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
+	const auto reportTrace = m_combatReportTrace;
+	m_combatReportTrace = {};
 	int fTookDamage;
 	float flRatio = ARMOR_RATIO;
 	float flBonus = ARMOR_BONUS;
@@ -838,6 +909,7 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		flDamage = g_pModRunning->GetAdjustedEntityDamage(this, pevInflictor, pevAttacker, flDamage, bitsDamageType);
 
 		LogAttack(pAttack, this, teamAttack, (int)flDamage, armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
+		RecordCombatDamage(pevInflictor, pevAttacker, (int)flDamage, reportTrace);
 		fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType);
 
 		if (fTookDamage > 0)
@@ -1073,6 +1145,7 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	// this cast to INT is critical!!! If a player ends up with 0.5 health, the engine will get that
 	// as an int (zero) and think the player is dead! (this will incite a clientside screentilt, etc)
+	RecordCombatDamage(pevInflictor, pevAttacker, (int)flDamage, reportTrace);
 	fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType);
 
 	if (fTookDamage > 0)
@@ -1601,6 +1674,8 @@ void CBasePlayer::SendFOV(int fov)
 
 void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 {
+	SendCombatReport(pevAttacker);
+	ResetCombatReport();
 	m_canSwitchObserverModes = false;
 
 	if (m_LastHitGroup == HITGROUP_HEAD)
@@ -4716,6 +4791,7 @@ bool CBasePlayer::SelectSpawnSpot(const char *pEntClassName, CBaseEntity *&pSpot
 
 void CBasePlayer::Spawn()
 {
+	ResetCombatReport();
 
 	m_iGaitsequence = 0;
 

@@ -130,11 +130,14 @@ struct AmmoInfo
 
 }
 
+#include "combat_report.h"
+
 #ifndef CLIENT_DLL
 namespace sv {
 
 struct MULTIDAMAGE
 {
+	combat_report::Trace trace;
 	CBaseEntity *pEntity;
 	float amount;
 	int type;
@@ -642,7 +645,7 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
 
 extern void ClearMultiDamage(void);
 extern void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker);
-extern void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType);
+extern void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType, int hitgroup = 0);
 extern void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars_t *pShooter, bool bHitMetal);
 extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal(CBaseEntity *pEntity, int bitsDamageType);

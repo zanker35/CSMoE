@@ -48,6 +48,7 @@ extern int gmsgLogo;
 extern int gmsgWeaponList;
 extern int gmsgAmmoX;
 extern int gmsgDeathMsg;
+extern int gmsgCombatReport;
 extern int gmsgScoreAttrib;
 extern int gmsgScoreInfo;
 extern int gmsgTeamInfo;

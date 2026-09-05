@@ -23,7 +23,7 @@ CHudRadarModern::CHudRadarModern(void) : m_flNextBuild(0), m_pHostages{}, m_Over
 	m_bCanRenderMapSprite = false;
 	m_iLastWide = 0;
 
-	cl_newradar_size = CVAR_CREATE("cl_newradar_size", "0.175", FCVAR_ARCHIVE);
+	cl_newradar_size = CVAR_CREATE("cl_newradar_size", "0.13", FCVAR_ARCHIVE);
 	cl_newradar_r = CVAR_CREATE("cl_newradar_r", "1", FCVAR_ARCHIVE);
 	cl_newradar_g = CVAR_CREATE("cl_newradar_g", "1", FCVAR_ARCHIVE);
 	cl_newradar_b = CVAR_CREATE("cl_newradar_b", "1", FCVAR_ARCHIVE);

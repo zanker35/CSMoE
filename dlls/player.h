@@ -231,6 +231,10 @@ constexpr std::size_t MAX_LOCATION_LENGTH = 32;
 template<> struct PrivateData<class CBasePlayer, CBaseMonster>
 {
 	int random_seed;
+#ifndef CLIENT_DLL
+	combat_report::Trace m_combatReportTrace;
+	std::map<int, combat_report::Weapons> m_combatDamageReceived;
+#endif
 	unsigned short m_usPlayerBleed;
 	EHANDLE m_hObserverTarget;
 	time_point_t m_flNextObserverInput;
@@ -459,6 +463,9 @@ public:
 	int TakeHealth(float flHealth, int bitsDamageType) override { return 0; }
 #else
 	int Classify() override;
+	void ResetCombatReport();
+	void RecordCombatDamage(entvars_t *inflictor, entvars_t *attacker, int damage, const combat_report::Trace &trace);
+	void SendCombatReport(entvars_t *attacker);
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) override;
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) override;
 	int TakeHealth(float flHealth, int bitsDamageType) override;

@@ -24,10 +24,16 @@
 #include "draw_util.h"
 
 #include "triangleapi.h"
+#include <vector>
+#ifdef XASH_VGUI2
+#include "vgui_controls/Controls.h"
+#include "vgui/ILocalize.h"
+#endif
 
 float color[3];
 
 DECLARE_MESSAGE( m_DeathNotice, DeathMsg )
+DECLARE_MESSAGE( m_DeathNotice, CombatReport )
 
 enum DrawBgType
 {
@@ -66,6 +72,7 @@ int CHudDeathNotice :: Init( void )
 	gHUD.AddHudElem( this );
 
 	HOOK_MESSAGE( DeathMsg );
+	HOOK_MESSAGE( CombatReport );
 
 	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
 	m_iFlags = 0;
@@ -87,6 +94,8 @@ void CHudDeathNotice::Reset(void)
 void CHudDeathNotice :: InitHUDData( void )
 {
 	memset( rgDeathNoticeList, 0, sizeof(rgDeathNoticeList) );
+	for (auto &report : m_combatReports)
+		report = {};
 }
 
 
@@ -141,6 +150,7 @@ void CHudDeathNotice::Shutdown(void)
 
 int CHudDeathNotice :: Draw( float flTime )
 {
+	DrawCombatReports(flTime);
 	int x, y, r, g, b, i;
 
 	for( i = 0; i < MAX_DEATHNOTICES; i++ )
@@ -387,13 +397,148 @@ int CHudDeathNotice :: Draw( float flTime )
 		}
 	}
 
-	if( i == 0 )
+	if (i == 0 && m_combatReports[0].expires <= flTime && m_combatReports[1].expires <= flTime)
 		m_iFlags &= ~HUD_DRAW; // disable hud item
 
 	return 1;
 }
 
 // This message handler may be better off elsewhere
+namespace {
+std::string CombatWeaponName(const std::string &weapon)
+{
+	const char *name = weapon.c_str();
+	if (!strncmp(name, "weapon_", 7)) name += 7;
+	else if (!strncmp(name, "knife_", 6)) name += 6;
+#ifdef XASH_VGUI2
+	const char *tokenName = name;
+	if (!strcmp(name, "usp")) tokenName = "USP45";
+	else if (!strcmp(name, "deagle")) tokenName = "DesertEagle";
+	else if (!strcmp(name, "hegrenade") || !strcmp(name, "grenade")) tokenName = "HE_Grenade";
+	char token[128];
+	snprintf(token, sizeof(token), "#CSO_%s", tokenName);
+	if (vgui2::localize())
+	{
+		if (const wchar_t *localized = vgui2::localize()->Find(token))
+		{
+			char translated[256];
+			vgui2::localize()->ConvertUnicodeToANSI(localized, translated, sizeof(translated));
+			return translated;
+		}
+	}
+#endif
+	return name;
+}
+
+// Wrap at UTF-8 boundaries, including names and localized custom weapons.
+void CombatReportLine(std::vector<std::string> &lines, const std::string &text, int width)
+{
+	std::string line;
+	for (size_t i = 0; i < text.size();)
+	{
+		size_t end = i + 1;
+		while (end < text.size() && (static_cast<unsigned char>(text[end]) & 0xc0) == 0x80)
+			++end;
+		const auto next = text.substr(i, end - i);
+		if (!line.empty() && DrawUtils::ConsoleStringLen((line + next).c_str()) > width)
+		{
+			lines.push_back(line);
+			line.clear();
+		}
+		line += next;
+		i = end;
+	}
+	if (!line.empty()) lines.push_back(line);
+}
+}
+
+int CHudDeathNotice::MsgFunc_CombatReport(const char *pszName, int iSize, void *pbuf)
+{
+	if (iSize < 2) return 0;
+	BufferReader reader(pszName, pbuf, iSize);
+	const int type = reader.ReadByte();
+	const int death = reader.ReadByte();
+	if (death > 1) return 0;
+	auto &report = m_combatReports[death];
+	if (type == combat_report::Begin)
+	{
+		report = {};
+		report.opponent = reader.ReadString();
+		report.distance = reader.ReadLong();
+		report.expires = gHUD.m_flTime + 8.0f;
+		m_iFlags |= HUD_DRAW;
+	}
+	else if (type == combat_report::Weapon && report.expires > gHUD.m_flTime)
+	{
+		const std::string weapon = reader.ReadString();
+		combat_report::Parts parts{};
+		for (auto &part : parts)
+		{
+			part.hits = reader.ReadLong();
+			part.damage = reader.ReadLong();
+			if (part.hits < 0 || part.damage < 0) return 0;
+		}
+		report.weapons[weapon] = parts;
+	}
+	return 1;
+}
+
+void CHudDeathNotice::DrawCombatReports(float time)
+{
+	static const char *partNames[] = {"其他", "头部", "胸部", "腹部", "左臂", "右臂", "左腿", "右腿"};
+	const int padding = 8;
+	const int width = min(520, ScreenWidth / 2 - 16);
+	int fontWidth = 0, fontHeight = 0;
+	DrawUtils::ConsoleStringSize("伤害", &fontWidth, &fontHeight);
+	const int lineHeight = max(14, fontHeight) + 2;
+	std::vector<std::string> lines[2];
+	for (int death = 0; death < 2; ++death)
+	{
+		const auto &report = m_combatReports[death];
+		if (report.expires <= time || report.weapons.empty()) continue;
+		auto add = [&](const std::string &line) { CombatReportLine(lines[death], line, width - padding * 2); };
+		add(std::string(death ? "被击杀：" : "击杀：") + report.opponent);
+		combat_report::Parts total{};
+		for (const auto &weapon : report.weapons)
+			combat_report::Accumulate(total, weapon.second);
+		char line[512];
+		snprintf(line, sizeof(line), "距离：%.1f 米", report.distance / 10.0f);
+		add(line);
+		for (const auto &weapon : report.weapons)
+		{
+			snprintf(line, sizeof(line), "武器：%s    伤害：%d", CombatWeaponName(weapon.first).c_str(), combat_report::Total(weapon.second));
+			add(line);
+		}
+		for (int part = 0; part < combat_report::kHitGroups; ++part)
+		{
+			if (!total[part].hits) continue;
+			snprintf(line, sizeof(line), "%s：%d 次命中    %d 伤害", partNames[part], total[part].hits, total[part].damage);
+			add(line);
+		}
+	}
+	const int bottom = ScreenHeight - max(90, ScreenHeight / 6);
+	const int combinedHeight = (lines[0].size() + lines[1].size()) * lineHeight + padding * 5;
+	// Normally stack on the right; long simultaneous reports use two columns.
+	const bool columns = !lines[0].empty() && !lines[1].empty() && combinedHeight > bottom - 40;
+	int cursor = bottom;
+	for (int death = 1; death >= 0; --death)
+	{
+		if (lines[death].empty()) continue;
+		const int height = lines[death].size() * lineHeight + padding * 2;
+		const int x = (columns && death == 0) ? 16 : ScreenWidth - width - 16;
+		const int y = max(32, (columns ? bottom : cursor) - height);
+		int rowY = y + padding;
+		for (const auto &line : lines[death])
+		{
+			gEngfuncs.pfnDrawSetTextColor(death ? 1.0f : 0.65f, death ? 0.72f : 0.85f, death ? 0.67f : 1.0f);
+			DrawUtils::DrawConsoleString(x + padding, rowY, line.c_str());
+			rowY += lineHeight;
+		}
+		cursor = y - padding;
+	}
+	gEngfuncs.pfnDrawSetTextColor(1, 1, 1);
+}
+
 int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbuf )
 {
 	m_iFlags |= HUD_DRAW;
@@ -688,6 +833,3 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	return 1;
 }
-
-
-

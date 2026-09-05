@@ -44,6 +44,7 @@ DLL_GLOBAL int gmsgLogo = 0;
 DLL_GLOBAL int gmsgWeaponList = 0;
 DLL_GLOBAL int gmsgAmmoX = 0;
 DLL_GLOBAL int gmsgDeathMsg = 0;
+DLL_GLOBAL int gmsgCombatReport = 0;
 DLL_GLOBAL int gmsgScoreAttrib = 0;
 DLL_GLOBAL int gmsgScoreInfo = 0;
 DLL_GLOBAL int gmsgTeamInfo = 0;
@@ -137,6 +138,7 @@ void LinkUserMessages()
 	gmsgViewMode = REG_USER_MSG("ViewMode", 0);
 	gmsgShowGameTitle = REG_USER_MSG("GameTitle", 1);
 	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
+	gmsgCombatReport = REG_USER_MSG("CombatReport", -1);
 	gmsgScoreAttrib = REG_USER_MSG("ScoreAttrib", 2);
 	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 9);
 	gmsgTeamInfo = REG_USER_MSG("TeamInfo", -1);
