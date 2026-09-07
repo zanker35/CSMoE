@@ -178,7 +178,6 @@ set(HLDLL_SRCS
 	./gamemode/zb2/zb2_zclass.cpp
 	./gamemode/zb2/zb2_zclass_tank.cpp
 	./gamemode/zb2/zb2_zclass_speed.cpp
-	./gamemode/zb2/zb2_zclass_deimos2.cpp
 	./gamemode/mod_zbb.cpp
 	./weapons_precache.cpp
 	./gamemode/zbb/zbb_basebuilder.cpp

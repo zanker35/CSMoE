@@ -44,22 +44,15 @@ void PlayerModel_ForceUnmodified(const Vector &vMin, const Vector &vMax)
 		ENGINE_FORCE_UNMODIFIED(force_model_specifybounds, (float *)&vMin, (float *)&vMax, psz);
 }
 
-// The shared class order is the citrus wire/menu order. Only models supplied by
-// the local CSO resource pack are selectable; buffclass IDs remain reserved.
+// Shared client/server roster: human characters released through 2009.
 static CPlayerClassManager::ClassData gPlayerClass[] =
 {
 	{ MODEL_UNASSIGNED, nullptr, UNASSIGNED },
 	{ MODEL_YURI, "yuri", TERRORIST, true, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_SAF, "saf", CT, false, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_PIRATEBOY, "pirateboy", TERRORIST, false, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_CHOIJIYOON, "choijiyoon", CT, true, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_MARINEBOY, "marineboy", TERRORIST, false, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_FERNANDO, "fernando", CT, false, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_PIRATEGIRL, "pirategirl", TERRORIST, true, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_707, "707", CT, false, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_RB, "rb", TERRORIST, false, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_SOZO, "sozo", CT, true, SHOW_SPEED | SHOW_DAMAGE },
-	{ MODEL_JPNGIRL01, "jpngirl01", TERRORIST, true, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_MAGUI, "magui", CT, false, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_RITSUKA, "ritsuka", TERRORIST, true, SHOW_SPEED | SHOW_DAMAGE },
 	{ MODEL_NATASHA, "natasha", CT, true, SHOW_SPEED | SHOW_DAMAGE },
@@ -139,12 +132,20 @@ int CPlayerClassManager::PlayerClass_GetNumClass() const
 
 int CPlayerClassManager::PlayerClass_GetNumCT() const
 {
-	return (NUM_PLAYER_CLASSES - 1) / 2;
+	int count = 0;
+	for (const auto &info : gPlayerClass)
+		if (info.team == CT)
+			++count;
+	return count;
 }
 
 int CPlayerClassManager::PlayerClass_GetNumTR() const
 {
-	return (NUM_PLAYER_CLASSES - 1) / 2;
+	int count = 0;
+	for (const auto &info : gPlayerClass)
+		if (info.team == TERRORIST)
+			++count;
+	return count;
 }
 
 ModelName CPlayerClassManager::PlayerClass_GetRandomClass() const
@@ -154,14 +155,28 @@ ModelName CPlayerClassManager::PlayerClass_GetRandomClass() const
 
 ModelName CPlayerClassManager::PlayerClass_FromTeamSlot(TeamName team, int slot) const
 {
-	if ((team != CT && team != TERRORIST) || slot < 1 || slot > PlayerClass_GetNumCT())
+	if ((team != CT && team != TERRORIST) || slot < 1)
 		return MODEL_UNASSIGNED;
-	return static_cast<ModelName>(slot * 2 - (team == TERRORIST ? 1 : 0));
+	for (const auto &info : gPlayerClass)
+		if (info.team == team && --slot == 0)
+			return static_cast<ModelName>(info.ClassID);
+	return MODEL_UNASSIGNED;
 }
 
 int CPlayerClassManager::PlayerClass_GetTeamSlot(int classId) const
 {
-	return PlayerClass_GetInfo(classId).model_name ? (classId + 1) / 2 : 0;
+	const auto &selected = PlayerClass_GetInfo(classId);
+	if (!selected.model_name)
+		return 0;
+	int slot = 0;
+	for (const auto &info : gPlayerClass)
+	{
+		if (info.team == selected.team)
+			++slot;
+		if (info.ClassID == classId)
+			return slot;
+	}
+	return 0;
 }
 
 void CPlayerClassManager::SetPlayerClass(int index, const char *name)

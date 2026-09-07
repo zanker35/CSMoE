@@ -1568,9 +1568,10 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 	Q_memset(&appearance, 0, sizeof(appearance));
 
 	const char *customModel = player->IsBot() && TheBotProfiles ? TheBotProfiles->GetCustomSkinModelname(slot) : nullptr;
-	if (customModel)
+	const int customClass = customModel ? classes.Client_ModelToApperance(customModel) : MODEL_UNASSIGNED;
+	if (customClass != MODEL_UNASSIGNED && classes.PlayerClass_GetInfo(customClass).team == player->m_iTeam)
 	{
-		appearance.model_id = static_cast<ModelName>(slot);
+		appearance.model_id = static_cast<ModelName>(customClass);
 		appearance.model_name = customModel;
 	}
 	else
@@ -1578,9 +1579,11 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 		// BOT profiles still use classic CS slots 1..5 and 6 for random.
 		if (player->IsBot())
 		{
+			static const ModelName classicCT[] = { MODEL_URBAN, MODEL_GSG9, MODEL_SAS, MODEL_GIGN, MODEL_SPETSNAZ };
+			static const ModelName classicTR[] = { MODEL_TERROR, MODEL_LEET, MODEL_ARCTIC, MODEL_GUERILLA, MODEL_MILITIA };
 			if (slot >= 1 && slot <= 5)
-				slot += 7;
-			else if (slot == 6)
+				slot = classes.PlayerClass_GetTeamSlot((player->m_iTeam == CT ? classicCT : classicTR)[slot - 1]);
+			else
 				slot = 0;
 		}
 		if (slot < 1 || slot > numSkins)

@@ -31,9 +31,9 @@ const char* TeamClassModel(TeamName team, int slot)
     return classes.PlayerClass_GetModelName(classes.PlayerClass_FromTeamSlot(team, slot));
 }
 
-std::string ClassNameToken(const char* model, int slot)
+std::string ClassNameToken(const char* model)
 {
-    return std::string(slot >= 8 ? "#CSO_Item_Name_" : "#CSO_") + model;
+    return std::string("#CSO_Item_Name_") + model;
 }
 }
 
@@ -131,7 +131,7 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t page)
             continue;
 
         const char* model = TeamClassModel(team, slot);
-        const std::string token = ClassNameToken(model, slot);
+        const std::string token = ClassNameToken(model);
         const wchar_t* text = localize()->Find(token.c_str());
         if (text)
             button->SetText(text);
@@ -269,7 +269,7 @@ void CCSClassMenu::UpdateClass(int index)
     const std::string description = "#Cstrike_" + name + "_Label";
     if (const wchar_t* text = localize()->Find(description.c_str()))
         m_pClassDesc->SetText(text);
-    else if (const wchar_t* text = localize()->Find(ClassNameToken(model, slot).c_str()))
+    else if (const wchar_t* text = localize()->Find(ClassNameToken(model).c_str()))
         m_pClassDesc->SetText(text);
     else
         m_pClassDesc->SetText(model);

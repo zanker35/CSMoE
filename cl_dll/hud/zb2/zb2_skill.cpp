@@ -46,8 +46,6 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_ICON[MAX_ZOMBIE_SKIL
 		"zombitrap", // ZOMBIE_SKILL_TRAP,
 		"zombismoke", // ZOMBIE_SKILL_SMOKE,
 		"zombiheal", // ZOMBIE_SKILL_HEAL,
-		"zombideimos", // ZOMBIE_SKILL_SHOCK,
-		"zombicrazy2" // ZOMBIE_SKILL_CRAZY2,
 };
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_TIP[MAX_ZOMBIE_SKILL] =
@@ -61,8 +59,6 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_TIP[MAX_ZOMBIE_SKILL
 		"resource/helperhud/trap", // ZOMBIE_SKILL_TRAP,
 		"resource/helperhud/smoke", // ZOMBIE_SKILL_SMOKE,
 		"resource/helperhud/heal", // ZOMBIE_SKILL_HEAL,
-		"resource/helperhud/tentacle", // ZOMBIE_SKILL_SHOCK,
-		"resource/helperhud/crazyspeed" // ZOMBIE_SKILL_CRAZY2,
 };
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON[MAX_ZOMBIE_CLASS] =
@@ -73,8 +69,6 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON[MAX_ZOMBIE_CLAS
 		"zombiETER", // ZOMBIE_CLASS_HEAVY,
 		"zombiFTER", // ZOMBIE_CLASS_PC,
 		"zombiGTER", // ZOMBIE_CLASS_HEAL,
-		"zombiITER", // ZOMBIE_CLASS_DEIMOS,
-		"zombiJTER", // ZOMBIE_CLASS_DEIMOS2,
 };
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_ICON_NEW[MAX_ZOMBIE_SKILL] =
@@ -88,8 +82,6 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_ICON_NEW[MAX_ZOMBIE_
 		"resource/zombi/zombieskill_zombitrap", // ZOMBIE_SKILL_TRAP,
 		"resource/zombi/zombieskill_zombismoke", // ZOMBIE_SKILL_SMOKE,
 		"resource/zombi/zombieskill_zombiheal", // ZOMBIE_SKILL_HEAL,
-		"resource/zombi/zombieskill_zombideimos", // ZOMBIE_SKILL_SHOCK,
-		"resource/zombi/zombieskill_zombicrazy2" // ZOMBIE_SKILL_CRAZY2,
 };
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON_NEW[MAX_ZOMBIE_CLASS] =
@@ -100,8 +92,6 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON_NEW[MAX_ZOMBIE_
 		"resource/zombi/zombietype_heavyzb", // ZOMBIE_CLASS_HEAVY,
 		"resource/zombi/zombietype_pczb", // ZOMBIE_CLASS_PC,
 		"resource/zombi/zombietype_doctorzb", // ZOMBIE_CLASS_HEAL,
-		"resource/zombi/zombietype_deimoszb", // ZOMBIE_CLASS_DEIMOS,
-		"resource/zombi/zombietype_deimos2zb", // ZOMBIE_CLASS_DEIMOS2,
 };
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_ITEM_HUD_ICON[2][3] =
