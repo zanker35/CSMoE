@@ -61,7 +61,6 @@ public:
 	static constexpr const auto &CycleTime = 0.2s;
 	static constexpr int DamageDefault = 45;
 	static constexpr int DamageZB = 76;
-	static constexpr int DamageZBS = 76;
 	static constexpr float AccuracyDefault = 0.9f;
 	static constexpr const auto & AccuracyCalc = A - (0.4 - T) * 0.3;
 	static constexpr float AccuracyMin = 0.5;

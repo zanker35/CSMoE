@@ -93,8 +93,6 @@ CCSBuySubMenu::CCSBuySubMenu(vgui2::Panel *parent, const char *name) : CBuySubMe
 	moneyBack = new DarkTextEntry(this, "moneyBack");
 	freezetime = new DarkTextEntry(this, "freezetime");
 
-	m_pUpgradeTitle = new vgui2::Label(this, "UpgradeTitle", "");
-	m_pOppZombiUpgradeTitle = new vgui2::Label(this, "OppZombiUpgradeTitle", "");
 
 	m_pSetSelBg = new vgui2::ImagePanel(this, "SetSelBg");
 	m_pSetLabel = new vgui2::Label(this, "SetLabel", "X Set");
@@ -278,7 +276,6 @@ void CCSBuySubMenu::SetupItems(MoEWeaponBuyType type)
 
 		for (int i = 0; i < 10; ++i)
 		{
-			m_pSlotButtons[i]->SetBanWeapon("");
 			m_pSlotButtons[i]->SetEnabled(true);
 			m_pSlotButtons[i]->SetText(szTitles[i]);
 			m_pSlotButtons[i]->SetCommand(szCommands[i]);
@@ -286,7 +283,6 @@ void CCSBuySubMenu::SetupItems(MoEWeaponBuyType type)
 			m_pSlotButtons[i]->SetVisible(true);
 			m_pSlotButtons[i]->UpdateWeapon("");
 		}
-		m_pSlotButtons[9]->SetBanWeapon("");
 		m_pSlotButtons[9]->SetHotkey('0');
 		m_pPrevBtn->SetVisible(false);
 		m_pNextBtn->SetVisible(false);
@@ -344,7 +340,6 @@ void CCSBuySubMenu::SetupPage(size_t iPage)
 		const size_t iElement = m_iCurrentPage * 9 + i;
 		if (iElement >= m_BuyItemList.size())
 		{
-			m_pSlotButtons[i]->SetBanWeapon("");
 			m_pSlotButtons[i]->SetText("");
 			m_pSlotButtons[i]->SetCommand("");
 			m_pSlotButtons[i]->SetVisible(false);
@@ -353,7 +348,6 @@ void CCSBuySubMenu::SetupPage(size_t iPage)
 		}
 		else
 		{
-			m_pSlotButtons[i]->SetBanWeapon("");
 			m_pSlotButtons[i]->SetEnabled(true);
 			
 
@@ -368,7 +362,6 @@ void CCSBuySubMenu::SetupPage(size_t iPage)
 		}
 	}
 	
-	m_pSlotButtons[9]->SetBanWeapon("");
 	m_pSlotButtons[9]->SetEnabled(true);
 	m_pSlotButtons[9]->SetText("#CSO_PrevWpnBuy");
 	m_pSlotButtons[9]->SetCommand("VGUI_BuyMenu_Show");
@@ -686,9 +679,6 @@ void CCSBuySubMenu_DefaultMode::LoadControlSettings(const char *dialogResourceNa
 	if (auto* hint = dynamic_cast<Label*>(FindChildByName("fav_edit_desc")))
 		hint->SetText(L"本地武器预设\nS / D / F / G / H：购买对应组合。");
 
-	// hide zbs
-	m_pUpgradeTitle->SetVisible(false);
-	m_pOppZombiUpgradeTitle->SetVisible(false);
 
 	// hide dm set
 	m_pSetSelBg->SetVisible(false);
@@ -752,9 +742,6 @@ void CCSBuySubMenu_ZombieMod::LoadControlSettings(const char *dialogResourceName
 	BaseClass::LoadControlSettings(dialogResourceName, pathID, pPreloadedKeyValues);
 	BaseClass::LoadControlSettings("Resource/UI/cso_buysubmenu_ver5.res", "GAME");
 
-	// hide zbs
-	m_pUpgradeTitle->SetVisible(false);
-	m_pOppZombiUpgradeTitle->SetVisible(false);
 
 	// hide dm set
 	m_pSetSelBg->SetVisible(false);
@@ -777,9 +764,6 @@ void CCSBuySubMenu_DeathMatch::LoadControlSettings(const char *dialogResourceNam
 	BaseClass::LoadControlSettings(dialogResourceName, pathID, pPreloadedKeyValues);
 	BaseClass::LoadControlSettings("Resource/UI/cso_buysubmenu_ver5.res", "GAME");
 
-	// hide zbs
-	m_pUpgradeTitle->SetVisible(false);
-	m_pOppZombiUpgradeTitle->SetVisible(false);
 
 	// Right Fav List Hide
 	for (int i = 0; i < 5; i++)

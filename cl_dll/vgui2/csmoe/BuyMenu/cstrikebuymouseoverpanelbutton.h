@@ -33,15 +33,10 @@ public:
 	}
     TeamName m_iTeam = UNASSIGNED;
 	void UpdateWeapon(const char *weapon = "");
-	void SetBanWeapon(const char* weapon = "", int iLevel = 0);
 
 	WeaponImagePanel *m_pWeaponImage;
-	vgui2::ImagePanel* m_pLockedImage;
-	vgui2::ImagePanel* m_pLockedImageBg;
 
-	vgui2::ImagePanel* m_pBlankBg;
 
-	vgui2::Label* m_pLevelText;
 };
 
 #endif

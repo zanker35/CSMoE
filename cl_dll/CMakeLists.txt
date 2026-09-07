@@ -117,7 +117,6 @@ set (HLWPN_SRCS
 	../dlls/wpn_shared/wpn_m4a1dragon.cpp
 	../dlls/wpn_shared/wpn_ak47dragon.cpp
 	../dlls/wpn_shared/wpn_knifedragon.cpp
-	../dlls/wpn_shared/wpn_svdex.cpp
 	../dlls/wpn_shared/wpn_infinityex1.cpp
 	../dlls/wpn_shared/wpn_infinityex2.cpp
 	../dlls/wpn_shared/wpn_anaconda.cpp
@@ -155,11 +154,6 @@ set (HUD_SRCS
 	./hud/spectator_gui.cpp
 	./hud/followicon.cpp
 	./hud/headname.cpp
-	./hud/zbs/zbs.cpp
-	./hud/zbs/zbs_level.cpp
-	./hud/zbs/zbs_scoreboard.cpp
-	./hud/zbs/zbs_kill.cpp
-	./hud/zbs/zbs_roundclear.cpp
 	./hud/retina.cpp
 	./hud/scenariostatus.cpp
 	./hud/zb2/zb2.cpp
@@ -167,9 +161,6 @@ set (HUD_SRCS
 	./hud/legacy/hud_radar_legacy.cpp
 	./hud/legacy/hud_scoreboard_legacy.cpp
 	./hud/modern/hud_radar_modern.cpp
-	./hud/zb3/zb3.cpp
-	./hud/zb3/zb3_morale.cpp
-	./hud/zb3/zb3_rage.cpp
 	./hud/moe/moe_touch.cpp
 
 )

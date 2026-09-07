@@ -104,7 +104,6 @@ public:
 
 	static constexpr int DamageDefault = 29;
 	static constexpr int DamageZB = 52;
-	static constexpr int DamageZBS = 52;
 
 	static constexpr const auto & AccuracyCalc = (N * N / 210.0) + 0.3;
 	static constexpr float AccuracyMax = 1.f;

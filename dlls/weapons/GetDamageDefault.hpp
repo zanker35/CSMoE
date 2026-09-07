@@ -26,12 +26,6 @@ private:
 		return df::DamageZB::Try(data, df::DamageDefault::Get(data));
 	}
 
-	float GetDamage_ZBS()
-	{
-		auto &wpn = static_cast<CFinal &>(*this);
-		auto &&data = wpn.WeaponTemplateDataSource();
-		return df::DamageZB::Try(data, df::DamageDefault::Get(data));
-	}
 
 	float GetDamage_Default()
 	{
@@ -44,9 +38,7 @@ public:
 #ifndef CLIENT_DLL
 	float GetDamage()
 	{
-		return	g_pModRunning->DamageTrack() == DT_ZB ? GetDamage_ZB() : (
-			g_pModRunning->DamageTrack() == DT_ZBS ? GetDamage_ZBS() :
-			GetDamage_Default());
+		return g_pModRunning->DamageTrack() == DT_ZB ? GetDamage_ZB() : GetDamage_Default();
 	}
 
 #else

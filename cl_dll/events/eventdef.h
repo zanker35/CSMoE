@@ -42,7 +42,6 @@ HOOK_EVENT(scarl, FireScarL);
 HOOK_EVENT(k1a, FireK1a);
 HOOK_EVENT(infinity_left, FireInfinity_Left);
 HOOK_EVENT(infinity_right, FireInfinity_Right);
-HOOK_EVENT(svdex, FireSVDEX);
 HOOK_EVENT(mp7a1c, FireMP7A1C);
 HOOK_EVENT(mp7a1p, FireMP7A1P);
 HOOK_EVENT(mg3, FireMG3);

@@ -284,8 +284,7 @@ float CInfinityEX2::GetDamage() const
 #ifndef CLIENT_DLL
 	if (g_pModRunning->DamageTrack() == DT_ZB)
 		flDamage = m_iSpecialAttack ? 60.0f : 80.0f;
-	else if (g_pModRunning->DamageTrack() == DT_ZBS)
-		flDamage = m_iSpecialAttack ? 60.0f : 80.0f;
+
 #endif
 	return flDamage;
 }

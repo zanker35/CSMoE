@@ -70,7 +70,7 @@ int CHudScoreBoardLegacy::VidInit(void)
 	BuildHudNumberRect(m_iNum_L, m_rcNumber_Large, 13, 13, 1, 1);
 	BuildHudNumberRect(m_iNum_S, m_rcNumber_Small, 10, 10, 1, 1);
 	R_InitTexture(m_pNewBackground, "resource/hud/hud_scoreboard_bg");
-	R_InitTexture(m_pNewZombieBackground, "resource/hud/hud_scoreboard_bg_gundeath");
+	R_InitTexture(m_pNewZombieBackground, "resource/hud/hud_scoreboard_bg_zombie");
 	R_InitTexture(m_pNewDeathmatchBackground, "resource/hud/hud_scoreboard_bg_zombie-gaint");
 	R_InitTexture(m_pNewLargeRed, "resource/hud/hud_sb_num_big_red");
 	R_InitTexture(m_pNewLargeBlue, "resource/hud/hud_sb_num_big_blue");
@@ -379,8 +379,7 @@ int CHudScoreBoardLegacy::DrawTexturedNumbers(const CTextureRef &texture,
 
 bool CHudScoreBoardLegacy::DrawNewHud(float)
 {
-	const bool zombie = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2 ||
-		gHUD.m_iModRunning == MOD_ZB3;
+	const bool zombie = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2;
 	const bool deathmatch = gHUD.m_iModRunning == MOD_DM;
 	const bool teamDeathmatch = gHUD.m_iModRunning == MOD_TDM;
 	if (gHUD.m_iModRunning != MOD_NONE && !zombie && !deathmatch && !teamDeathmatch)
@@ -500,18 +499,11 @@ void CHudScoreBoardLegacy::Reset(void)
 		m_iCTTextIndex = m_iText_Kill;
 		break;
 	}
-	case MOD_ZB3:
 	case MOD_ZB2:
 	case MOD_ZB1:
 	{
 		m_iTTextIndex = m_iText_ZB;
 		m_iCTTextIndex = m_iText_HM;
-		break;
-	}
-	case MOD_ZBS:
-	{
-		// already drawn in zbs/zbs_scoreboard.cpp
-		m_iBGIndex = -1;
 		break;
 	}
 	default:

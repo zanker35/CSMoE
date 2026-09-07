@@ -208,8 +208,7 @@ float CAK47Dragon::GetDamage() const
 #ifndef CLIENT_DLL
 	if (g_pModRunning->DamageTrack() == DT_ZB)
 		flDamage = 42.0f;
-	else if (g_pModRunning->DamageTrack() == DT_ZBS)
-		flDamage = 42.0f;
+
 #endif
 	return flDamage;
 }

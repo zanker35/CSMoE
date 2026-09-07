@@ -106,12 +106,8 @@ DLL_GLOBAL int gmsgBrass = 0;
 DLL_GLOBAL int gmsgFog = 0;
 DLL_GLOBAL int gmsgShowTimer = 0;
 
-DLL_GLOBAL int gmsgZBSTip = 0;
-DLL_GLOBAL int gmsgZBSLevel = 0;
 DLL_GLOBAL int gmsgBTEWeapon = 0;
 DLL_GLOBAL int gmsgZB2Msg = 0;
-DLL_GLOBAL int gmsgZB3Msg = 0;
-DLL_GLOBAL int gmsgGunDeath = 0;
 
 // main code
 
@@ -202,12 +198,8 @@ void LinkUserMessages()
 	gmsgShowTimer = REG_USER_MSG("ShowTimer", 0);
 	gmsgHudTextArgs = REG_USER_MSG("HudTextArgs", -1);
 
-	gmsgZBSTip = REG_USER_MSG("ZBSTip", -1);
-	gmsgZBSLevel = REG_USER_MSG("ZBSLevel", -1);
 	gmsgBTEWeapon = REG_USER_MSG("BTEWeapon", -1);
 	gmsgZB2Msg = REG_USER_MSG("ZB2Msg", -1);
-	gmsgZB3Msg = REG_USER_MSG("ZB3Msg", -1);
-	gmsgGunDeath = REG_USER_MSG("GunDeath", -1);
 }
 
 /*void WriteWeaponInfo(const ItemInfo &II)

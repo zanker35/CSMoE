@@ -1293,23 +1293,6 @@ void BuyMachineGun(CBasePlayer *pPlayer, int iSlot)
 	}
 }
 
-void ZbsUpgrade(CBasePlayer *pPlayer, int iSlot)
-{
-	if (!pPlayer->CanPlayerBuy(true))
-		return;
-
-	switch (iSlot) {
-		case MENU_SLOT_UPGRADE_HP: {
-			pPlayer->ClientCommand("zbs_hp_up");
-			break;
-		}
-		case MENU_SLOT_UPGRADE_ATK: {
-			pPlayer->ClientCommand("zbs_atk_up");
-			break;
-		}
-	}
-}
-
 void BuyItem(CBasePlayer *pPlayer, int iSlot)
 {
 	//int iItem = 0;
@@ -2946,16 +2929,8 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 							}
 							break;
 						}
-						case VGUI_MenuSlot_Zbs_Upgrade:
-						{
-							if (player->m_signals.GetState() & SIGNAL_BUY)
-							{
-								if (!player->m_bVGUIMenus)
-									ShowMenu(player, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_0), -1, 0, "#ZbsUpgrade");
-								player->m_iMenu = Menu_ZbsUpgrade;
-							}
-							break;
-						}
+
+
 					}
 				}
 				break;
@@ -3023,14 +2998,8 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 				Radio3(player, slot);
 				break;
 			}
-			case Menu_ZbsUpgrade:
-			{
-				if (!player->m_bVGUIMenus)
-				{
-					ZbsUpgrade(player, slot);
-				}
-				break;
-			}
+
+
 
 			default:
 				ALERT(at_console, "ClientCommand(): Invalid menu selected\n");
@@ -3403,10 +3372,7 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 			{
 				if (player->m_signals.GetState() & SIGNAL_BUY)
 				{
-					if (g_pModRunning->DamageTrack() == DT_ZBS)
-						ShowVGUIMenu(player, VGUI_Menu_Buy, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9 | MENU_KEY_0), "#BuyZbs");
-					else
-						ShowVGUIMenu(player, VGUI_Menu_Buy, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_0), "#Buy");
+					ShowVGUIMenu(player, VGUI_Menu_Buy, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_0), "#Buy");
 					player->m_iMenu = Menu_Buy;
 
 					if (TheBots != NULL)

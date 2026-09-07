@@ -55,4 +55,4 @@ private:
 }
 
 
-#endif //PROJECT_ZBB_GHOST_H
+#endif // PROJECT_ZB1_COUNTDOWN_H

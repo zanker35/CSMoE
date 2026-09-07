@@ -28,21 +28,12 @@ enum GameMode_e : byte
 	MOD_TDM = 4,
 	MOD_ZB1 = 5,
 	MOD_ZB2 = 6,
-	MOD_ZBU = 7,
-	MOD_ZB3 = 8,
-	MOD_ZBS = 9,
-	MOD_ZE = 10,
-	MOD_ZB4 = 11,
-	MOD_GD = 12,
-	MOD_ZBB = 13,
 };
 
 enum DamageTrack_e : byte
 {
 	DT_NONE,
 	DT_ZB,
-	DT_ZBS,
-	DT_ZSE
 };
 
 #endif

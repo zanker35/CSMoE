@@ -205,13 +205,6 @@ const char *GetGameModeName()
 	case MOD_TDM	: return "Team DeathMatch";
 	case MOD_ZB1	: return "Zombie Mod 1";
 	case MOD_ZB2	: return "Zombie Mod 2";
-	case MOD_ZBU	: return "Zombie United";
-	case MOD_ZB3	: return "Zombie Mod 3";
-	case MOD_ZBS	: return "Zombie Scenario";
-	case MOD_ZE		: return "Zombie Escape";
-	case MOD_ZB4	: return "Zombie Darkness";
-	case MOD_GD		: return "GunDeath Match";
-	case MOD_ZBB	: return "Zombie BaseBuilder";
 	default			: break;
 	}
 	return "Unknown";
@@ -238,7 +231,7 @@ int CHudScoreboard::DrawScoreboard(float fTime)
 	const auto iTextLen = DrawUtils::HudStringLen(szTitle, flScale);
 	DrawUtils::DrawHudString(iCenterX - iTextLen / 2, iStartY + 35, 1000, szTitle, 255, 255, 255, flScale);
 
-	if ((gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2 || gHUD.m_iModRunning == MOD_ZB3 || gHUD.m_iModRunning == MOD_ZB4 || gHUD.m_iModRunning == MOD_ZBB || gHUD.m_iModRunning == MOD_ZE || gHUD.m_iModRunning == MOD_DM || gHUD.m_iModRunning == MOD_ZBS))
+	if ((gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2 || gHUD.m_iModRunning == MOD_DM))
 	{
 		DrawScoreNew(false);
 	}
@@ -267,7 +260,7 @@ void CHudScoreboard::DrawScoreNew(bool bDivideTeam)
 	});
 
 	int r = 255, g = 255, b = 255, a = 255;
-	const bool bIsZombieMode = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2 || gHUD.m_iModRunning == MOD_ZB3 || gHUD.m_iModRunning == MOD_ZB4 || gHUD.m_iModRunning == MOD_ZBB;
+	const bool bIsZombieMode = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2;
 
 	for (int iColumn = 1; iColumn <= 2; iColumn++)
 	{
@@ -341,10 +334,7 @@ void CHudScoreboard::DrawScoreNew(bool bDivideTeam)
 			}
 			else if (g_PlayerExtraInfo[id].vip)
 			{
-				if(gHUD.m_iModRunning == MOD_ZB3)
-					sprintf(szBuf, "Hero");
-				else 
-					sprintf(szBuf, "VIP");
+				sprintf(szBuf, "VIP");
 				DrawUtils::DrawHudStringReverse(x + (iStartW / 2) - 5 - 220, y + offsetY, 0, szBuf, r, g, b, flScale);
 			}
 			else if (g_PlayerExtraInfo[id].zombie)
@@ -388,7 +378,7 @@ void CHudScoreboard::DrawScoreNew(bool bDivideTeam)
 
 		if (bDivideTeam && iPlayerCount)
 		{
-			const bool bIsZombieMode = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2 || gHUD.m_iModRunning == MOD_ZB3 || gHUD.m_iModRunning == MOD_ZB4 || gHUD.m_iModRunning == MOD_ZBB;
+			const bool bIsZombieMode = gHUD.m_iModRunning == MOD_ZB1 || gHUD.m_iModRunning == MOD_ZB2;
 			if (iColumn == 2)
 				sprintf(szBuf, "%s  (%d)", bIsZombieMode ? "Human" : "CT", iPlayerCount);
 			else

@@ -363,8 +363,7 @@ int CKnife::Swing(int fFirst)
 #ifndef CLIENT_DLL
 			if (g_pModRunning->DamageTrack() == DT_ZB)
 				flDamage *= 9.5f;
-			else if (g_pModRunning->DamageTrack() == DT_ZBS)
-				flDamage *= 5.5f;
+
 #endif
 
 			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
@@ -496,8 +495,7 @@ int CKnife::Stab(int fFirst)
 #ifndef CLIENT_DLL
 		if (g_pModRunning->DamageTrack() == DT_ZB)
 			flDamage *= 9.5f;
-		else if(g_pModRunning->DamageTrack() == DT_ZBS)
-			flDamage *= 5.5f;
+
 #endif
 
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle);

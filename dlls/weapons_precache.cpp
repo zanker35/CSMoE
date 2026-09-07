@@ -156,7 +156,6 @@ void W_Precache()
 	UTIL_PrecacheOtherWeapon("weapon_m134");
 	UTIL_PrecacheOtherWeapon("weapon_k1a");
 	UTIL_PrecacheOtherWeapon("weapon_mg3");
-	UTIL_PrecacheOtherWeapon("weapon_svdex");
 	UTIL_PrecacheOtherWeapon("weapon_infinityss");
 	UTIL_PrecacheOtherWeapon("weapon_infinitysb");
 	UTIL_PrecacheOtherWeapon("weapon_infinitysr");

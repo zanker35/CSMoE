@@ -323,15 +323,7 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		szCmd = "exec touch/chooseteam_ct.cfg";
 		break;
 	case MENU_BUY:
-		switch (gHUD.m_iModRunning)
-		{
-		case MOD_ZBS:
-			szCmd = "exec touch/buy_zbs.cfg";
-			break;
-		default:
-			szCmd = "exec touch/buy.cfg";
-			break;
-		}
+		szCmd = "exec touch/buy.cfg";
 		
 		break;
 	case MENU_BUY_PISTOL:

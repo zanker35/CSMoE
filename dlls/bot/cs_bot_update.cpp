@@ -397,39 +397,6 @@ void CCSBot::Update()
 
 		ctrl->SetLastSeenEnemyTimestamp();
 	}
-	else
-	{
-		// not player enemy found
-		// try monsters...
-		CBaseEntity *target = NULL;
-
-		float shorestDistance = 9.9999998e10f;
-		CBaseEntity *shorestTarget = NULL;
-
-		while ((target = UTIL_FindEntityByClassname(target, "monster_entity")) != NULL)
-		{
-			if (!FVisible(target))
-				continue;
-
-			if (g_pGameRules->PlayerRelationship(this, target) == GR_TEAMMATE)
-				continue;
-
-			float range = (pev->origin - target->pev->origin).Length();
-
-			if (range < shorestDistance)
-			{
-				shorestDistance = range;
-				shorestTarget = target;
-			}
-		}
-
-		if (shorestTarget)
-		{
-			Attack(shorestTarget);
-			m_isEnemyVisible = true;
-		}
-	}
-
 	// Validate existing enemy, if any
 	if (m_enemy != nullptr)
 	{

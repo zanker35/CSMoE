@@ -113,9 +113,7 @@ struct HUDLIST {
 #include "health.h"
 #include "radar.h"
 #include "scoreboard.h"
-#include "zbs/zbs.h"
 #include "zb2/zb2.h"
-#include "zb3/zb3.h"
 #include "retina.h"
 #include "moe/moe_touch.h"
 #include "newhud/NewHud.h"
@@ -1023,9 +1021,7 @@ public:
 	
 	CHudHeadName	m_HeadName;
 	CHudRetina		m_Retina;
-	CHudZBS	m_ZBS;
 	CHudZB2 m_ZB2;
-	CHudZB3 m_ZB3;
 	CHudMoeTouch m_MoeTouch;
 
 	// user messages

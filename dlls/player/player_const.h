@@ -39,7 +39,6 @@ typedef enum
 	Menu_Radio2,
 	Menu_Radio3,
 	Menu_ClientBuy,
-	Menu_ZbsUpgrade
 
 } _Menu;
 

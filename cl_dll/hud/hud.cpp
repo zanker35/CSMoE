@@ -249,9 +249,7 @@ void CHud :: Init( void )
 	m_Battery.Init();
 	m_StatusIcons.Init();
 	m_Radar.Init();
-	m_ZBS.Init();
 	m_ZB2.Init();
-	m_ZB3.Init();
 	m_MoeTouch.Init();
 
 	// chat, death notice, status bars and other

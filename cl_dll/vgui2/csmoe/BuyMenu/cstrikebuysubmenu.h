@@ -129,10 +129,6 @@ protected:
 	vgui2::TextEntry *buytime;
 	vgui2::TextEntry *moneyBack;
 
-	// ZBS
-	vgui2::Label *m_pUpgradeTitle;
-	vgui2::Label *m_pOppZombiUpgradeTitle;
-
 	// DM
 	vgui2::ImagePanel *m_pSetSelBg;
 	vgui2::Label *m_pSetLabel;

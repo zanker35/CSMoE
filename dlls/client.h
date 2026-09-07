@@ -58,12 +58,6 @@ enum BuyItemMenuSlot
 	MENU_SLOT_ITEM_SHIELD,
 };
 
-// custom enum
-enum ZbsUpgradeMenuSlot
-{
-	MENU_SLOT_UPGRADE_HP = 1,
-	MENU_SLOT_UPGRADE_ATK,
-};
 
 #define CS_NUM_SKIN			4
 #define CZ_NUM_SKIN			5
@@ -147,7 +141,6 @@ void BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID);
 void BuyRifle(CBasePlayer *pPlayer, int iSlot);
 void BuyMachineGun(CBasePlayer *pPlayer, int iSlot);
 void BuyItem(CBasePlayer *pPlayer, int iSlot);
-void ZbsUpgrade(CBasePlayer *pPlayer, int iSlot);
 void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot);
 BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot);
 void Radio1(CBasePlayer *player, int slot);

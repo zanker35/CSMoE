@@ -194,8 +194,7 @@ float CMG3::GetDamage() const
 #ifndef CLIENT_DLL
 	if (g_pModRunning->DamageTrack() == DT_ZB)
 		flDamage = 35.0f;
-	else if (g_pModRunning->DamageTrack() == DT_ZBS)
-		flDamage = 35.0f;
+
 #endif
 	return flDamage;
 }

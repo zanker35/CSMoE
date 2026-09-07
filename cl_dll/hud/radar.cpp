@@ -1,5 +1,5 @@
 /*
-zbs.cpp - CSMoE Client HUD : Radar
+radar.cpp - CSMoE Client HUD : Radar
 Copyright (C) 2019 Moemod Yanase
 
 This program is free software: you can redistribute it and/or modify

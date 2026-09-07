@@ -123,8 +123,6 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 
 	// reset mod-specific settings
 	gHUD.m_ZB2.m_iFlags &= ~HUD_ACTIVE;
-	gHUD.m_ZB3.m_iFlags &= ~HUD_ACTIVE;
-	gHUD.m_ZBS.m_iFlags &= ~HUD_ACTIVE;
 
 	switch (m_iModRunning)
 	{
@@ -153,12 +151,6 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 		break;
 	}
 	
-	case MOD_ZB3:
-	{
-		gHUD.m_ZB3.m_iFlags |= HUD_ACTIVE;
-		// dont break, continue to ZB2...
-		//[fallthrough]];
-	}
 	case MOD_ZB2:
 	{
 		gHUD.m_ZB2.m_iFlags |= HUD_ACTIVE;
@@ -167,12 +159,6 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 	}
 	case MOD_ZB1:
 	{
-		break;
-	}
-	case MOD_ZBS:
-	{
-		m_Teamplay = false;
-		gHUD.m_ZBS.m_iFlags |= HUD_ACTIVE;
 		break;
 	}
 	default:
@@ -184,7 +170,7 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 
 bool CHud::IsZombieMod() const
 {
-	return m_iModRunning == MOD_ZB1 || m_iModRunning == MOD_ZB2 || m_iModRunning == MOD_ZB3;
+	return m_iModRunning == MOD_ZB1 || m_iModRunning == MOD_ZB2;
 }
 
 int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )

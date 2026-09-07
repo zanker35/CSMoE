@@ -39,7 +39,6 @@ DF_GENERATE_TEMPLATE_GETTER_WITH_DEFAULT(Distance, 8192) // TFirePistol
 DF_GENERATE_TEMPLATE_GETTER(Penetration) // TFirePistol TFireRifle
 DF_GENERATE_TEMPLATE_GETTER(DamageDefault) // TGetDamageDefault TFirePistol TFireRifle
 DF_GENERATE_TEMPLATE_GETTER(DamageZB) // TGetDamageDefault
-DF_GENERATE_TEMPLATE_GETTER(DamageZBS) // TGetDamageDefault
 DF_GENERATE_TEMPLATE_GETTER(RangeModifier) // TFirePistol TFireRifle
 DF_GENERATE_TEMPLATE_GETTER(BulletType) // TFirePistol TFireRifle
 DF_GENERATE_TEMPLATE_GETTER(ItemSlot) // TFirePistol TFireRifle TGeneralData

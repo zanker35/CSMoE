@@ -61,7 +61,6 @@ public:
 	static constexpr const auto &CycleTime = 0.21s;
 	static constexpr int DamageDefault = 40;
 	static constexpr int DamageZB = 69;
-	static constexpr int DamageZBS = 69;
 	static constexpr float AccuracyDefault = 0.9f;
 	static constexpr const auto & AccuracyCalc = A - (0.35 - T) * 0.175;
 	static constexpr float AccuracyMin = 0.5;
@@ -83,7 +82,6 @@ struct InfinitySR_WeaponData : InfinitySS_WeaponData
 	static constexpr const auto &DefaultReloadTime = 2s;
 	static constexpr int DamageDefault = 38;
 	static constexpr int DamageZB = 62;
-	static constexpr int DamageZBS = 62;
 	static constexpr int MaxClip = 15;
 	static constexpr const auto & SpreadCalcDefault = 0.11 * (1 - A);
 	static constexpr const auto & AccuracyCalc = A - (0.35 - T) * 0.25;
@@ -99,7 +97,6 @@ struct InfinitySB_WeaponData : InfinitySS_WeaponData
 	static constexpr const char *ClassName = "weapon_infinitysb";
 	static constexpr int DamageDefault = 44;
 	static constexpr int DamageZB = 79;
-	static constexpr int DamageZBS = 79;
 	static constexpr const auto & SpreadCalcDefault = 0.125 * (1 - A);
 	static constexpr const auto & AccuracyCalc = A - (0.35 - T) * 0.25;
 	static constexpr const auto &CycleTime = 0.225s;

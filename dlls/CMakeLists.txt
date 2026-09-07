@@ -86,7 +86,6 @@ set(HLDLL_SRCS
 	./player/player_zombie.cpp
 	./player/player_spawnprotection.cpp
 	./player/player_knockback.cpp
-	./player/player_human_level.cpp
 	./items.cpp
 	./lights.cpp
 	./maprules.cpp
@@ -158,9 +157,6 @@ set(HLDLL_SRCS
 	./gamemode/mod_tdm.cpp
 	./gamemode/mod_dm.cpp
 	./gamemode/mod_zb1.cpp
-	./gamemode/mod_zbs.cpp
-	./gamemode/zbs/zs_subs.cpp
-	./gamemode/zbs/monster_entity.cpp
 	./../public/unicode_strtools.cpp
 	./gamemode/mod_zb2.cpp
 	./gamemode/zb2/supplybox.cpp
@@ -168,24 +164,17 @@ set(HLDLL_SRCS
 	./weapons_data.cpp
 	./weapons_msg.cpp
 	./player/player_mod_strategy.cpp
-	./gamemode/zbs/monster_manager.cpp
 	./player/player_account.cpp
 	./cbase/cbase_memory.cpp
-	./gamemode/mod_zb3.cpp
-	./gamemode/mod_gd.cpp
 	./gamemode/zb2/zb2_skill_human.cpp
 	./gamemode/zb2/zb2_skill_zombie.cpp
 	./gamemode/zb2/zb2_zclass.cpp
 	./gamemode/zb2/zb2_zclass_tank.cpp
 	./gamemode/zb2/zb2_zclass_speed.cpp
-	./gamemode/mod_zbb.cpp
 	./weapons_precache.cpp
-	./gamemode/zbb/zbb_basebuilder.cpp
-	./gamemode/zbb/zbb_ghost.cpp
 	./gamemode/zb1/zb1_countdown.cpp
 	./cbase/cbase_entity_factory.cpp
 	./cbase/cbase_physint.cpp
-	./gamemode/zbb/zbb_zombie.cpp
 	)
 
 set (HLWPN_SRCS
@@ -230,7 +219,6 @@ set (HLWPN_SRCS
 	../dlls/wpn_shared/wpn_xm8c.cpp
 	../dlls/wpn_shared/wpn_xm8s.cpp
 	../dlls/wpn_shared/wpn_mg3.cpp
-	../dlls/wpn_shared/wpn_svdex.cpp
 	../dlls/wpn_shared/wpn_mp7a1c.cpp
 	../dlls/wpn_shared/wpn_mp7a1p.cpp
 	../dlls/wpn_shared/wpn_infinitys.cpp

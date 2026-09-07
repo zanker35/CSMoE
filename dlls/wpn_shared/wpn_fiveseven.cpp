@@ -231,8 +231,7 @@ float CFiveSeven::GetDamage() const
 #ifndef CLIENT_DLL
 	if (g_pModRunning->DamageTrack() == DT_ZB)
 		flDamage = 20.0f;
-	else if (g_pModRunning->DamageTrack() == DT_ZBS)
-		flDamage = 20.0f;
+
 #endif
 	return flDamage;
 }

@@ -20,12 +20,12 @@ namespace vgui2
 {
 class ListPanel;
 }
-#define MAX_GAMEMODES 9
+#define MAX_GAMEMODES 5
 static const char* g_szGameModeCode[MAX_GAMEMODES] = {
-	"none", "dm", "tdm", "zb1", "zb2", "zb3", "zbs", "gd", "zbb"
+	"none", "dm", "tdm", "zb1", "zb2"
 }; 
 static const wchar_t* g_szGameModeNames[MAX_GAMEMODES] = {
-	L"竞技模式", L"个人竞技模式", L"团队竞技模式", L"生化模式(感染)", L"生化模式(异变)", L"生化模式(英雄)", L"大灾变", L"枪王决战", L"僵尸建造"
+	L"竞技模式", L"个人竞技模式", L"团队竞技模式", L"生化模式(感染)", L"生化模式(异变)"
 };
 //-----------------------------------------------------------------------------
 // Purpose: server options page of the create game server dialog

@@ -476,7 +476,7 @@ void AttackState::OnUpdate(CCSBot *me)
 	if (gpGlobals->time > m_reacquireTimestamp)
 		me->FireWeaponAtEnemy();
 
-	bool bEnemyIsZombie = (enemy->IsPlayer() && static_cast<CBasePlayer *>(enemy)->m_bIsZombie) || (enemy->Classify() == CLASS_PLAYER_ALLY); // zbs support...
+	bool bEnemyIsZombie = enemy->IsPlayer() && static_cast<CBasePlayer *>(enemy)->m_bIsZombie;
 	// attacking zombie, must moveback
 	// do dodge behavior
 	// If sniping or crouching, stand still.
