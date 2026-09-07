@@ -9,7 +9,7 @@
 inline std::string GetBuyMenuBasketImage(const char *weapon)
 {
 	std::string name = weapon ? weapon : "";
-	for (const char *prefix : {"weapon_", "z4b_", "csgo_", "knife_"})
+	for (const char *prefix : {"weapon_", "knife_"})
 		if (name.compare(0, std::char_traits<char>::length(prefix), prefix) == 0)
 			name.erase(0, std::char_traits<char>::length(prefix));
 	std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });

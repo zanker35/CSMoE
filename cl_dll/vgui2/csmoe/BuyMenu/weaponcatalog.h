@@ -38,8 +38,8 @@ inline constexpr const char *g_BuyMenuDefaultFavorites[5][2] = {
 	{"weapon_mp5navy", "weapon_usp"},
 	{"weapon_awp", "weapon_deagle"},
 	{"weapon_mg3", "weapon_infinityex2"},
-	{"weapon_sgdrill", "weapon_desperado"},
-	{"weapon_gungnir", "weapon_gunkata"}
+	{"weapon_m14ebr", "weapon_infinity"},
+	{"weapon_m134", "weapon_anaconda"}
 };
 
 // Classic weapons use master's buy aliases; extensions are copied from the
@@ -75,9 +75,9 @@ inline const std::vector<BuyMenuWeaponInfo> &GetBuyMenuWeapons()
 			{"weapon_hegrenade", "#Cstrike_HE_Grenade", HEGRENADE_PRICE, GRENADE_SLOT, UNASSIGNED, BUY_EQUIP}
 		};
 
-		const char *smgs[] = {"weapon_kriss", "weapon_k1a", "weapon_thompson", "weapon_mp7a1c", "csgo_bizon", "z4b_dmp7a1x"};
-		const char *shotguns[] = {"weapon_m1887", "weapon_tbarrel", "csgo_mag7", "csgo_sawedoff", "weapon_sgdrill", "weapon_gatling", "weapon_gatlingex"};
-		const char *machineguns[] = {"weapon_m2", "weapon_m134", "weapon_m134ex", "weapon_m134xmas", "weapon_mg36", "weapon_mg3", "weapon_mg3xmas", "csgo_negev", "weapon_janus7xmas", "weapon_balrog7", "z4b_m134heroi"};
+		const char *smgs[] = {"weapon_k1a", "weapon_mp7a1c"};
+		const char *shotguns[] = {"weapon_m1887"};
+		const char *machineguns[] = {"weapon_m134", "weapon_mg3"};
 
 		for (const auto &weapon : g_MoEWeaponBuyInfo)
 		{
@@ -126,6 +126,8 @@ inline std::string GetBuyMenuWeaponCommand(const char *name)
 		return "elites";
 	if (std::strcmp(name, "weapon_mp5navy") == 0)
 		return "mp5";
+	if (std::strcmp(name, "weapon_hegrenade") == 0)
+		return "hegren";
 	return name + std::strlen("weapon_");
 }
 

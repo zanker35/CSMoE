@@ -357,7 +357,6 @@ void CPlayerModStrategy_Zombie::GiveDefaultItems()
 	m_pPlayer->RemoveAllItems(FALSE);
 	m_pPlayer->m_bHasPrimary = false;
 
-	m_pPlayer->GiveNamedItem("weapon_zombibomb");
 	m_pPlayer->GiveNamedItem("knife_zombi");
 	
 

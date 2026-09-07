@@ -150,7 +150,6 @@ enum MaxAmmoType
 	MAX_AMMO_C4 = 1,
 
 	MAX_AMMO_46MM = 80,
-	MAX_AMMO_50BMG = 50,
 };
 
 enum WeightWeapon

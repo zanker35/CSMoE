@@ -62,7 +62,6 @@ short g_sModelIndexBloodSpray;		// holds the sprite index for splattered blood
 short g_sModelIndexSmokePuff;
 short g_sModelIndexFireball2;
 short g_sModelIndexFireball3;
-short g_sModelIndexZombiebomb_exp;
 short g_sModelIndexFireball4;
 short g_sModelIndexRadio;
 
@@ -470,7 +469,7 @@ void CBasePlayerItem::DefaultTouch(CBaseEntity *pOther)
 		return;
 	}
 
-	if (pPlayer->m_bIsZombie && m_iId != WEAPON_KNIFE && Q_strcmp(STRING(pev->classname), "weapon_zombibomb"))
+	if (pPlayer->m_bIsZombie && m_iId != WEAPON_KNIFE)
 	{
 		return;
 	}

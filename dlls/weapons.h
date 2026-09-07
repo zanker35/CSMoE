@@ -224,17 +224,14 @@ public:
 #ifndef CLIENT_DLL
 	static CGrenade *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time);
 	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, int iTeam, unsigned short usEvent);
-	static CGrenade* ShootZombieBomb(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, int iTeam, unsigned short usEvent);
 	static CGrenade *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, unsigned short usEvent);
-	static CGrenade* ShootMolotov(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, unsigned short usEvent);
 	static CGrenade *ShootSatchelCharge(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 #else
 	static CGrenade *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time) { return NULL; }
 	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, int iTeam, unsigned short usEvent) { return NULL; }
 	static CGrenade *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity) { return NULL; }
 	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, unsigned short usEvent) { return NULL; }
-	static CGrenade *ShootMolotov(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, duration_t time, unsigned short usEvent) { return NULL; }
 	static CGrenade *ShootSatchelCharge(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity) { return NULL; }
 #endif
 	NOXREF static void UseSatchelCharges(entvars_t *pevOwner, SATCHELCODE code);
@@ -243,8 +240,6 @@ public:
 	void Explode(TraceResult *pTrace, int bitsDamageType);
 	void Explode2(TraceResult *pTrace, int bitsDamageType);
 	void Explode3(TraceResult *pTrace, int bitsDamageType);
-	void FB_Explode(TraceResult* pTrace, int bitsDamageType);
-	void ZombieBombKnockback(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker);
 	NOXREF void SG_Explode(TraceResult *pTrace, int bitsDamageType);
 
 	void EXPORT Smoke();
@@ -261,15 +256,10 @@ public:
 	void EXPORT PreDetonate();
 	void EXPORT Detonate();
 	void EXPORT SG_Detonate();
-	void EXPORT FB_Detonate();
-	void EXPORT FB_BounceTouch(CBaseEntity* pOther);
 	void EXPORT Detonate2();
 	void EXPORT Detonate3();
-	void EXPORT ZombieBombExplosion();
 	void EXPORT DetonateUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void EXPORT TumbleThink();
-	void EXPORT FB_TumbleThink();
-	void EXPORT ZombieBomb_TumbleThink();
 	void EXPORT SG_TumbleThink();
 	void EXPORT C4Think();
 
@@ -621,7 +611,6 @@ extern short g_sModelIndexBloodSpray;
 extern short g_sModelIndexSmokePuff;
 extern short g_sModelIndexFireball2;
 extern short g_sModelIndexFireball3;
-extern short g_sModelIndexZombiebomb_exp;
 extern short g_sModelIndexFireball4;
 extern short g_sModelIndexCTGhost;
 extern short g_sModelIndexTGhost;

@@ -1053,29 +1053,10 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			flRatio += flShieldRatio;
 			flRatio *= pAttack->m_pActiveItem->GetArmorRatioModifier();
 
-			if (!FNullEnt(ENT(pevInflictor)) && !teamAttack)
-			{
-				CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)pAttack->m_pActiveItem;
-
-				if (!Q_strcmp(STRING(pWeapon->pev->classname), "weapon_desperado") || !Q_strcmp(STRING(pWeapon->pev->classname), "weapon_gungnir") || !Q_strcmp(STRING(pWeapon->pev->classname), "z4b_m4a1mw") || !Q_strcmp(STRING(pWeapon->pev->classname), "weapon_gunkata") || !Q_strcmp(STRING(pWeapon->pev->classname), "weapon_voidpistol") || !Q_strcmp(STRING(pWeapon->pev->classname), "weapon_gatlingex"))
-				{
-					PLAYBACK_EVENT_FULL(FEV_HOSTONLY, pAttacker->edict(), PRECACHE_EVENT(1, "events/desperado.sc"), 0.0, 0, 0, 0.0, 0.0, (1 << 7), 0, TRUE, FALSE);
-				}
-			}
 		}
-		CBaseEntity* DmgEntity = GetClassPtr<CBaseEntity>(pevInflictor);
 		if (pAttack->m_pActiveItem && Knockback(pAttack, pAttack->m_pActiveItem->GetKnockBackData())) // Zombie Knockback...
 		{
 			// already handled.
-		}
-		else if (!Q_strcmp(STRING(DmgEntity->pev->classname), "molotov") && pev == pAttacker->pev)
-		{
-			if (g_pGameRules->IsTeamplay() && pAttack->m_iTeam == m_iTeam && !bAttackFFA)
-			{
-				flDamage /= 0.35;
-			}
-			
-			//do nothing
 		}
 		else if (!ShouldDoLargeFlinch(m_LastHitGroup, iGunType))
 		{

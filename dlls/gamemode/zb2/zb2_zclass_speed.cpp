@@ -125,11 +125,6 @@ void CZombieClass_Speed::OnWeaponDeploy(CBasePlayerItem *item)
 			m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_knife_zombis.mdl");
 			break;
 		}
-		case WEAPON_HEGRENADE:
-		{
-			m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_zombibomb-s.mdl");
-			break;
-		}
 		default:
 			break;
 	}
