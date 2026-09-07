@@ -11,9 +11,6 @@
 #include <vgui/KeyCode.h>
 #include <FileSystem.h>
 #include <cstddef>
-#include <string>
-#include "wrect.h"
-#include <vgui_controls/Label.h>
 
 class WeaponImagePanel : public vgui2::ImagePanel
 {
@@ -23,7 +20,6 @@ public:
 	WeaponImagePanel(Panel *parent, const char *name);
 
 	virtual void PaintBackground() override;
-	void PerformLayout() override;
 
 	void SetWeapon(const char *weapon);
 	void SetWeapon(std::nullptr_t);
@@ -33,10 +29,6 @@ private:
 
 	bool m_bBanned;
 	vgui2::IImage *m_pBannedImage;
-	vgui2::Label *m_pMissingImage;
-	std::string m_HudSprite;
-	wrect_t m_HudRect{};
-	void PaintHudSprite();
 };
 
 #endif

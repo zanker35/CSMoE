@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Audit every compiled buy-menu entry against basket art and its HUD sprite.
+"""Audit every compiled buy-menu entry against its color basket image.
 
 Uses the same C++ catalogue and name mapping as WeaponImagePanel, honoring
-disabled entries and aliases. This checks files and sprite rectangles;
+disabled entries and aliases. This checks loose files;
 screenshots are still needed to verify the actual rendered menu.
 """
 
@@ -10,7 +10,6 @@ import argparse
 import os
 from pathlib import Path
 import runpy
-import struct
 import subprocess
 import tempfile
 
@@ -52,7 +51,7 @@ def main():
         return next((path for root in roots if (path := case_file(root, relative))), None)
 
     entries = catalogue()
-    basket_count = hud_count = missing_count = 0
+    basket_count = missing_count = 0
     for name, basket in entries:
         picture = locate(basket + ".tga") or locate(basket + ".bmp")
         if picture:
@@ -60,35 +59,10 @@ def main():
             print(f"BASKET\t{name}\t{picture}")
             continue
 
-        manifest = locate(f"sprites/{name}.txt")
-        rows = []
-        if manifest:
-            for line in manifest.read_text().splitlines():
-                row = line.split("//", 1)[0].split()
-                if len(row) == 7 and row[0] == "weapon":
-                    rows.append(row)
-        if rows:
-            row = max(rows, key=lambda entry: int(entry[1]))
-            sprite = locate(f"sprites/{row[2]}.spr")
-            if sprite:
-                data = sprite.read_bytes()
-                # GoldSrc sprite header, palette, then a single first frame.
-                if len(data) >= 42 and data[:4] == b"IDSP" and struct.unpack_from("<i", data, 4)[0] == 2:
-                    palette_count = struct.unpack_from("<H", data, 40)[0]
-                    offset = 42 + 3 * palette_count
-                    if len(data) >= offset + 20:
-                        frame_type, _, _, width, height = struct.unpack_from("<5i", data, offset)
-                        x, y, w, h = map(int, row[3:])
-                        if (frame_type == 0 and width > 0 and height > 0
-                                and len(data) >= offset + 20 + width * height
-                                and 0 <= x < x + w <= width and 0 <= y < y + h <= height):
-                            hud_count += 1
-                            print(f"HUD_SPRITE\t{name}\t{sprite}\t{x},{y},{w},{h}")
-                            continue
         missing_count += 1
-        print(f"MISSING\t{name}\tNo basket image or valid weapon HUD sprite")
+        print(f"MISSING\t{name}\tNo color basket image")
 
-    print(f"Catalogue: {len(entries)}; basket: {basket_count}; HUD sprite: {hud_count}; missing: {missing_count}")
+    print(f"Catalogue: {len(entries)}; basket: {basket_count}; missing: {missing_count}")
     return 1 if missing_count else 0
 
 

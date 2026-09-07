@@ -14,6 +14,7 @@ inline std::string GetBuyMenuBasketImage(const char *weapon)
 			name.erase(0, std::char_traits<char>::length(prefix));
 	std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
 	if (name == "mp5navy") name = "mp5";
+	if (name == "mp7a1c") name = "mp7a1";
 	if (name == "scarl" || name == "scarh") name = "scar";
 	if (name == "xm8c" || name == "xm8s") name = "xm8";
 	return name.empty() ? std::string() : "gfx/vgui/basket/" + name;
