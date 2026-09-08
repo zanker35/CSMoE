@@ -20,10 +20,6 @@
 #include <string>
 #include <memory>
 
-//#define USE_IMGUI_SURFACE
-#ifdef USE_IMGUI_SURFACE
-#include "client/imgui_surface.h"
-#endif
 
 // from engine/common/common.h
 typedef struct rgbdata_s
@@ -251,9 +247,6 @@ void BaseUISurface::PushMakeCurrent(vgui2::VPANEL panel, bool useInsets) {
 	paintState.iScissorBottom = clipRect[3] - m_iSurfaceBounds[1];
 
 	SetupPaintState(paintState);
-#ifdef USE_IMGUI_SURFACE
-    ImGui_Surface_EnableFullScreenScissor();
-#endif
 }
 
 void BaseUISurface::PopMakeCurrent(vgui2::VPANEL panel) {
@@ -274,9 +267,6 @@ void BaseUISurface::PopMakeCurrent(vgui2::VPANEL panel) {
 		rootState.iScissorBottom = m_iSurfaceBounds[3];
 		SetupPaintState(rootState);
 	}
-#ifdef USE_IMGUI_SURFACE
-    ImGui_Surface_DisableScissor();
-#endif
 }
 
 void BaseUISurface::DrawSetColor(int r, int g, int b, int a) {
@@ -366,16 +356,10 @@ void BaseUISurface::DrawFilledRect(int x0, int y0, int x1, int y1) {
 	if (!ClipRect(rect[0], rect[1], &clippedRect[0], &clippedRect[1])) {
 		return;
 	}
-#ifdef USE_IMGUI_SURFACE
-    ImGui_Surface_SetRenderMode(kRenderTransAlpha);
-    SPR_AdjustSize(&rect[0].point[0], &rect[0].point[1], &rect[1].point[0], &rect[1].point[1]);
-    ImGui_Surface_DrawRectangle(rect[0].point[0], rect[0].point[1], rect[1].point[0] - rect[0].point[0], rect[1].point[1] - rect[0].point[1], _drawColor[0], _drawColor[1], _drawColor[2],  255 - _drawColor[3]);
-#else
     g_api->SetupDrawingRect(_drawColor);
     g_api->EnableTexture(false);
     g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
     g_api->EnableTexture(true);
-#endif
 }
 
 void BaseUISurface::DrawOutlinedRect(int x0, int y0, int x1, int y1) {
@@ -609,15 +593,8 @@ void BaseUISurface::DrawSetTexture(int id) {
     {
         m_iCurrentTexture = id;
         DrawFlushText();
-#ifdef USE_IMGUI_SURFACE
-        ImGui_Surface_Flush();
-#endif
     }
-#ifdef USE_IMGUI_SURFACE
-    // nothing
-#else
 	g_api->BindTexture(id);
-#endif
 }
 
 void BaseUISurface::DrawGetTextureSize(int id, int &wide, int &tall) {
@@ -639,18 +616,8 @@ void BaseUISurface::DrawTexturedRect(int x0, int y0, int x1, int y1) {
 	if (!ClipRect(rect[0], rect[1], &clippedRect[0], &clippedRect[1])) {
 		return;
 	}
-#ifdef USE_IMGUI_SURFACE
-    int id = m_iCurrentTexture;
-    if( id > 0 && id < VGUI_MAX_TEXTURES && g_textures[id] )
-    {
-        ImGui_Surface_SetRenderMode(kRenderTransTexture);
-        SPR_AdjustSize(&clippedRect[0].point[0], &clippedRect[0].point[1], &clippedRect[1].point[0], &clippedRect[1].point[1]);
-        ImGui_Surface_DrawImage(g_textures[id], clippedRect[0].point[0], clippedRect[0].point[1], clippedRect[1].point[0], clippedRect[1].point[1], clippedRect[0].coord[0], clippedRect[0].coord[1], clippedRect[1].coord[0], clippedRect[1].coord[1], _drawColor[0], _drawColor[1], _drawColor[2],  255 - _drawColor[3]);
-    }
-#else
 	g_api->SetupDrawingImage(_drawColor);
 	g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
-#endif
 }
 
 bool BaseUISurface::IsTextureIDValid(int) {
@@ -1327,11 +1294,7 @@ void BaseUISurface::DrawRenderCharInternal(const CharRenderInfo &info)
     }
     else
 #endif
-#ifdef USE_IMGUI_SURFACE
-    if(true)
-#else
     if (info.additive)
-#endif
     {
         DrawSetTexture(info.textureId);
         DrawQuadBlend(clippedRect[0], clippedRect[1], _drawTextColor);
@@ -1364,11 +1327,7 @@ void BaseUISurface::DrawFlushText(void)
     {
         //DrawSetTexture(m_BatchedCharInfos[i].textureId);
         m_iCurrentTexture = m_BatchedCharInfos[i].textureId;
-#ifdef USE_IMGUI_SURFACE
-        // nothing
-#else
         g_api->BindTexture(m_BatchedCharInfos[i].textureId);
-#endif
         DrawQuad(m_BatchedCharInfos[i].verts[0], m_BatchedCharInfos[i].verts[1], _drawTextColor);
     }
 
@@ -1377,73 +1336,20 @@ void BaseUISurface::DrawFlushText(void)
 
 void BaseUISurface::DrawQuad(vpoint_t ul, vpoint_t lr, int *pColor)
 {
-#ifdef USE_IMGUI_SURFACE
-    int id = m_iCurrentTexture;
-    if( id > 0 && id < VGUI_MAX_TEXTURES && g_textures[id] )
-    {
-        ImGui_Surface_SetRenderMode(kRenderTransTexture);
-        SPR_AdjustSize(&ul.point[0], &ul.point[1], &lr.point[0], &lr.point[1]);
-        ImGui_Surface_DrawImage(g_textures[id], ul.point[0], ul.point[1], lr.point[0], lr.point[1], ul.coord[0], ul.coord[1], lr.coord[0], lr.coord[1], pColor[0], pColor[1], pColor[2], pColor[3]);
-    }
-    else
-    {
-        gEngfuncs.Con_DPrintf("BaseUISurface::DrawQuad invalid texture %d", id);
-    }
-#else
     int pColor2[4] = { pColor[0], pColor[1], pColor[2], 255 - pColor[3] };
     g_api->SetupDrawingImage(pColor2);
     g_api->DrawQuad(&ul, &lr);
-#endif
 }
 
 void BaseUISurface::DrawQuadBlend(vpoint_t ul, vpoint_t lr, int *pColor)
 {
-#ifdef USE_IMGUI_SURFACE
-    int id = m_iCurrentTexture;
-    if( id > 0 && id < VGUI_MAX_TEXTURES && g_textures[id] )
-    {
-        ImGui_Surface_SetRenderMode(kRenderTransAlpha);
-        SPR_AdjustSize(&ul.point[0], &ul.point[1], &lr.point[0], &lr.point[1]);
-        ImGui_Surface_DrawImage(g_textures[id], ul.point[0], ul.point[1], lr.point[0], lr.point[1], ul.coord[0], ul.coord[1], lr.coord[0], lr.coord[1], pColor[0], pColor[1], pColor[2], pColor[3]);
-    }
-    else
-    {
-        gEngfuncs.Con_DPrintf("BaseUISurface::DrawQuadBlend invalid texture %d", id);
-    }
-#else
     int pColor2[4] = { pColor[0], pColor[1], pColor[2], 255 - pColor[3] };
     g_api->SetupDrawingImage(pColor2);
     g_api->DrawQuad(&ul, &lr);
-#endif
 }
 
 void BaseUISurface::DrawQuadArray(int quadCount, vpoint_t *pVerts, int *pColor)
 {
-#ifdef USE_IMGUI_SURFACE
-    int id = m_iCurrentTexture;
-    if( id > 0 && id < VGUI_MAX_TEXTURES && g_textures[id] )
-    {
-        ImGui_Surface_SetRenderMode(kRenderTransTexture);
-
-        for (int i = 0; i < quadCount; ++i)
-        {
-            vpoint_t ulc, lrc;
-            vpoint_t &ul = pVerts[2 * i];
-            vpoint_t &lr = pVerts[2 * i + 1];
-
-            if (!ClipRect(ul, lr, &ulc, &lrc))
-                continue;
-
-            SPR_AdjustSize(&ulc.point[0], &ulc.point[1], &lrc.point[0], &lrc.point[1]);
-            ImGui_Surface_DrawImage(g_textures[id], ulc.point[0], ulc.point[1], lrc.point[0], lrc.point[1], ulc.coord[0], ulc.coord[1], lrc.coord[0], lrc.coord[1], pColor[0], pColor[1], pColor[2], pColor[3]);
-        }
-        ImGui_Surface_Flush();
-    }
-    else
-    {
-        gEngfuncs.Con_DPrintf("BaseUISurface::DrawQuadArray invalid texture %d", id);
-    }
-#else
     int pColor2[4] = { pColor[0], pColor[1], pColor[2], 255 - pColor[3] };
     g_api->SetupDrawingImage(pColor2);
     for (int i = 0; i < quadCount; ++i)
@@ -1457,7 +1363,6 @@ void BaseUISurface::DrawQuadArray(int quadCount, vpoint_t *pVerts, int *pColor)
 
         g_api->DrawQuad(&ul, &lr);
     }
-#endif
 }
 #ifndef DISABLE_MOE_VGUI2_EXT
 bool BaseUISurface::IsEmojiChar(uchar32 ch)

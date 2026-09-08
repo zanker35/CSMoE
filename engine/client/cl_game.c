@@ -36,9 +36,6 @@ GNU General Public License for more details.
 #include "vgui2_surface.h"
 #endif
 
-#if XASH_IMGUI
-#include "imgui_console.h"
-#endif
 
 #define MAX_LINELENGTH		80
 #define MAX_TEXTCHANNELS	8		// must be power of two (GoldSrc uses 4 channels)
@@ -112,7 +109,6 @@ static dllfunc_t cdll_new_exports[] = 	// allowed only in SDK 2.3 and higher
 { "IN_ClientTouchEvent", (void **)&clgame.dllFuncs.pfnTouchEvent}, // Xash3D ext
 { "IN_ClientMoveEvent", (void **)&clgame.dllFuncs.pfnMoveEvent}, // Xash3D ext
 { "IN_ClientLookEvent", (void **)&clgame.dllFuncs.pfnLookEvent}, // Xash3D ext
-{ "HUD_OnGUI", (void **)&clgame.dllFuncs.pfnOnGUI}, // Xash3D ext
 { "CL_OnPrecache", (void **)&clgame.dllFuncs.CL_OnPrecache}, // Xash3D ext
 { NULL, NULL }
 };
@@ -652,12 +648,6 @@ void CL_DrawCenterPrint( void )
 	y = clgame.centerPrint.y; // start y
 	colorDefault = g_color_table[7];
 	pText = clgame.centerPrint.message;
-#ifdef XASH_IMGUI
-	ImGui_Console_DrawStringLen(pText, &x, &y);
-	x = scr_width->integer / 2 - x / 2;
-	y = scr_height->integer / 4;
-	ImGui_Console_AddGenericString(x, y, pText, colorDefault);
-#else
 	Con_DrawCharacterLen( 0, NULL, &charHeight );
 	
 	for( i = 0; i < clgame.centerPrint.lines; i++ )
@@ -690,7 +680,6 @@ void CL_DrawCenterPrint( void )
 		}
 		y += charHeight;
 	}
-#endif
 }
 
 /*
@@ -1763,14 +1752,6 @@ int GAME_EXPORT pfnDrawCharacter( int x, int y, int number, int r, int g, int b 
 	if( !cls.creditsFont.valid )
 		return 0;
 
-#ifdef XASH_IMGUI
-	clgame.ds.adjust_size = true;
-	int a = max(r, max(g, b));
-	rgba_t rgb = { r,g,b,a };
-	int w = ImGui_Console_DrawChar(x, y, number, rgb);
-	clgame.ds.adjust_size = false;
-	return w;
-#else
 	number &= 255;
 	
 	if( hud_utf8->integer )
@@ -1786,7 +1767,6 @@ int GAME_EXPORT pfnDrawCharacter( int x, int y, int number, int r, int g, int b 
 	clgame.ds.adjust_size = false;
 
 	return clgame.scrInfo.charWidths[number];
-#endif
 #endif
 }
 
@@ -1807,8 +1787,6 @@ int GAME_EXPORT pfnDrawConsoleString( int x, int y, const char *string )
 #ifdef XASH_VGUI2
 	drawLen = VGUI2_Surface_DrawConsoleString( x, y, string, clgame.ds.textColor[0],
 		clgame.ds.textColor[1], clgame.ds.textColor[2], clgame.ds.textColor[3] );
-#elif defined(XASH_IMGUI)
-	drawLen = ImGui_Console_AddGenericString(x, y, string, clgame.ds.textColor);
 #else
 	drawLen = Con_DrawString(x, y, string, clgame.ds.textColor);
 #endif
@@ -1848,8 +1826,6 @@ void GAME_EXPORT pfnDrawConsoleStringLen( const char *pText, int *length, int *h
 	clgame.ds.adjust_size = true;
 #ifdef XASH_VGUI2
 	VGUI2_Surface_DrawStringLen( pText, length, height );
-#elif defined(XASH_IMGUI)
-	ImGui_Console_DrawStringLen( pText, length, height );
 #else
 	Con_DrawStringLen( pText, length, height );
 #endif
@@ -2883,11 +2859,6 @@ static int GAME_EXPORT pfnVGUI2DrawCharacter( int x, int y, int number, unsigned
 #ifdef XASH_VGUI2
 	clgame.ds.adjust_size = true;
 	int w = VGUI2_Surface_DrawChar( x, y, number, 255, 255, 255, 255 );
-	clgame.ds.adjust_size = false;
-	return w;
-#elif defined(XASH_IMGUI)
-	clgame.ds.adjust_size = true;
-	int w = ImGui_Console_DrawChar(x, y, number, g_color_table[7]);
 	clgame.ds.adjust_size = false;
 	return w;
 #else

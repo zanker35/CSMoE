@@ -30,9 +30,6 @@ GNU General Public License for more details.
 #include "windows.h"
 #endif
 
-#ifdef XASH_IMGUI
-#include "imgui_impl_xash.h"
-#endif
 
 Xash_Cursor*	in_mousecursor;
 qboolean	in_mouseactive;				// false when not focus app
@@ -636,16 +633,6 @@ void IN_MouseMove( void )
 	}
 #endif
 
-#ifdef XASH_IMGUI
-	if (ImGui_ImplGL_MouseMove(current_pos.x, current_pos.y))
-	{
-#ifdef XASH_SDL
-		SDL_ShowCursor( SDL_TRUE );
-#endif
-		IN_ActivateCursor();
-		return;
-	}
-#endif
 
 	VGui_MouseMove( current_pos.x, current_pos.y );
 

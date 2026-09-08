@@ -24,9 +24,6 @@ GNU General Public License for more details.
 #ifdef XASH_VGUI2
 #include "vgui2_surface.h"
 #endif
-#ifdef XASH_IMGUI
-#include "imgui_impl_xash.h"
-#endif
 
 convar_t *scr_centertime;
 convar_t *scr_loading;

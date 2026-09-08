@@ -27,9 +27,6 @@ GNU General Public License for more details.
 #include "sound.h"
 #include "gl_vidnt.h"
 
-#ifdef XASH_IMGUI
-#include "imgui_impl_xash.h"
-#endif
 
 extern convar_t *vid_fullscreen;
 extern convar_t *snd_mute_losefocus;
@@ -142,10 +139,6 @@ static void SDLash_KeyEvent( SDL_KeyboardEvent key, int down )
 		}
 	}
 
-#ifdef XASH_IMGUI
-	if (ImGui_ImplGL_KeyEvent(keynum, down))
-		return;
-#endif
 
 #ifndef XASH_VGUI2
 	if (SDL_IsTextInputActive() && down)
@@ -233,9 +226,6 @@ static void SDLash_EventFilter( SDL_Event *event )
 
 	if( wheelbutton )
 	{
-#if XASH_IMGUI
-		if (!ImGui_ImplGL_KeyEvent(wheelbutton, true))
-#endif
 		Key_Event( wheelbutton, false );
 		wheelbutton = 0;
 	}
@@ -269,15 +259,6 @@ static void SDLash_EventFilter( SDL_Event *event )
 #else
 		SDLash_MouseEvent( event->button );
 #endif
-#ifdef XASH_IMGUI
-		{
-			if (event->button.button == SDL_BUTTON_LEFT && ImGui_ImplGL_MouseButtonCallback(0, false)) break;
-			if (event->button.button == SDL_BUTTON_RIGHT && ImGui_ImplGL_MouseButtonCallback(1, false)) break;
-			if (event->button.button == SDL_BUTTON_MIDDLE && ImGui_ImplGL_MouseButtonCallback(2, false)) break;
-			if (event->button.button == SDL_BUTTON_X1 && ImGui_ImplGL_MouseButtonCallback(3, false)) break;
-			if (event->button.button == SDL_BUTTON_X2 && ImGui_ImplGL_MouseButtonCallback(4, false)) break;
-		}
-#endif
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 #ifdef TOUCHEMU
@@ -291,22 +272,10 @@ static void SDLash_EventFilter( SDL_Event *event )
 #else
 		SDLash_MouseEvent( event->button );
 #endif
-#ifdef XASH_IMGUI
-			{
-				if (event->button.button == SDL_BUTTON_LEFT && ImGui_ImplGL_MouseButtonCallback(0, true)) break;
-				if (event->button.button == SDL_BUTTON_RIGHT && ImGui_ImplGL_MouseButtonCallback(1, true)) break;
-				if (event->button.button == SDL_BUTTON_MIDDLE && ImGui_ImplGL_MouseButtonCallback(2, true)) break;
-				if (event->button.button == SDL_BUTTON_X1 && ImGui_ImplGL_MouseButtonCallback(3, true)) break;
-				if (event->button.button == SDL_BUTTON_X2 && ImGui_ImplGL_MouseButtonCallback(4, true)) break;
-			}
-#endif
 		break;
 
 	case SDL_MOUSEWHEEL:
 		wheelbutton = event->wheel.y < 0 ? K_MWHEELDOWN : K_MWHEELUP;
-#if XASH_IMGUI
-		if (!ImGui_ImplGL_KeyEvent(wheelbutton, true))
-#endif
 		Key_Event( wheelbutton, true );
 		break;
 

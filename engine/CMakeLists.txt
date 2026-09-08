@@ -234,14 +234,6 @@ set(XASH_ENGINE_CLIENT_SOURCES
    client/vgui/vgui_draw.c
 )
 
-set(XASH_ENGINE_IMGUI_SOURCES
-	client/imgui_impl_xash.cpp
-	client/imgui_lcsm_warning.cpp
-	client/imgui_console.cpp
-	client/imgui_imewindow.cpp
-	client/imgui_sprview.cpp
-)
-
 set(XASH_ENGINE_DEDICATED_SOURCES
 	common/dedicated.c
 )
@@ -266,10 +258,6 @@ if(NOT XASH_DEDICATED)
 set(XASH_ENGINE_SOURCES ${XASH_ENGINE_SOURCES} ${XASH_ENGINE_CLIENT_SOURCES})
 else()
 set(XASH_ENGINE_SOURCES ${XASH_ENGINE_SOURCES} ${XASH_ENGINE_DEDICATED_SOURCES})
-endif()
-if(XASH_IMGUI)
-set(XASH_ENGINE_SOURCES ${XASH_ENGINE_SOURCES} ${XASH_ENGINE_IMGUI_SOURCES})
-add_definitions(-DXASH_IMGUI=1)
 endif()
 if(XASH_SINGLE_BINARY)
 set(XASH_ENGINE_SOURCES ${XASH_ENGINE_SOURCES} ${XASH_ENGINE_LAUNCHER_SOURCES})
@@ -423,9 +411,6 @@ if(XASH_DEDICATED)
 	endif()
 endif()
 
-if(XASH_IMGUI)
-	target_link_libraries(${XASH_ENGINE} imgui imgui_ext)
-endif()
 
 if(XASH_SDL)
 	set(SDL2_BUILDING_EXECUTABLE ${XASH_SINGLE_BINARY}) # link sdl2main, if needed

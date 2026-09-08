@@ -54,11 +54,9 @@ if(XASH_STATIC_GAMELIB)
 endif()
 
 if(NOT XASH_DEDICATED)
-	option(XASH_IMGUI "Imgui support for CSMoE" ON)
 	# VGUI2 is the only player menu and viewport implementation.
 	set(XASH_VGUI2 ON)
 else()
-	set(XASH_IMGUI OFF)
 	set(XASH_VGUI2 OFF)
 endif()
 
@@ -166,34 +164,6 @@ if(XASH_VGUI2)
 	add_subdirectory(vgui2_support)
 endif()
 
-if(XASH_IMGUI)
-	# TODO : since vcpkg doesn't provide with imgui_internal.h, just use our own one
-    if(XASH_VCPKG AND FALSE)
-		find_package(imgui CONFIG REQUIRED)
-		add_library(imgui INTERFACE)
-		target_link_libraries(imgui INTERFACE imgui::imgui)
-	else()
-		set(IMGUI_SRC
-				imgui/imgui_demo.cpp
-				imgui/imgui_draw.cpp
-				imgui/imgui_widgets.cpp
-				imgui/imgui.cpp)
-		add_library(imgui STATIC ${IMGUI_SRC})
-		target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR}/imgui)
-	endif()
-	add_library(imgui_ext STATIC 
-		imgui_ext/ImGuiFileDialog/ImGuiFileDialog.cpp
-		)
-	target_include_directories(imgui_ext PUBLIC ${CMAKE_SOURCE_DIR}/imgui_ext)
-	if(WIN32)
-		target_include_directories(imgui_ext PRIVATE ${CMAKE_SOURCE_DIR}/imgui_ext/dirent)
-	endif()
-	target_link_libraries(imgui_ext PUBLIC imgui)
-	if(XASH_UNITY_BUILD)
-		set_target_properties(imgui PROPERTIES UNITY_BUILD ON)
-		set_target_properties(imgui_ext PROPERTIES UNITY_BUILD ON)
-	endif()
-endif()
 
 if(XASH_LUASH)
 	add_subdirectory(luash)

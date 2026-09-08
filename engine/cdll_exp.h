@@ -73,7 +73,7 @@ typedef struct cldll_func_s
 	void (*pfnMoveEvent)( float forwardmove, float sidemove );
 	void (*pfnLookEvent)( float relyaw, float relpitch );
 	// CSMoE extension
-	void (*pfnOnGUI)( struct ImGuiContext *context );
+	void (*reserved_gui_callback)(void *context); // Reserved ABI slot; never called.
 	void (*CL_OnPrecache)(int type, const char* name, int index); // 1=model 2=sound 3=generic 4=event
 } cldll_func_t;
 

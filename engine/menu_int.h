@@ -190,7 +190,7 @@ typedef struct
 	int	(*pfnIsVisible)( void );
 	int	(*pfnCreditsActive)( void );	// unused
 	void	(*pfnFinalCredits)( void );	// show credits + game end
-	void (*pfnOnGUI)(struct ImGuiContext* context);
+	void (*reserved_gui_callback)(void *context); // Reserved ABI slot; never called.
 	int (*pfnHandleMessageMode_f)( void );
 } UI_FUNCTIONS;
 

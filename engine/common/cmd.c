@@ -17,9 +17,6 @@ GNU General Public License for more details.
 #include "client.h"
 #include "server.h"
 
-#if XASH_IMGUI
-#include "imgui_console.h"
-#endif
 
 #define MAX_CMD_BUFFER	32768
 #define MAX_CMD_LINE	1024
@@ -799,9 +796,6 @@ static void Cmd_AddCommandEx( const char *funcname, const char *cmd_name, xcomma
 	BaseCmd_Insert( HM_CMD, cmd, cmd->name );
 #endif
 
-#if XASH_IMGUI
-	ImGui_Console_UpdateCommandList();
-#endif
 }
 
 /*

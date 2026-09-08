@@ -25,10 +25,6 @@ GNU General Public License for more details.
 #include "vgui2_surface.h"
 #endif
 
-#ifdef XASH_IMGUI
-#include "imgui_impl_xash.h"
-#include "imgui_console.h"
-#endif
 
 typedef struct key_s
 {
@@ -864,10 +860,6 @@ Normal keyboard characters, already shifted / capslocked / etc
 */
 void CL_CharEvent( int ch )
 {
-#ifdef XASH_IMGUI
-	if (ImGui_ImplGL_CharCallback(ch))
-		return;
-#endif
 	// the console key should never be used as a char
 #ifdef _WIN32
 	if( ch == '`' || ch == '~' ) return;
@@ -908,10 +900,6 @@ void CL_CharEvent( int ch )
 
 void CL_CharEventUTF(const char* str)
 {
-#ifdef XASH_IMGUI
-	if (ImGui_ImplGL_CharCallbackUTF(str))
-		return;
-#endif
 	int i;
 
 	// Pass characters one by one to Con_CharEvent

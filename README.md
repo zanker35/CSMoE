@@ -26,7 +26,6 @@ This project includes CSMoE's Engine, Server and Client.
 * Simplified gameplay
 * No AMXX, all written as C/C++ code 
 * Lightweight implement, VGUI2-less
-* IMGUI Support
 * English only
 * Support low-end specs
 * Cross-platform
@@ -174,7 +173,6 @@ For player:
 * 简单粗暴的游戏模式
 * 不使用外置 AMXX 插件, 所有功能由内置 C/C++ 代码实现
 * 无 VGUI2 支持
-* 新的GUI: IMGUI
 * 仅支持英语
 * 支持低端规格
 * 可跨平台

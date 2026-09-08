@@ -27,9 +27,6 @@ GNU General Public License for more details.
 #include <errno.h>
 convar_t *android_sleep;
 
-#ifdef XASH_IMGUI
-#include "imgui_impl_xash.h"
-#endif
 
 #ifndef JAVA_EXPORT
 #define JAVA_EXPORT // a1ba: workaround for my IDE, where Java files are not included
@@ -258,9 +255,6 @@ void Android_RunEvents()
 			break;
 
 		case event_key_down:
-#ifdef XASH_IMGUI
-			if (!ImGui_ImplGL_KeyEvent(events.queue[i].arg, true))
-#endif
 			Key_Event( events.queue[i].arg, true );
 
 			if( events.queue[i].arg == K_AUX31 || events.queue[i].arg == K_AUX29 )
@@ -270,9 +264,6 @@ void Android_RunEvents()
 			}
 			break;
 		case event_key_up:
-#ifdef XASH_IMGUI
-			if(!ImGui_ImplGL_KeyEvent( events.queue[i].arg, false ))
-#endif
 			Key_Event( events.queue[i].arg, false );
 
 			if( events.queue[i].arg == K_AUX31 || events.queue[i].arg == K_AUX29 )
@@ -384,9 +375,6 @@ void Android_RunEvents()
 
 	events.count = 0; // no more events
 
-#ifdef XASH_IMGUI
-	if(!ImGui_ImplGL_CharCallbackUTF( events.inputtext )) {
-#endif
 
 	// text input handled separately to allow unicode symbols
 	for( i = 0; events.inputtext[i]; i++ )
@@ -405,11 +393,6 @@ void Android_RunEvents()
 		// some keyboards may send enter as text
 		if( ch == '\n' )
 		{
-#ifdef XASH_IMGUI
-			// dont use && or ||
-			if(ImGui_ImplGL_KeyEvent( K_ENTER, true ) + ImGui_ImplGL_KeyEvent(K_ENTER, false))
-				continue;
-#endif
 			Key_Event( K_ENTER, true );
 			Key_Event( K_ENTER, false );
 			continue;
@@ -419,9 +402,6 @@ void Android_RunEvents()
 		CL_CharEvent( ch );
 	}
 
-#ifdef XASH_IMGUI
-	}
-#endif
 
 	events.inputtext[0] = 0; // no more text
 

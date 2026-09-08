@@ -178,16 +178,6 @@ set(PM_SRCS
 	../pm_shared/pm_math.cpp
 )
 
-if(XASH_IMGUI)
-	set(IMGUI_SRCS
-			imgui_cl/imgui_cl_main.cpp
-			imgui_cl/imgui_cl_buy.cpp
-			imgui_cl/imgui_cl_menu.cpp
-	)
-	add_definitions(-DXASH_IMGUI)
-else()
-	set(IMGUI_SRCS )
-endif()
 
 if(XASH_LUASH)
 	set(LUASH_SRCS
@@ -232,7 +222,6 @@ set (CLDLL_SOURCES
 	${CLWEAPON_SRCS}
 	${HLWPN_SRCS}
 	${STUDIORENDER_SRCS}
-	${IMGUI_SRCS}
 )
 
 if(XASH_VGUI2)
@@ -321,9 +310,6 @@ if(XASH_VGUI2)
 		${CMAKE_SOURCE_DIR}/SourceSDK/public/tier1)
 endif()
 
-if(XASH_IMGUI)
-	target_link_libraries( ${CLIENT_LIBRARY} imgui imgui_ext )
-endif()
 
 if(XASH_LUASH)
 	target_link_libraries( ${CLIENT_LIBRARY} luash)
