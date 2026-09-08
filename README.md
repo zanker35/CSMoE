@@ -14,6 +14,12 @@
 
 具体人物和武器见 [内容范围](docs/content-scope.md)。裁切范围、共享接口和验收记录见 [MVP 清理记录](docs/mvp-cleanup.md)。
 
+## 开发导航与功能迁入
+
+先读 [AGENTS.md](AGENTS.md) 的目录和依赖规则。按任务找代码见 [源码开发视图](docs/source-layout.md)；从完整分支迁入时查 [旧路径映射](docs/source-path-map.json)，并填写 [功能迁入记录](docs/feature-imports.md)。
+
+`src/engine_api` 放接口和 ABI，`src/engine` 放引擎实现，`src/game/server` 放玩法判定，`src/game/client` 放输入/预测/表现，`src/game/shared` 放两端复用；UI 与第三方依赖分别位于 `src/ui`、`vendor`。
+
 ## 构建
 
 需要 Apple Silicon Mac、Xcode Command Line Tools、CMake、Ninja，以及可被 CMake 找到的 SDL2 和 FreeType。
@@ -49,6 +55,7 @@ python3 tools/prune-mvp-resources.py --game-root dist/csmoe --apply
 ## 验证
 
 ```sh
+python3 tools/check-source-layout.py
 node tools/check-cso-hud-messages.js
 python3 tools/check-cso-weapon-icons.py
 python3 tools/check-cso-weapon-assets.py

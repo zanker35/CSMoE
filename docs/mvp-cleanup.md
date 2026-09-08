@@ -32,7 +32,7 @@
 1. 桌面鼠标视角之前通过旧移动回调传递，现在使用独立 `IN_MouseLook`。HUD 的缩放文字绘制移出移动 API，继续供桌面 HUD 使用。
 2. 普通 `sv_restart` 也调用原 `CareerRestart`。保留重开对局和刷新玩家状态的部分，重命名为 `PrepareMatchRestart`，删除其中的战役任务逻辑。
 
-`vgui2_support/.../linuxfont.cpp` 是当前 Mac 使用的 FreeType 字体实现；`hud/legacy/hud_scoreboard_legacy.cpp` 仍承载当前计分显示。这些文件按实际使用关系保留。
+`src/ui/vgui2/.../linuxfont.cpp` 是当前 Mac 使用的 FreeType 字体实现；`hud/legacy/hud_scoreboard_legacy.cpp` 仍承载当前计分显示。这些文件按实际使用关系保留。
 
 ## 地图与资源边界
 
