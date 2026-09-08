@@ -38,8 +38,6 @@
 #include "hostage/hostage.h"
 #include "hostage/hostage_localnav.h"
 
-#include "tutor_base_states.h"
-#include "tutor_base_tutor.h"
 
 namespace sv {
 
@@ -292,10 +290,6 @@ void CBotManager::OnEvent(GameEventType event, CBaseEntity *entity, CBaseEntity 
 		bot->OnEvent(event, entity, other);
 	}
 
-	if (TheTutor != NULL)
-	{
-		TheTutor->OnEvent(event, entity, other);
-	}
 
 	if (g_pHostages != NULL)
 	{

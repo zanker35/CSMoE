@@ -157,38 +157,6 @@ NOXREF void UTIL_BotDPrintf(const char *pszMsg, ...)
 	}
 }
 
-void UTIL_CareerDPrintf(const char *pszMsg, ...)
-{
-	if (!IsDeveloper())
-		return;
-
-	if (theDebugOutputTypes & DEBUG_CAREER)
-	{
-		va_list argptr;
-		va_start(argptr, pszMsg);
-		vsprintf(theDebugBuffer, pszMsg, argptr);
-		va_end(argptr);
-
-		SERVER_PRINT(theDebugBuffer);
-	}
-}
-
-NOXREF void UTIL_TutorDPrintf(const char *pszMsg, ...)
-{
-	if (!IsDeveloper())
-		return;
-
-	if (theDebugOutputTypes & DEBUG_TUTOR)
-	{
-		va_list argptr;
-		va_start(argptr, pszMsg);
-		vsprintf(theDebugBuffer, pszMsg, argptr);
-		va_end(argptr);
-
-		SERVER_PRINT(theDebugBuffer);
-	}
-}
-
 NOXREF void UTIL_StatsDPrintf(const char *pszMsg, ...)
 {
 	if (!IsDeveloper())

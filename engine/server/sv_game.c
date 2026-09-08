@@ -4865,13 +4865,13 @@ static enginefuncs_t gEngfuncs =
 	pfnSequencePickSentence,
 	pfnGetFileSize,
 	Sound_GetApproxWavePlayLen,
-	pfnIsCareerMatch,
+	NULL, // Reserved teaching API slot
 	pfnGetLocalizedStringLength,
-	pfnRegisterTutorMessageShown,
-	pfnGetTimesTutorMessageShown,
-	pfnProcessTutorMessageDecayBuffer,
-	pfnConstructTutorMessageDecayBuffer,
-	pfnResetTutorMessageDecayData,
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
 	pfnQueryClientCvarValue,
 	pfnQueryClientCvarValue2,
 	pfnCheckParm,

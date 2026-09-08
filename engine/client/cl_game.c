@@ -2353,8 +2353,6 @@ static physent_t *GAME_EXPORT pfnGetPhysent( int idx )
 	return NULL;
 }
 
-
-
 /*
 =============
 pfnSetTraceHull
@@ -2916,11 +2914,7 @@ GetCareerGameInterface
 
 =============
 */
-static void *GAME_EXPORT GetCareerGameInterface( void )
-{
-	Msg( "^1Career GameInterface called!\n" );
-	return NULL;
-}
+
 
 /*
 =============
@@ -3805,8 +3799,6 @@ static event_api_t gEventApi =
 	pfnGetCurrentEventIndex,
 };
 
-
-
 static net_api_t gNetApi =
 {
 	NetAPI_InitNetworking,
@@ -3821,8 +3813,6 @@ static net_api_t gNetApi =
 	NetAPI_RemoveKey,
 	NetAPI_SetValueForKey,
 };
-
-
 
 // engine callbacks
 static cl_enginefunc_t gEngfuncs = 
@@ -3947,15 +3937,15 @@ static cl_enginefunc_t gEngfuncs =
 	pfnVGUI2DrawCharacter,
 	pfnVGUI2DrawCharacterAdditive,
 	(void*)Sound_GetApproxWavePlayLen,
-	GetCareerGameInterface,
+	NULL, // Reserved career API slot
 	(void*)Cvar_Set,
-	pfnIsCareerMatch,
+	NULL, // Reserved teaching API slot
 	pfnPlaySoundVoiceByName,
 	pfnMP3_InitStream,
 	Sys_DoubleTime,
-	pfnProcessTutorMessageDecayBuffer,
-	pfnConstructTutorMessageDecayBuffer,
-	pfnResetTutorMessageDecayData,
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
+	NULL, // Reserved teaching API slot
 	pfnPlaySoundByNameAtPitch,
 	CL_FillRGBABlend,
 	pfnGetAppID,

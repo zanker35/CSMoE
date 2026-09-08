@@ -314,10 +314,6 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 		WRITE_BYTE(0);
 	MESSAGE_END();
 
-	if (TheTutor != NULL)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 
 	return TRUE;
 }
@@ -351,10 +347,6 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 		WRITE_BYTE(1);
 	MESSAGE_END();
 
-	if (TheTutor != NULL)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 
 	return TRUE;
 }
@@ -394,10 +386,6 @@ BOOL CItemThighPack::MyTouch(CBasePlayer *pPlayer)
 	SendItemStatus(pPlayer);
 	EMIT_SOUND(pPlayer->edict(), CHAN_VOICE, "items/kevlar.wav", VOL_NORM, ATTN_NORM);
 
-	if (TheTutor != NULL)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 
 	return TRUE;
 }

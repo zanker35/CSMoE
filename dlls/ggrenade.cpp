@@ -126,13 +126,6 @@ void CGrenade::Explode2(TraceResult *pTrace, int bitsDamageType)
 
 	mp->m_bTargetBombed = true;
 
-	if (mp->IsCareer())
-	{
-		if (TheCareerTasks != NULL)
-		{
-			TheCareerTasks->LatchRoundEndMessage();
-		}
-	}
 
 	m_bJustBlew = true;
 	mp->CheckWinConditions();
@@ -198,13 +191,6 @@ void CGrenade::Explode2(TraceResult *pTrace, int bitsDamageType)
 	pev->owner = NULL;
 	RadiusDamage(pev, pevOwner, mp->m_flBombRadius, CLASS_NONE, bitsDamageType);
 
-	if (mp->IsCareer())
-	{
-		if (TheCareerTasks != NULL)
-		{
-			TheCareerTasks->UnlatchRoundEndMessage();
-		}
-	}
 
 	// tell director about it
 	// send director message, that something important happed here
@@ -988,13 +974,6 @@ void CGrenade::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTy
 		TheBots->OnEvent(EVENT_BOMB_DEFUSING, pActivator);
 	}
 
-	if (g_pGameRules->IsCareer())
-	{
-		if (TheCareerTasks != NULL)
-		{
-			TheCareerTasks->HandleEvent(EVENT_BOMB_DEFUSING);
-		}
-	}
 
 	if (player->m_bHasDefuser)
 	{
@@ -1338,13 +1317,6 @@ void CGrenade::C4Think()
 				WRITE_BYTE(0);
 			MESSAGE_END();
 
-			if (g_pGameRules->IsCareer() && !pPlayer->IsBot())
-			{
-				if (TheCareerTasks != NULL)
-				{
-					TheCareerTasks->HandleEvent(EVENT_BOMB_DEFUSED, pPlayer);
-				}
-			}
 
 			g_pGameRules->m_bBombDefused = true;
 			g_pGameRules->CheckWinConditions();

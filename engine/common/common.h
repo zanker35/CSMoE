@@ -809,14 +809,8 @@ int pfnIsInGame( void );
 // CS:CS engfuncs (stubs)
 void *pfnSequenceGet( const char *fileName, const char *entryName );
 void *pfnSequencePickSentence( const char *groupName, int pickMethod, int *picked );
-int pfnIsCareerMatch( void );
 
 // Decay engfuncs (stubs)
-int pfnGetTimesTutorMessageShown( int mid );
-void pfnRegisterTutorMessageShown( int mid );
-void pfnConstructTutorMessageDecayBuffer( int *buffer, int buflen );
-void pfnProcessTutorMessageDecayBuffer( int *buffer, int bufferLength );
-void pfnResetTutorMessageDecayData( void );
 
 /*
 ==============================================================

@@ -103,7 +103,6 @@ cvar_t gamemode = {"mp_gamemode", "none", FCVAR_SERVER, 0.0f, NULL};
 cvar_t maxkills = {"mp_maxkills", "150", FCVAR_SERVER, 0.0f, NULL};
 
 extern void Bot_RegisterCvars();
-extern void Tutor_RegisterCVars();
 extern void Hostage_RegisterCVars();
 
 void EXT_FUNC GameDLLInit()
@@ -165,7 +164,6 @@ void EXT_FUNC GameDLLInit()
 	CVAR_REGISTER(&maxkills);
 
 	Bot_RegisterCvars();
-	Tutor_RegisterCVars();
 	Hostage_RegisterCVars();
 }
 

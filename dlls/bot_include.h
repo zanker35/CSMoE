@@ -35,12 +35,6 @@
 #include "bot/cs_bot.h"
 
 // Tutor
-#include "tutor.h"
-#include "tutor_base_states.h"
-#include "tutor_base_tutor.h"
-#include "tutor_cs_states.h"
-#include "tutor_cs_tutor.h"
 
 #include "gamerules.h"
-#include "career_tasks.h"
 #include "maprules.h"

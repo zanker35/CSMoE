@@ -6,7 +6,6 @@
 #include "player.h"
 #include "client.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"

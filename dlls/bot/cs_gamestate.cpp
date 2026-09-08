@@ -5,7 +5,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"

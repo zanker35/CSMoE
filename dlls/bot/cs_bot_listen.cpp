@@ -6,7 +6,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -16,7 +15,6 @@
 #include "bot_include.h"
 
 #include "gamerules.h"
-#include "career_tasks.h"
 #include "maprules.h"
 
 namespace sv {

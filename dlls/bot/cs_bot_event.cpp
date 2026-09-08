@@ -6,7 +6,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -96,10 +95,6 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *entity, CBaseEntity *othe
 			CBasePlayer *killer = (other && other->IsPlayer()) ? static_cast<CBasePlayer *>(other) : NULL;
 
 			// if the human player died in the single player game, tell the team
-			if (g_pGameRules->IsCareer() && !victim->IsBot() && victim->m_iTeam == m_iTeam)
-			{
-				GetChatter()->Say("CommanderDown", 20.0s);
-			}
 
 			// keep track of the last player we killed
 			if (killer == this)
@@ -165,10 +160,7 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *entity, CBaseEntity *othe
 								else
 								{
 									// humans get the honorific
-									if (g_pGameRules->IsCareer())
-										GetChatter()->Say("NiceShotCommander", 3.0s, delay);
-									else
-										GetChatter()->Say("NiceShotSir", 3.0s, delay);
+									{ GetChatter()->Say("NiceShotSir", 3.0s, delay); }
 								}
 							}
 						}

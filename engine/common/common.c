@@ -549,10 +549,7 @@ pfnIsCareerMatch
 used by CS:CZ (client stub)
 =============
 */
-int GAME_EXPORT GAME_EXPORT pfnIsCareerMatch( void )
-{
-	return 0;
-}
+
 
 /*
 =============
@@ -561,9 +558,7 @@ pfnRegisterTutorMessageShown
 only exists in PlayStation version
 =============
 */
-void GAME_EXPORT pfnRegisterTutorMessageShown( int mid )
-{
-}
+
 
 /*
 =============
@@ -572,10 +567,7 @@ pfnGetTimesTutorMessageShown
 only exists in PlayStation version
 =============
 */
-int GAME_EXPORT pfnGetTimesTutorMessageShown( int mid )
-{
-	return 0;
-}
+
 
 /*
 =============
@@ -584,9 +576,7 @@ pfnProcessTutorMessageDecayBuffer
 only exists in PlayStation version
 =============
 */
-void GAME_EXPORT pfnProcessTutorMessageDecayBuffer( int *buffer, int bufferLength )
-{
-}
+
 
 /*
 =============
@@ -595,9 +585,7 @@ pfnConstructTutorMessageDecayBuffer
 only exists in PlayStation version
 =============
 */
-void GAME_EXPORT pfnConstructTutorMessageDecayBuffer( int *buffer, int bufferLength )
-{
-}
+
 
 /*
 =============
@@ -606,6 +594,3 @@ pfnResetTutorMessageDecayData
 only exists in PlayStation version
 =============
 */
-void GAME_EXPORT pfnResetTutorMessageDecayData( void )
-{
-}

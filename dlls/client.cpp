@@ -43,7 +43,6 @@ time_point_t g_flTimeLimit;
 time_point_t g_flResetTime;
 bool g_bClientPrintEnable = true;
 
-bool g_skipCareerInitialSpawn = false;
 
 static entity_field_alias_t entity_field_alias[] =
 		{
@@ -188,16 +187,11 @@ void respawn(entvars_t *pev, BOOL fCopyCorpse)
 	if (gpGlobals->coop || gpGlobals->deathmatch) {
 		CHalfLifeMultiplay *mp = g_pGameRules;
 
-		if (mp->m_iTotalRoundsPlayed > 0)
-			mp->MarkSpawnSkipped();
 
 		CBasePlayer *pPlayer = GetClassPtr<CBasePlayer>(pev);
 
-		if (mp->IsCareer() && mp->ShouldSkipSpawn() && pPlayer->IsAlive())
-			g_skipCareerInitialSpawn = true;
 
 		pPlayer->Spawn();
-		g_skipCareerInitialSpawn = false;
 	} else if (pev->deadflag > DEAD_NO) {
 		SERVER_COMMAND("reload\n");
 	}
@@ -965,9 +959,6 @@ void BuyPistol(CBasePlayer *pPlayer, int iSlot)
 	pPlayer->GiveNamedItem(pszWeapon);
 	pPlayer->AddAccount(-iWeaponPrice);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuyShotgun(CBasePlayer *pPlayer, int iSlot)
@@ -1017,9 +1008,6 @@ void BuyShotgun(CBasePlayer *pPlayer, int iSlot)
 	pPlayer->GiveNamedItem(pszWeapon);
 	pPlayer->AddAccount(-iWeaponPrice);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuySubMachineGun(CBasePlayer *pPlayer, int iSlot)
@@ -1088,9 +1076,6 @@ void BuySubMachineGun(CBasePlayer *pPlayer, int iSlot)
 	pPlayer->GiveNamedItem(pszWeapon);
 	pPlayer->AddAccount(-iWeaponPrice);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID)
@@ -1127,9 +1112,6 @@ void BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID)
 	pPlayer->GiveNamedItem(info->entityName);
 	pPlayer->AddAccount(-info->cost);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuyRifle(CBasePlayer *pPlayer, int iSlot)
@@ -1249,9 +1231,6 @@ void BuyRifle(CBasePlayer *pPlayer, int iSlot)
 	pPlayer->GiveNamedItem(pszWeapon);
 	pPlayer->AddAccount(-iWeaponPrice);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuyMachineGun(CBasePlayer *pPlayer, int iSlot)
@@ -1286,9 +1265,6 @@ void BuyMachineGun(CBasePlayer *pPlayer, int iSlot)
 	pPlayer->GiveNamedItem(pszWeapon);
 	pPlayer->AddAccount(-iWeaponPrice);
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void BuyItem(CBasePlayer *pPlayer, int iSlot)
@@ -1525,9 +1501,6 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		pPlayer->AddAccount(-iItemPrice);
 	}
 
-	if (TheTutor != NULL) {
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
@@ -1581,11 +1554,6 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 	} else if (player->m_iJoiningState == PICKINGTEAM) {
 		player->m_iJoiningState = GETINTOGAME;
 
-		if (mp->IsCareer()) {
-			if (!player->IsBot()) {
-				mp->CheckWinConditions();
-			}
-		}
 	}
 
 	player->pev->body = 0;
@@ -1859,7 +1827,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 		SET_MODEL(ENT(player->pev), "models/player.mdl");
 	}
 
-	if (!g_pGameRules->IsCareer()) {
+	{
 		switch (team) {
 			case CT:
 				if (g_bIsCzeroGame)
@@ -2309,9 +2277,6 @@ BOOL HandleBuyAliasCommands(CBasePlayer *pPlayer, const char *pszCommand)
 			if (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, true)) {
 				while (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, false));
 
-				if (TheTutor != NULL) {
-					TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-				}
 			}
 		}
 			// secondary ammo
@@ -2324,9 +2289,6 @@ BOOL HandleBuyAliasCommands(CBasePlayer *pPlayer, const char *pszCommand)
 			if (BuyAmmo(pPlayer, PISTOL_SLOT, true)) {
 				while (BuyAmmo(pPlayer, PISTOL_SLOT, false));
 
-				if (TheTutor != NULL) {
-					TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-				}
 			}
 		}
 			// equipment
@@ -2726,10 +2688,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 
 		if (player->m_signals.GetState() & SIGNAL_BUY)
 		{
-			if (TheTutor != NULL)
-			{
-				TheTutor->OnEvent(EVENT_TUTOR_BUY_MENU_OPENNED);
-			}
 		}
 		else
 		{
@@ -2875,10 +2833,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 									while (BuyAmmo(player, PRIMARY_WEAPON_SLOT, false))
 										;
 
-									if (TheTutor != NULL)
-									{
-										TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, player);
-									}
 								}
 
 								player->BuildRebuyStruct();
@@ -2894,10 +2848,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 									while (BuyAmmo(player, PISTOL_SLOT, false))
 										;
 
-									if (TheTutor != NULL)
-									{
-										TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, player);
-									}
 								}
 
 								player->BuildRebuyStruct();
@@ -2997,8 +2947,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 				break;
 			}
 
-
-
 			default:
 				ALERT(at_console, "ClientCommand(): Invalid menu selected\n");
 				break;
@@ -3020,7 +2968,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 			}
 		}
 
-		if (!mp->IsCareer())
 		{
 			if (mp->m_iMapHasVIPSafetyZone == MAP_HAVE_VIP_SAFETYZONE_YES && player->m_iJoiningState == JOINED && player->m_iTeam == CT)
 			{
@@ -3317,10 +3264,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 					BuyAmmo(player, PRIMARY_WEAPON_SLOT, true);
 					player->BuildRebuyStruct();
 
-					if (TheTutor != NULL)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, player);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "buyammo2"))
@@ -3330,10 +3273,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 					BuyAmmo(player, PISTOL_SLOT, true);
 					player->BuildRebuyStruct();
 
-					if (TheTutor != NULL)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, player);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "buyequip"))
@@ -3669,10 +3608,6 @@ void EXT_FUNC StartFrame()
 		TheBots->StartFrame();
 	}
 
-	if (TheTutor != NULL)
-	{
-		TheTutor->StartFrame(gpGlobals->time);
-	}
 }
 
 void ClientPrecache()

@@ -261,55 +261,6 @@ public:
 	BOOL m_bBombDropped;
 };
 
-class CHalfLifeRules : public CGameRules
-{
-public:
-	CHalfLifeRules();
-
-	virtual void Think();
-	virtual BOOL IsAllowedToSpawn(CBaseEntity *pEntity);
-	virtual BOOL FAllowFlashlight() { return TRUE; }
-	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
-	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
-	virtual BOOL IsMultiplayer();
-	virtual BOOL IsDeathmatch();
-	virtual BOOL IsCoOp();
-	virtual BOOL
-	ClientConnected(edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128]);
-	virtual void InitHUD(CBasePlayer *pl);
-	virtual void ClientDisconnected(edict_t *pClient);
-	virtual float FlPlayerFallDamage(CBasePlayer *pPlayer);
-	virtual void PlayerSpawn(CBasePlayer *pPlayer);
-	virtual void PlayerThink(CBasePlayer *pPlayer);
-	virtual BOOL FPlayerCanRespawn(CBasePlayer *pPlayer);
-	virtual time_point_t FlPlayerSpawnTime(CBasePlayer *pPlayer);
-	virtual edict_t *GetPlayerSpawnSpot(CBasePlayer *pPlayer);
-	virtual BOOL AllowAutoTargetCrosshair();
-	virtual int IPointsForKill(CBasePlayer *pAttacker, CBasePlayer *pKilled);
-	virtual void PlayerKilled(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor);
-	virtual void DeathNotice(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor);
-	virtual void PlayerGotWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
-	virtual int WeaponShouldRespawn(CBasePlayerItem *pWeapon);
-	virtual time_point_t FlWeaponRespawnTime(CBasePlayerItem *pWeapon);
-	virtual time_point_t FlWeaponTryRespawn(CBasePlayerItem *pWeapon);
-	virtual Vector VecWeaponRespawnSpot(CBasePlayerItem *pWeapon);
-	virtual BOOL CanHaveItem(CBasePlayer *pPlayer, CItem *pItem);
-	virtual void PlayerGotItem(CBasePlayer *pPlayer, CItem *pItem);
-	virtual int ItemShouldRespawn(CItem *pItem);
-	virtual time_point_t FlItemRespawnTime(CItem *pItem);
-	virtual Vector VecItemRespawnSpot(CItem *pItem);
-	virtual void PlayerGotAmmo(CBasePlayer *pPlayer, char *szName, int iCount);
-	virtual int AmmoShouldRespawn(CBasePlayerAmmo *pAmmo);
-	virtual time_point_t FlAmmoRespawnTime(CBasePlayerAmmo *pAmmo);
-	virtual Vector VecAmmoRespawnSpot(CBasePlayerAmmo *pAmmo);
-	virtual float FlHealthChargerRechargeTime();
-	virtual int DeadPlayerWeapons(CBasePlayer *pPlayer);
-	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);
-	virtual const char *GetTeamID(CBaseEntity *pEntity) { return ""; };
-	virtual int PlayerRelationship(CBasePlayer *pPlayer, CBaseEntity *pTarget);
-	virtual BOOL FAllowMonsters();
-};
-
 class CHalfLifeMultiplay : public CGameRules
 {
 public:
@@ -368,7 +319,6 @@ public:
 	virtual BOOL PlayTextureSounds() { return FALSE; }
 	virtual BOOL FAllowMonsters();
 	virtual void EndMultiplayerGame() { GoToIntermission(); }
-	virtual void ServerDeactivate();
 	virtual void CheckMapConditions();
 
 	// Recreate all the map entities from the map data (preserving their indices),
@@ -417,14 +367,8 @@ public:
 
 	void CheckLevelInitialized();
 	void CheckRestartRound();
+	void PrepareMatchRestart();
 
-	BOOL IsCareer();
-	void QueueCareerRoundEndMenu(duration_t tmDelay, int iWinStatus);
-	void SetCareerMatchLimit(int minWins, int winDifference);
-	bool IsInCareerRound();
-	void CareerRestart();
-	bool ShouldSkipSpawn() const { return m_bSkipSpawn; }
-	void MarkSpawnSkipped() { m_bSkipSpawn = false; }
 	//NOXREF void PlayerJoinedTeam(CBasePlayer *pPlayer) { }
 	duration_t TimeRemaining() { return duration_t(m_iRoundTimeSecs) - (gpGlobals->time - m_fRoundCount); }
 	BOOL TeamFull(int team_id);
@@ -450,7 +394,7 @@ public:
 
 	bool IsMatchStarted()
 	{
-		return (m_fTeamCount != invalid_time_point || m_fCareerRoundMenuTime != invalid_time_point || m_fCareerMatchMenuTime != invalid_time_point);
+		return (m_fTeamCount != invalid_time_point);
 	}
 	void SendMOTDToClient(edict_t *client);
 
@@ -537,12 +481,7 @@ protected:
 	BOOL m_iEndIntermissionButtonHit;
 	time_point_t m_tmNextPeriodicThink;
 	bool m_bFirstConnected;
-	bool m_bInCareerGame;
-	time_point_t m_fCareerRoundMenuTime;
-	int m_iCareerMatchWins;
 	int m_iRoundWinDifference;
-	time_point_t m_fCareerMatchMenuTime;
-	bool m_bSkipSpawn;
 };
 
 typedef struct mapcycle_item_s
@@ -573,19 +512,10 @@ public:
 	float m_flBombRadius;
 };
 
-
-
 extern CHalfLifeMultiplay *g_pGameRules;
 
 CGameRules *InstallGameRules();
 
-bool IsBotSpeaking();
-void SV_Continue_f();
-void SV_Tutor_Toggle_f();
-void SV_Career_Restart_f();
-void SV_Career_EndRound_f();
-void SV_CareerAddTask_f();
-void SV_CareerMatchLimit_f();
 void Broadcast(const char *sentence);
 const char *GetTeam(int teamNo);
 void EndRoundMessage(const char *sentence, int event);

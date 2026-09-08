@@ -7,7 +7,6 @@
 #include "player.h"
 #include "client.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -61,11 +60,6 @@ CCSBotManager::CCSBotManager()
 	TheBotProfiles->FindVoiceBankIndex("BotChatter.db");
 
 	const char *filename;
-	if (IS_CAREER_MATCH())
-	{
-		filename = "MissionPacks/BotPackList.db";
-	}
-	else
 	{
 		filename = "BotPackList.db";
 	}
@@ -838,8 +832,6 @@ bool CCSBotManager::BotAddCommand(BotProfileTeamType team, bool isFromConsole)
 		bool ignoreHumans = false;
 		CHalfLifeMultiplay *mp = g_pGameRules;
 
-		if (mp != NULL && mp->IsCareer())
-			ignoreHumans = true;
 
 		if (UTIL_IsNameTaken(CMD_ARGV(1), ignoreHumans))
 		{
@@ -962,7 +954,7 @@ void CCSBotManager::MaintainBotQuota()
 	}
 	else
 	{
-		if (mp != NULL && !mp->IsCareer())
+		if (mp != NULL)
 			return;
 
 		bool humansAreCTs = (Q_strcmp(humans_join_team.string, "CT") == 0);

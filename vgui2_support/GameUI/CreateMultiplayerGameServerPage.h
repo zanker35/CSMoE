@@ -62,7 +62,6 @@ private:
 	vgui2::ComboBox* m_pModeList;
 	vgui2::TextEntry *m_pBotQuotaCombo;
 	vgui2::CheckButton *m_pEnableBotsCheck;
-	CCvarToggleCheckButton *m_pEnableTutorCheck;
 
 	enum { DATA_STR_LENGTH = 64 };
 	char m_szHostName[DATA_STR_LENGTH];

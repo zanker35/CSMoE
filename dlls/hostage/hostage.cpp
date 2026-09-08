@@ -6,7 +6,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -307,10 +306,6 @@ void CHostage::IdleThink()
 					TheBots->OnEvent(EVENT_HOSTAGE_RESCUED, player, this);
 				}
 
-				if (TheCareerTasks != NULL && g_pGameRules->IsCareer() && player != NULL && !player->IsBot())
-				{
-					TheCareerTasks->HandleEvent(EVENT_HOSTAGE_RESCUED, player);
-				}
 
 				pev->deadflag = DEAD_RESPAWNABLE;
 
@@ -649,11 +644,6 @@ void CHostage::AnnounceDeath(CBasePlayer *pAttacker)
 	{
 		pAttacker->HintMessage("#Hint_lost_money");
 		pAttacker->m_flDisplayHistory |= DHF_HOSTAGE_KILLED;
-	}
-
-	if (!g_pGameRules->IsMultiplayer())
-	{
-		CHalfLifeTraining::HostageDied();
 	}
 
 	UTIL_LogPrintf("\"%s<%i><%s><%s>\" triggered \"Killed_A_Hostage\"\n", STRING(pAttacker->pev->netname), GETPLAYERUSERID(pAttacker->edict()),
@@ -1623,4 +1613,3 @@ duration_t SimpleChatter::PlaySound(CBaseEntity *entity, HostageChatterType type
 }
 
 }
-

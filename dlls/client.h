@@ -103,7 +103,6 @@ namespace sv {
 
 extern time_point_t g_flTimeLimit;
 extern time_point_t g_flResetTime;
-extern bool g_skipCareerInitialSpawn;
 
 extern unsigned short m_usResetDecals;
 extern unsigned short g_iShadowSprite;

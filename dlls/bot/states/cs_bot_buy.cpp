@@ -5,7 +5,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -58,7 +57,7 @@ void BuyState::OnEnter(CCSBot *me)
 		if (ctrl->GetScenario() == CCSBotManager::SCENARIO_DEFUSE_BOMB)
 		{
 			// CT's sometimes buy defuse kits in the bomb scenario (except in career mode, where the player should defuse)
-			if (g_pGameRules->IsCareer() == false)
+			if (false == false)
 			{
 				const float buyDefuseKitChance = 50.0f;	// 100.0f * (me->GetProfile()->GetSkill() + 0.2f);
 				if (RANDOM_FLOAT(0.0f, 100.0f) < buyDefuseKitChance)

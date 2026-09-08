@@ -5,7 +5,6 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "skill.h"
 #include "game.h"
 #include "globals.h"
@@ -139,8 +138,7 @@ CGameRules *InstallGameRules()
 
 	InstallBteMod(gamemode.string);
 
-	if (!gpGlobals->deathmatch)
-		return new CHalfLifeTraining;
+	gpGlobals->deathmatch = true;
 
 	//return new CHalfLifeMultiplay;
 	return dynamic_cast<CHalfLifeMultiplay *>(g_pModRunning);

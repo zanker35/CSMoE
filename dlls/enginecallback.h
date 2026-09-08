@@ -89,10 +89,7 @@ inline void	ADD_SERVER_COMMAND( const char *cmd_name, void (*function) (void) ) 
 inline const char *GETPLAYERAUTHID		( edict_t *e ) { return (*g_engfuncs.pfnGetPlayerAuthId)(e); }
 inline int	GET_FILE_SIZE( const char *filename ) { return (*g_engfuncs.pfnGetFileSize)(filename); }
 inline unsigned int GET_APPROX_WAVE_PLAY_LEN( const char *filepath ) { return (*g_engfuncs.pfnGetApproxWavePlayLen)(filepath); }
-inline int	IS_CAREER_MATCH( void ) { return (*g_engfuncs.pfnIsCareerMatch)(); }
 inline int	GET_LOCALIZED_STRING_LENGTH( const char *label ) { return (*g_engfuncs.pfnGetLocalizedStringLength)(label); }
-inline void	REGISTER_TUTOR_MESSAGE_SHOWN( int mid ) { return (*g_engfuncs.pfnRegisterTutorMessageShown)(mid); }
-inline int	GET_TIMES_TUTOR_MESSAGE_SHOWN( int mid ) { return (*g_engfuncs.pfnGetTimesTutorMessageShown)(mid); }
 inline int	ENG_CHECK_PARM( char *parm, char **ppnext ) { return (*g_engfuncs.CheckParm)(parm, ppnext); }
 inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin = nullptr, edict_t *ed = nullptr) { (*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed); }
 inline void	MESSAGE_END( void ) { return (*g_engfuncs.pfnMessageEnd)(); }

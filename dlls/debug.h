@@ -62,8 +62,6 @@ void PrintDebugFlag(const char *flagStr);
 void UTIL_SetDprintfFlags(const char *flagStr);
 
 NOXREF void UTIL_BotDPrintf(const char *pszMsg, ...);
-void UTIL_CareerDPrintf(const char *pszMsg, ...);
-NOXREF void UTIL_TutorDPrintf(const char *pszMsg, ...);
 NOXREF void UTIL_StatsDPrintf(const char *pszMsg, ...);
 NOXREF void UTIL_HostageDPrintf(const char *pszMsg, ...);
 

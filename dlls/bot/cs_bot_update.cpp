@@ -5,7 +5,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "training_gamerules.h"
 #include "hltv.h"
 #include "game.h"
 #include "trains.h"
@@ -663,11 +662,6 @@ void CCSBot::Update()
 								Follow(leader);
 								PrintIfWatched("Auto-Following %s\n", STRING(leader->pev->netname));
 
-								if (g_pGameRules->IsCareer())
-								{
-									GetChatter()->Say("FollowingCommander", 10.0s);
-								}
-								else
 								{
 									GetChatter()->Say("FollowingSir", 10.0s);
 								}

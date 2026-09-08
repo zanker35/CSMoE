@@ -47,7 +47,6 @@ set(HLDLL_SRCS
 	./animation.cpp
 	./bmodels.cpp
 	./buttons.cpp
-	./career_tasks.cpp
 	./cbase.cpp
 	./client.cpp
 	./combat.cpp
@@ -85,19 +84,12 @@ set(HLDLL_SRCS
 	./plane.cpp
 	./plats.cpp
 	./player.cpp
-	./singleplay_gamerules.cpp
 	./skill.cpp
 	./sound.cpp
 	./soundent.cpp
 	./spectator.cpp
 	./subs.cpp
-	./training_gamerules.cpp
 	./triggers.cpp
-	./tutor_base_states.cpp
-	./tutor_base_tutor.cpp
-	./tutor.cpp
-	./tutor_cs_states.cpp
-	./tutor_cs_tutor.cpp
 	./util.cpp
 	./vehicle.cpp
 	./weapons.cpp

@@ -53,15 +53,12 @@ CCreateMultiplayerGameServerPage::CCreateMultiplayerGameServerPage(vgui2::Panel 
 	m_pModeList = new vgui2::ComboBox(this, "ModeList", 12, false);
 
 	m_pBotQuotaCombo = new vgui2::TextEntry( this, "BotQuotaCombo" );
-	m_pEnableTutorCheck = new CCvarToggleCheckButton( this, "CheckButtonTutor", "#CStrike_Tutor_Enabled", "tutor_enable" );
 	m_pEnableBotsCheck = new vgui2::CheckButton( this, "EnableBotsCheck", "Enable bots" );
 
 	LoadControlSettings("Resource/CreateMultiplayerGameServerPage.res");
 
 	LoadMapList();
 	LoadModeList();
-	if ( stricmp( ModInfo().GetGameDescription(), "Condition Zero" ) )
-		m_pEnableTutorCheck->SetVisible( false );
 
 	m_szModeName[0] = 0;
 	m_szMapName[0]  = 0;
@@ -224,8 +221,6 @@ void CCreateMultiplayerGameServerPage::LoadMaps( const char *pszPathID )
 	}
 	vgui2::filesystem()->FindClose(findHandle);
 }
-
-
 
 //-----------------------------------------------------------------------------
 // Purpose: loads the list of available maps into the map list

@@ -28,7 +28,6 @@
 
 #include "GameUI/IGameUI.h"
 #include "GameUI/IGameConsole.h"
-#include "GameUI/ICareerUI.h"
 
 namespace ui
 {
@@ -46,7 +45,6 @@ extern cl_enginefunc_t gEngfuncs;
 IClientVGUI *staticClient;
 IGameUI* staticGameUIFuncs;
 IGameConsole* staticGameConsole;
-ICareerUI* staticCareerUI;
 vgui2::IInputInternal *g_pInputInternal;
 
 CStaticPanel *staticPanel;
@@ -122,7 +120,6 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	{
 		staticGameUIFuncs = static_cast<IGameUI*>(gameUIFactory(GAMEUI_INTERFACE_VERSION, nullptr));
 		staticGameConsole = static_cast<IGameConsole*>(gameUIFactory(GAMECONSOLE_INTERFACE_VERSION, nullptr));
-		staticCareerUI = static_cast<ICareerUI*>(gameUIFactory(CAREERUI_INTERFACE_VERSION, nullptr));
 
 		++m_iNumFactories;
 	}
@@ -279,7 +276,6 @@ void CBaseUI::Shutdown() {
 
 	staticGameUIFuncs = nullptr;
 	staticGameConsole = nullptr;
-	staticCareerUI = nullptr;
 
 	vgui2::system()->SaveUserConfigFile();
 }
