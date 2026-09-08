@@ -1,56 +1,67 @@
-# MVP 实现与清理记录
+# Mac MVP 完整裁切记录
 
-本轮基线：`dd2ba6ef`。目标是现有 5 种模式、44 项购买目录和 18 个人物在 Apple Silicon Mac 上稳定完成本地游戏 + BOT。
+当前目标：Apple Silicon macOS 上的本地游戏 + BOT，保留 5 种模式、44 项购买目录和 18 个人物。唯一构建路径是 **SDL2 + 桌面 OpenGL + 静态 client/server + VGUI2 + 当前 HUD**。
 
-唯一验收组合：SDL + 桌面 OpenGL + 静态 client/server + VGUI2 + 原 HUD 风格 2。
+原计划中保留其他平台、触屏、手柄、语音、发现和录像的待定范围，已按后续“全部清理”要求执行。本分支不再提供原上游多平台工程。
 
-## 已删除
+## 已完成的删除
 
-- 两套备用菜单及子模块：`mainui_cpp`、`hymenu`，以及仅供旧菜单使用的二维码依赖。
-- 旧 ImGui 核心、扩展、测试购买页、引擎渲染/输入接入、调试窗口和构建开关。
-- Lua 接入、客户端脚本事件、LuaJIT、nameof、脚本资源及 CI 的下载步骤。
-- 未使用的反射导出和在线公告实现。
-- macOS Touch Bar 实现及 SDL 调用点。
-- HUD 风格 0/1 的专属绘制、字段、资源加载、切换控件和本地资源。风格 2 的计分板仍在 `hud/legacy/hud_scoreboard_legacy.cpp` 中。
+| 主题 | 删除范围 |
+|---|---|
+| 平台和构建 | Android、Xcode-iOS、Win32/WinRT/Emscripten 后端、旧 Android.mk、iOS/MinGW 工具链、多平台 CI、vcpkg 和非 Mac 打包入口 |
+| 渲染与启动变体 | NanoGL、WES、QindieGL、gl4es；独立服务器启动、动态游戏库加载和无窗口回退路径 |
+| 重复 UI 和脚本 | mainui_cpp、hymenu、旧 ImGui、Lua/LuaJIT、nameof、专属接入和资源 |
+| 输入 | 触控、触屏预设/编辑器、移动 API、震动、手柄/摇杆、evdev、Touch Bar、触屏旁观者/生化技能面板 |
+| 外围功能 | 玩家实时语音及设置、服务器发现/心跳、远程连接菜单和命令、录像录制与回放 |
+| 训练和战役 | career_tasks、tutor、training_gamerules、singleplay_gamerules，以及任务购买、教学消息和专属实体注册 |
+| HL 实体 | 气瓶、医疗包/医疗站、护甲充电站、迫击炮/炮塔及控制器；玩家炮塔控制、对应技能参数和注册表；未使用的 plane 工具 |
+| 其他遗留 | 旧 HUD 风格 0/1、未使用的反射导出/公告实现、60 个未参与构建的 SDK/UI 源文件及旧图标、无使用方的本地依赖和旧生成产物 |
 
-客户端 GUI 和预缓存回调表保留空槽以保持接口布局，删除其原声明、导出查找和调用。空槽不引用已删除框架。
+源代码之外还清理了本地触屏图片/配置、语音设置、旧菜单条目、旧 HUD 精灵和贴图。删除对象的配置、菜单、注册和调用链一起处理，不以关闭一个构建开关代替删除。
 
-本地额外清掉无使用方的 Boost、Bullet、libexpat、OpenSSL、ASTC、cpuinfo、oneTBB 等遗留目录。连同脚本依赖约移除 1088.9 MiB 文件内容；这些主要是被忽略的本地依赖，不等同于应用体积下降。旧 `build`、`build-rebuild`、`build-citrus`、`build-filament` 的生成产物也已清理。
+## 保留的共享主干
 
-## 保留与尚未确定的范围
+- 本地服务器与 loopback、网络消息、移动/碰撞预测、武器规则及客户端开火事件。
+- 现有五种规则、BOT、人质、门、梯子、可破坏物、列车、水和相机等地图实体。
+- VGUI2、SourceSDK 实际参与构建的依赖、FreeType、字符处理、KeyValues 和资源加载。
+- BOT 无线电音效与提示；它们不依赖已删除的玩家实时语音。
+- 引擎标准函数表中的必要空槽，防止其他字段错位；这些槽没有已删除功能的实现或调用。
 
-- 非 Mac 平台源码、工程、移动触控、手柄和平台渲染转译层暂时保留。旧的 Mac-only 删除计划与后续四端目标有冲突，需确定平台边界后再处理。本轮没有进行 iOS、Android 或 Windows 构建验收。
-- 实时语音、远程连接/发现和录像回放没有删除，功能范围尚未确定。
-- 本地服务器、loopback、网络消息、移动预测、武器 C++ 事件、BOT、人质、地图实体和资源加载保留。
-- VGUI2 当前需要的 SourceSDK、FreeType、共享字体/贴图、KeyValues、JSON 与桥接代码保留。
-- 更深的训练/战役/教学与 HL 实体裁切后置，不能只凭地图未直接引用就删注册或运行时生成路径。
+两个共享实现经过单独处理：
 
-## 构建与资源
+1. 桌面鼠标视角之前通过旧移动回调传递，现在使用独立 `IN_MouseLook`。HUD 的缩放文字绘制移出移动 API，继续供桌面 HUD 使用。
+2. 普通 `sv_restart` 也调用原 `CareerRestart`。保留重开对局和刷新玩家状态的部分，重命名为 `PrepareMatchRestart`，删除其中的战役任务逻辑。
+
+`vgui2_support/.../linuxfont.cpp` 是当前 Mac 使用的 FreeType 字体实现；`hud/legacy/hud_scoreboard_legacy.cpp` 仍承载当前计分显示。这些文件按实际使用关系保留。
+
+## 地图与资源边界
+
+重新扫描当前 25 张 CS 地图，没有直接使用已删除的医疗站、炮塔、迫击炮及训练实体。可破坏物的 `spawnobject` 没有非零值。医疗包掉落表位置留空并增加空项检查，保留其后项目的地图编号。
+
+资源清理只操作项目自己的 `csmoe` 包和可写覆盖目录，不删除外部 Steam 的 `cstrike`/`valve` 安装内容。共享模型、声音、贴图和外部 `.seq` 动作包继续保留。此结论针对当前地图集合，不保证任意 HL/自定义地图可用。
+
+```sh
+python3 tools/prune-mvp-resources.py --game-root dist/csmoe
+python3 tools/prune-mvp-resources.py --game-root dist/csmoe --apply
+python3 tools/prune-mvp-resources.py --game-root build-cso-ui/run/csmoe --apply
+```
+
+默认只预览；`--apply` 应用清单。重复执行已清理包应得到零待处理项。素材与本地依赖不进入 Git，源码提交携带可重复执行的清理工具。
+
+## 构建与检查
 
 ```sh
 ./tools/build-cso-ui.sh
-python3 tools/prune-mvp-resources.py --game-root dist/csmoe
-# 确认输出的本地资源清单后应用：
-python3 tools/prune-mvp-resources.py --game-root dist/csmoe --apply
-# 已有可写覆盖目录也应同步清理：
-python3 tools/prune-mvp-resources.py --game-root build-cso-ui/run/csmoe --apply
+node tools/check-cso-hud-messages.js
+python3 tools/check-cso-weapon-icons.py
+python3 tools/check-cso-weapon-assets.py
 ./tools/run-cso-ui.sh --check
 ./tools/run-cso-ui.sh --smoke-quit
 ```
 
-资源工具默认只预览；`--apply` 删除明确退役的脚本与旧 HUD 资源、更新精灵表计数、删除旧设置控件和配置项。它不遍历 Steam 的 `cstrike`/`valve` 链接，也不删除共享武器、人物和移动触控素材。对已清理包再次执行应报告零改动。
+- 本轮从空目录完成 Mac arm64 构建；编译动作由上轮 759 条降至 732 条，已删除模块没有进入构建图。最初裁切前的记录为 851 条。
+- 44 项购买目录/命令路由和五组配装测试通过，44 张购买图齐全。
+- HUD 的 11 个 TextMsg、4 个 TeamScore、24 个 Brass 用例与异常包诊断通过。
+- 原有两条声音缺失 `k1a_boltpull.wav`、`mg3-2.wav` 与裁切前一致；两个 `.sc` 名称由原生事件注册，不因此补造文件。
 
-素材和本地依赖不进入 Git；源码提交携带清理工具，不携带资源包。构建脚本产物是 `build-cso-ui/game_launch/CSMoE.app`，日常应用位于 `dist/CSMoE.app`。
-
-## 验证记录
-
-- 从空生成目录完成 Mac arm64 构建；编译动作由原审计的 851 条降到 759 条。已删除模块没有进入构建图，最终二进制未发现 ImGui/Lua 运行时符号。
-- 44 项购买目录的分类、价格/命令路由和五组配装测试通过；44 张彩色购买图齐全。
-- HUD 的 11 个 TextMsg、4 个 TeamScore、24 个 Brass 生产/消费用例与异常包诊断通过。
-- 竞技本地回合和购买、DM/TDM 死亡重生与购买、生化Ⅰ/Ⅱ感染与僵尸武器均完成回归，每种模式确认 1 名本地玩家和 3 名 BOT。
-- 对局冒烟覆盖队伍/人物菜单、M4A1 和 M134 购买与开火、计分板、购买菜单及正常退出，并检查实际截图。
-- 真实 VGUI 控件的五模式下拉菜单、选项点击、取消和设置页打开通过；中文名字输入并应用成功，旧 HUD 风格控件不再出现。此项使用 VGUI 测试输入，不等于系统输入法候选窗口验收。
-
-这些记录不等于所有武器动作、所有地图或外网联机完整验收。武器资源检查仍有原有的 `k1a_boltpull.wav`、`mg3-2.wav` 缺失；与本轮清理前报告一致。原生事件注册的两个 `.sc` 名称无需因此补造同名文件。
-
-应用仍使用本机 Homebrew SDL2/FreeType 和 Steam 基础素材路径；复制到另一台 Mac 即可运行的独立分发包不在本轮验收范围。
+五种模式均完成本地玩家 + 3 个 BOT 回归：竞技购买、DM/TDM 死亡重生与购买、生化Ⅰ/Ⅱ感染均通过。VGUI 控件测试覆盖五模式下拉、菜单选择/取消、中文名字输入与应用，并确认触摸/语音/旧 HUD 选项不再出现。游戏内移动命令已验证能改变角色位置；系统级原生键鼠自动化暂受窗口识别限制，不记为已通过。本地应用仍依赖本机 SDL2/FreeType 和 Steam 基础素材；独立分发包属于交付打包工作，不等于源码裁切。
