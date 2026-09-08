@@ -3958,7 +3958,6 @@ studiohdr_t *R_StudioLoadHeader( model_t *mod, const void *buffer )
 	Mod_StudioBigEndian( mod, phdr );
 #endif
 
-	if( !Host_IsDedicated() )
 	{
 		ptexture = (mstudiotexture_t *)(((byte *)phdr) + phdr->textureindex);
 		if( phdr->textureindex > 0 && phdr->numtextures <= MAXSTUDIOSKINS )

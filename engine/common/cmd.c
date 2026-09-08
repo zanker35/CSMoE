@@ -1103,7 +1103,7 @@ void Cmd_ExecuteString( const char *text, cmd_source_t src )
 #endif
 
 	// forward the command line to the server, so the entity DLL can parse it
-	if( cmd_source != src_client && !Host_IsDedicated() )
+	if(cmd_source != src_client)
 	{
 		if( cls.state >= ca_connected )
 			Cmd_ForwardToServer();

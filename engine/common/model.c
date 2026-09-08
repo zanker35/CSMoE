@@ -543,9 +543,7 @@ void Mod_Init( void )
 	mod_studiocache = Cvar_Get( "r_studiocache", "1", CVAR_ARCHIVE, "enables studio cache for speedup tracing hitboxes" );
 	r_wadtextures = Cvar_Get( "r_wadtextures", "1", CVAR_ARCHIVE, "completely ignore textures in the wad-files if disabled" );
 
-	if( !Host_IsDedicated() )
-		mod_allow_materials = Cvar_Get( "host_allow_materials", "0", CVAR_LATCH|CVAR_ARCHIVE, "allow HD textures" );
-	else mod_allow_materials = NULL; // no reason to load HD-textures for dedicated server
+	{ mod_allow_materials = Cvar_Get( "host_allow_materials", "0", CVAR_LATCH|CVAR_ARCHIVE, "allow HD textures" ); } // no reason to load HD-textures for dedicated server
 
 	Cmd_AddCommand( "mapstats", Mod_PrintBSPFileSizes_f, "show stats for currently loaded map" );
 	Cmd_AddCommand( "modellist", Mod_Modellist_f, "display loaded models list" );

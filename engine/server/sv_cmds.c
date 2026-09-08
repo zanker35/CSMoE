@@ -63,7 +63,7 @@ void SV_BroadcastPrintf( int level, char *fmt, ... )
 	va_end( argptr );
 	
 	// echo to console
-	if( Host_IsDedicated() ) Msg( "%s", string );
+	{  }
 
 	for( i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++ )
 	{
@@ -210,17 +210,7 @@ void SV_Map_f( void )
 		spawn_entity = GI->sp_entity;
 	else spawn_entity = GI->mp_entity;
 
-	if( Host_IsDedicated() && !startingdefmap )
-	{
-		// apply servercfgfile cvar on first dedicated server run
-		if( !host.stuffcmdsrun )
-			Cbuf_Execute();
-
-		// dedicated servers are using settings from server.cfg file
-		Cbuf_AddText( va( "exec %s\n", Cvar_VariableString( "servercfgfile" )));
-	}
-	else
-		startingdefmap = false;
+	{ startingdefmap = false; }
 
 	mapinit = true;
 	// make sure that all configs are executed
@@ -497,16 +487,11 @@ void SV_Load_f( void )
 		return;
 	}
 
-	if( Host_IsDedicated() )
-	{
-		SV_InactivateClients();
-		SV_DeactivateServer();
-	}
+	{  }
 
 	SV_LoadGame( arg );
 
-	if( Host_IsDedicated() )
-		SV_ActivateServer();
+	{  }
 }
 
 /*
@@ -670,7 +655,7 @@ void SV_ChangeLevel_f( void )
 	// bad changelevel position invoke enables in one-way transtion
 	if( sv.net_framenum < 30 )
 	{
-		if( sv_validate_changelevel->integer && !Host_IsDedicated() )
+		if(sv_validate_changelevel->integer)
 		{
 			MsgDev( D_INFO, "SV_ChangeLevel: An infinite changelevel detected.\n" );
 			MsgDev( D_INFO, "Changelevel will be disabled until the next save\\restore.\n" );
@@ -1353,13 +1338,6 @@ void SV_InitOperatorCommands( void )
 	Cmd_AddCommand( "dumpreslist", SV_DumpResList_f, "dump resource list to reslist-dump.txt" );
 	Cmd_AddCommand( "dumpprecache", SV_DumpPrecache_f, "dump precached resources to precache-dump.txt" );
 
-	if( Host_IsDedicated() )
-	{
-		Cmd_AddCommand( "say", SV_ConSay_f, "send a chat message to everyone on the server" );
-		Cmd_AddCommand( "killserver", SV_KillServer_f, "shutdown current server" );
-		Cmd_AddCommand( "startdefaultmap", SV_StartDefaultMap_f, "start default map in dedicated server" );
-	}
-	else
 	{
 		Cmd_AddCommand( "map_background", SV_MapBackground_f, "set background map" );
 	}
@@ -1393,13 +1371,6 @@ void SV_KillOperatorCommands( void )
 	Cmd_RemoveCommand( "entity_info" );
 	Cmd_RemoveCommand( "sendreconnect" );
 
-	if( Host_IsDedicated() )
-	{
-		Cmd_RemoveCommand( "say" );
-		Cmd_RemoveCommand( "killserver" );
-		Cmd_RemoveCommand( "startdefaultmap" );
-	}
-	else
 	{
 		Cmd_RemoveCommand( "map_background" );
 		Cmd_RemoveCommand( "save" );

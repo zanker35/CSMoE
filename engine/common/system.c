@@ -391,8 +391,7 @@ void Sys_MergeCommandLine( )
 	for( i = 0; i < host.argc; i++ )
 	{
 		// second call
-		if( Host_IsDedicated() && !Q_strnicmp( "+menu_", host.argv[i], 6 ))
-			host.argv[i] = (char *)blank;
+		{  }
 	}
 }
 
@@ -588,8 +587,7 @@ void Sys_Warn( const char *format, ... )
 	Q_vsnprintf( text, MAX_SYSPATH, format, argptr );
 	va_end( argptr );
 	Msg( "Sys_Warn: %s\n", text );
-	if( !Host_IsDedicated() ) // dedicated server should not hang on messagebox
-		MSGBOX(text);
+	{ MSGBOX(text); }
 }
 
 /*
@@ -621,7 +619,6 @@ void Sys_Error( const char *format, ... )
 
 	SV_SysError( text );
 
-	if( !Host_IsDedicated() )
 	{
 		if( host.hWnd ) SDL_HideWindow( host.hWnd );
 	}
@@ -668,12 +665,11 @@ void Sys_Break( const char *format, ... )
 	Q_vsnprintf( text, sizeof( text ), format, argptr );
 	va_end( argptr );
 
-	if( !Host_IsDedicated() )
 	{
 		if( host.hWnd ) SDL_HideWindow( host.hWnd );
 	}
 
-	if( Host_IsDedicated() || host.developer > 0 )
+	if(host.developer > 0)
 	{
 #ifdef XASH_W32CON
 		Wcon_ShowConsole( true );
@@ -718,8 +714,7 @@ print into window console
 */
 void Sys_Print( const char *pMsg )
 {
-	if( !Host_IsDedicated() )
-		Con_Print( pMsg );
+	{ Con_Print( pMsg ); }
 
 #ifdef XASH_W32CON
 

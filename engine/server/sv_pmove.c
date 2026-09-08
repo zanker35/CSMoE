@@ -482,8 +482,7 @@ static void GAME_EXPORT pfnPlaybackEventFull( int flags, int clientindex, word e
 	ent = EDICT_NUM( clientindex + 1 );
 	if( !SV_IsValidEdict( ent )) return;
 
-	if( Host_IsDedicated() )
-		flags |= FEV_NOTHOST; // no local clients for dedicated server
+	{  } // no local clients for dedicated server
 
 	SV_PlaybackEventFull( flags, ent, eventindex,
 		delay, origin, angles,

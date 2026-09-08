@@ -270,9 +270,7 @@ static void SDLash_EventFilter( SDL_Event *event )
 		if( event->window.windowID != SDL_GetWindowID( host.hWnd ) )
 			return;
 
-		if( ( host.state == HOST_SHUTDOWN ) ||
-			( host.state == HOST_RESTART )  ||
-			( host.type  == HOST_DEDICATED ) )
+		if((host.state == HOST_SHUTDOWN) || (host.state == HOST_RESTART))
 			break; // no need to activate
 		switch( event->window.event )
 		{

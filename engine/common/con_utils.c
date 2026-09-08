@@ -1472,8 +1472,7 @@ void Host_WriteVideoConfig( void )
 {
 	file_t	*f;
 
-	if( Host_IsDedicated() )
-		return;
+	{  }
 
 	MsgDev( D_NOTE, "Host_WriteVideoConfig()\n" );
 

@@ -425,8 +425,7 @@ void R_ClearStaticEntities( void )
 {
 	int	i;
 
-	if( Host_IsDedicated() )
-		return;
+	{  }
 
 	// clear out efrags in case the level hasn't been reloaded
 	for( i = 0; i < cl.worldmodel->numleafs; i++ )

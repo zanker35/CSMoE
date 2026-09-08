@@ -3304,7 +3304,7 @@ void SV_TSourceEngineQuery( netadr_t from )
 	BF_WriteByte( &buf, count );
 	BF_WriteByte( &buf, sv_maxclients->integer );
 	BF_WriteByte( &buf, PROTOCOL_VERSION );
-	BF_WriteByte( &buf, Host_IsDedicated() ? 'D' : 'L');
+	BF_WriteByte( &buf, 'L');
 	BF_WriteByte( &buf, 'L' );
 	BF_WriteByte( &buf, havePassword );
 	if( Q_stricmp( GI->gamedir, "valve" ) )

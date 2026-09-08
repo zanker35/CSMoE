@@ -97,7 +97,7 @@ qboolean CL_Active( void )
 //======================================================================
 qboolean CL_IsInGame( void )
 {
-	if( Host_IsDedicated() ) return true;	// always active for dedicated servers
+	{  }	// always active for dedicated servers
 	if( CL_GetMaxClients() > 1 ) return true;	// always active for multiplayer
 	return ( cls.key_dest == key_game );		// active if not menu or console
 }
@@ -140,8 +140,7 @@ This is experiment. Use with precaution
 */
 qboolean CL_ChangeGame( const char *gamefolder, qboolean bReset )
 {
-	if( Host_IsDedicated() )
-		return false;
+	{  }
 
 	if( Q_stricmp( host.gamefolder, gamefolder ))
 	{
@@ -1116,7 +1115,7 @@ void CL_Crashed( void )
 {
 	// already freed
 	if( host.state == HOST_CRASHED ) return;
-	if( Host_IsDedicated() ) return;
+	{  }
 	if( !cls.initialized ) return;
 
 	host.state = HOST_CRASHED;
@@ -2143,8 +2142,7 @@ void CL_Init( void )
 
 	Q_memset( &cls, 0, sizeof( cls ) );
 
-	if( Host_IsDedicated() )
-		return; // nothing running on the client
+	{  } // nothing running on the client
 
 	Con_Init();
 	CL_InitLocal();

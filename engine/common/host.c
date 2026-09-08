@@ -77,7 +77,6 @@ void Sys_PrintUsage( void )
 	O("-nowriteconfig   ","disable config save")
 	O("-casesensitive   ","disable case-insensitive FS emulation")
 	#ifndef XASH_MOBILE_PLATFORM
-		O("-daemonize       ", "run engine in background(only for dedicated)")
 	#endif
 
 		O("-width <n>       ","specifies width of engine window")
@@ -86,11 +85,9 @@ void Sys_PrintUsage( void )
 		O("-fullscreen      ","runs engine in fullscreen mode")
 		O("-windowed        ","runs engine in windowed mode")
 
-		O("-nojoy           ","disable joystick support")
 		O("-nosound         ","disable sound")
 		O("-noenginemouse   ","disable mouse completely")
 	#ifndef XASH_MOBILE_PLATFORM
-			O("-dedicated       ","run in dedicated server mode")
 	#endif
 
 
@@ -202,8 +199,7 @@ void Host_EndGame( const char *message, ... )
 		return;
 	}
 	
-	if( Host_IsDedicated() )
-		Sys_Break( "Host_EndGame: %s\n", string ); // dedicated servers exit
+	{  } // dedicated servers exit
 
 	SV_Shutdown( false );
 	CL_Disconnect();
@@ -428,8 +424,7 @@ void Host_Minimize_f( void )
 
 qboolean Host_IsLocalGame( void )
 {
-	if( Host_IsDedicated() )
-		return false;
+	{  }
 	if( CL_Active() && SV_Active() && CL_GetMaxClients() == 1 )
 		return true;
 	return false;
@@ -681,13 +676,6 @@ void Host_Autosleep( void )
 {
 	int sleeptime = host_sleeptime->integer;
 
-	if( Host_IsDedicated() )
-	{
-		// let the dedicated server some sleep
-		Sys_Sleep( sleeptime );
-
-	}
-	else
 	{
 		if( host.state == HOST_NOFOCUS )
 		{
@@ -737,8 +725,7 @@ void Host_Frame( float time )
 
 	Host_ServerFrame (); // server frame
 
-	if ( !Host_IsDedicated() )
-		Host_ClientFrame (); // client frame
+	{ Host_ClientFrame (); } // client frame
 
 	HTTP_Run();
 
@@ -1053,14 +1040,7 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		else host.developer++; // -dev == 1, -dev -console == 2
 	}
 
-	if( Sys_CheckParm("-dedicated") || progname[0] == '#' )
-	{
-		host.type = HOST_DEDICATED;
-	}
-	else
-	{
-		host.type = HOST_NORMAL;
-	}
+	host.type = HOST_NORMAL;
 
 	host.con_showalways = true;
 	host.mouse_visible = false;
@@ -1070,10 +1050,8 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 
 	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_EVENTS ) )
 	{
-		Sys_Warn( "SDL_Init failed: %s", SDL_GetError() );
-		host.type = HOST_DEDICATED;
+		Sys_Error( "SDL_Init failed: %s", SDL_GetError() );
 	}
-	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
 
 	if ( !host.rootdir[0] || SetCurrentDirectory( host.rootdir ) != 0)
 		MsgDev( D_INFO, "%s is working directory now\n", host.rootdir );
@@ -1083,16 +1061,8 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	Sys_InitLog();
 
 	// set default gamedir
-	if( progname[0] == '#' ) progname++;
 	Q_strncpy( SI.ModuleName, progname, sizeof( SI.ModuleName ));
 
-	if( Host_IsDedicated() )
-	{
-		Sys_MergeCommandLine( );
-
-		if( host.developer < 3 ) host.developer = 3; // otherwise we see empty console
-	}
-	else
 	{
 		// don't show console as default
 		if( host.developer < D_WARN ) host.con_showalways = false;
@@ -1212,7 +1182,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	Cvar_Get( "violence_agibs", "1", CVAR_ARCHIVE, "show alien gib entities" );
 	Cvar_Get( "violence_hblood", "1", CVAR_ARCHIVE, "draw human blood" );
 	Cvar_Get( "violence_ablood", "1", CVAR_ARCHIVE, "draw alien blood" );
-	if( !Host_IsDedicated() )
 	{
 		// when we're in developer-mode, automatically turn cheats on
 		if( host.developer > 1 ) Cvar_SetFloat( "sv_cheats", 1.0f );
@@ -1243,46 +1212,12 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	ID_Init();
 
 	// post initializations
-	switch( host.type )
-	{
-	case HOST_NORMAL:
-#ifdef XASH_W32CON
-		Wcon_ShowConsole( false ); // hide console
-#endif
-		// execute startup config and cmdline
-		Cbuf_AddText( va( "exec %s.rc\n", GI->gamefolder ) );
-		CSCR_LoadDefaultCVars( "settings.scr" );
-		CSCR_LoadDefaultCVars( "user.scr" );
-		// intentional fallthrough
-	case HOST_DEDICATED:
-		//Cbuf_Execute(); // force stuffcmds run if it is in cbuf
-		// if stuffcmds wasn't run, then init.rc is probably missing, use default
-		if( !FS_FileExists( va( "%s.rc\n", SI.ModuleName ), false ) ) Cbuf_AddText( "stuffcmds\n" );
+	Cbuf_AddText( va( "exec %s.rc\n", GI->gamefolder ) );
+	CSCR_LoadDefaultCVars( "settings.scr" );
+	CSCR_LoadDefaultCVars( "user.scr" );
+	if( !FS_FileExists( va( "%s.rc\n", SI.ModuleName ), false ) )
+		Cbuf_AddText( "stuffcmds\n" );
 
-		break;
-	case HOST_UNKNOWN:
-		break;
-	}
-
-	if( Host_IsDedicated() )
-	{
-		Cmd_AddCommand( "quit", Sys_Quit, "quit the game" );
-		Cmd_AddCommand( "exit", Sys_Quit, "quit the game" );
-
-		SV_InitGameProgs();
-
-		Cbuf_AddText( "exec config.cfg\n" );
-
-		if( !Sys_CheckParm( "+map" ) )
-				Cbuf_AddText( "startdefaultmap" );
-
-		Cvar_FullSet( "xashds_hacks", "0", CVAR_READ_ONLY );
-
-		Cbuf_Execute(); // apply port cvar
-
-		NET_Config( true, true );
-	}
-	else
 	{
 		Cmd_AddCommand( "minimize", Host_Minimize_f, "minimize main window to taskbar" );
 		Cbuf_AddText( "exec config.cfg\n" );
@@ -1302,8 +1237,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	Cmd_RemoveCommand( "setgl" );
 
 	// we need to execute it again here
-	if( !Host_IsDedicated() )
-		Cmd_ExecuteString( "exec config.cfg\n", src_command );
+	{ Cmd_ExecuteString( "exec config.cfg\n", src_command ); }
 
 	Cbuf_Execute();
 
@@ -1342,13 +1276,12 @@ void EXPORT Host_Shutdown( void )
 	case HOST_INIT:
 	case HOST_CRASHED:
 	case HOST_ERR_FATAL:
-		if( !Host_IsDedicated() )
-			MsgDev( D_WARN, "Not shutting down normally (%d), skipping config save!\n", host.state );
+		{ MsgDev( D_WARN, "Not shutting down normally (%d), skipping config save!\n", host.state ); }
 		if( host.state != HOST_ERR_FATAL)
 			host.state = HOST_SHUTDOWN;
 		break;
 	default:
-		if( !Host_IsDedicated() && !host.skip_configs )
+		if(!(host.skip_configs))
 		{
 			// restore all latched cheat cvars
 			Cvar_SetCheatState( true );

@@ -119,7 +119,7 @@ IN_StartupMouse
 
 void IN_StartupMouse( void )
 {
-	if( Host_IsDedicated() ) return;
+	{  }
 
 	m_ignore = Cvar_Get( "m_ignore", DEFAULT_M_IGNORE, CVAR_ARCHIVE , "ignore mouse events" );
 

@@ -1020,12 +1020,11 @@ static void NET_OpenIP( qboolean changeport )
 		}
 
 		ip_sockets[NS_SERVER] = NET_IPSocket( net_ip->string, port );
-		if( !ip_sockets[NS_SERVER] && Host_IsDedicated() )
-			Host_Error( "Couldn't allocate dedicated server IP port.\nMaybe you're trying to run dedicated server twice?\n" );
+		{  }
 	}
 
 	// dedicated servers don't need client ports
-	if( Host_IsDedicated() ) return;
+	{  }
 
 	if( changeport && ( net_clientport->modified || cl_nat ) )
 	{
@@ -1149,12 +1148,12 @@ void NET_Config( qboolean multiplayer, qboolean changeport )
 	static qboolean old_config;
 	static qboolean bFirst = true;
 
-	if( old_config == multiplayer && !Host_IsDedicated() && ( SV_Active() || CL_Active() ) )
+	if((old_config == multiplayer) && ((SV_Active()) || (CL_Active())))
 		return;
 
 	old_config = multiplayer;
 
-	if( !multiplayer && !Host_IsDedicated() )
+	if(!(multiplayer))
 	{	
 		int	i;
 

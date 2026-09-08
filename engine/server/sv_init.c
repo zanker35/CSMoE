@@ -351,16 +351,12 @@ void SV_ActivateServer( void )
 	else
 	{
 		// clear the ugly moving delay in singleplayer
-		if( !Host_IsDedicated() )
-			Cvar_SetFloat( "clockwindow", 0.0f );
+		{ Cvar_SetFloat( "clockwindow", 0.0f ); }
 		MsgDev( D_INFO, "Game started\n" );
 	}
 	Log_Printf( "Started map \"%s\" (CRC \"0\")\n", STRING( svgame.globals->mapname ) );
 
-	if( Host_IsDedicated() )
-	{
-		Mod_FreeUnused ();
-	}
+	{  }
 
 	sv.state = ss_active;
 	physinfo->modified = true;
@@ -372,7 +368,6 @@ void SV_ActivateServer( void )
 	if( sv_maxclients->integer > 1 )
 	{
 		// listenserver is executed on every map change in multiplayer
-		if( !Host_IsDedicated() )
 		{
 			char *plservercfgfile = Cvar_VariableString( "lservercfgfile" );
 			if( *plservercfgfile )
@@ -676,11 +671,7 @@ void SV_InitGame( void )
 
 	// dedicated servers are can't be single player and are usually DM
 	// so unless they explicity set coop, force it to deathmatch
-	if( Host_IsDedicated() )
-	{
-		if( !Cvar_VariableValue( "coop" ) && !Cvar_VariableValue( "teamplay" ))
-			Cvar_FullSet( "deathmatch", "1",  CVAR_LATCH );
-	}
+	{  }
 
 	// init clients
 	if( Cvar_VariableValue( "deathmatch" ) || Cvar_VariableValue( "teamplay" ))

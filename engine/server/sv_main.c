@@ -1008,8 +1008,7 @@ void SV_Shutdown( qboolean reconnect )
 	// rcon will be disconnected
 	SV_EndRedirect();
 
-	if( Host_IsDedicated() )
-		MsgDev( D_INFO, "SV_Shutdown: %s\n", host.finalmsg );
+	{  }
 
 	if( svs.clients )
 		SV_FinalMessage( host.finalmsg, reconnect );

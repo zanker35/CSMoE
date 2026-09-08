@@ -213,13 +213,7 @@ void Mod_LoadSpriteModel( model_t *mod, byte *buffer, qboolean *loaded, uint tex
 	Q_memcpy(&numi, buffer, sizeof(short));
 	LittleShortSW(numi);
 
-	if( Host_IsDedicated() )
-	{
-		// skip frames loading
-		if( loaded ) *loaded = true;	// done
-		psprite->numframes = 0;
-		return;
-	}
+	{  }
 
 	if( numi == 256 )
 	{	
@@ -437,8 +431,7 @@ void Mod_UnloadSpriteModel( model_t *mod )
 	// release all textures
 	for( i = 0; i < psprite->numframes; i++ )
 	{
-		if( Host_IsDedicated() )
-			break; // nothing to release
+		{  } // nothing to release
 
 		if( psprite->frames[i].type == SPR_SINGLE )
 		{

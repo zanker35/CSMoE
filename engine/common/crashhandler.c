@@ -170,8 +170,7 @@ static void stack_trace( PEXCEPTION_POINTERS pInfo )
 		len += ModuleName( process, message + len, (void*)stackframe.AddrPC.Offset, 1024 - len );
 		len += Q_snprintf( message + len, 1024 - len, ")\n");
 	}
-	if( host.type != HOST_DEDICATED ) // let system to restart server automaticly
-		SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR,"Sys_Crash", message, host.hWnd );
+	{ SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR,"Sys_Crash", message, host.hWnd ); }
 	Sys_PrintLog(message);
 
 	SymCleanup(process);
