@@ -24,13 +24,13 @@ function extractFunction(relativePath, signature) {
 }
 
 const handlers = [
-  ["cl_dll/hud/text_message.cpp", "void StripEndNewlineFromString("],
-  ["cl_dll/hud/text_message.cpp", "char* ConvertCRtoNL("],
-  ["cl_dll/hud/text_message.cpp", "int CHudTextMessage::MsgFunc_TextMsg("],
-  ["cl_dll/hud/scoreboard.cpp", "int CHudScoreboard::MsgFunc_TeamScore("],
-  ["cl_dll/hud/ammo.cpp", "int CHudAmmo::MsgFunc_Brass("],
+  ["src/game/client/hud/text_message.cpp", "void StripEndNewlineFromString("],
+  ["src/game/client/hud/text_message.cpp", "char* ConvertCRtoNL("],
+  ["src/game/client/hud/text_message.cpp", "int CHudTextMessage::MsgFunc_TextMsg("],
+  ["src/game/client/hud/scoreboard.cpp", "int CHudScoreboard::MsgFunc_TeamScore("],
+  ["src/game/client/hud/ammo.cpp", "int CHudAmmo::MsgFunc_Brass("],
 ].map(([file, signature]) => extractFunction(file, signature)).join("\n");
-const brassProducer = extractFunction("dlls/weapons.cpp", "void EjectBrass(");
+const brassProducer = extractFunction("src/game/server/combat/weapons.cpp", "void EjectBrass(");
 
 const harness = String.raw`
 #include <cassert>
@@ -46,7 +46,7 @@ const harness = String.raw`
 static int readerErrors;
 static void ReaderDiagnostic(const char *, ...) { ++readerErrors; }
 struct Engine { void (*Con_DPrintf)(const char *, ...); } gEngfuncs{ReaderDiagnostic};
-#include "cl_dll/parsemsg.h"
+#include "game/client/runtime/parsemsg.h"
 
 #define stricmp strcasecmp
 #define TRUE 1
@@ -210,7 +210,7 @@ int main() {
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "csmoe-hud-messages-"));
 const executable = path.join(temporary, "hud-messages-test");
 try {
-  const compiled = spawnSync("c++", ["-std=c++17", "-fsanitize=address", "-fno-omit-frame-pointer", "-I", root, "-x", "c++", "-", "-o", executable], {
+  const compiled = spawnSync("c++", ["-std=c++17", "-fsanitize=address", "-fno-omit-frame-pointer", "-I", path.join(root, "src"), "-I", path.join(root, "vendor"), "-x", "c++", "-", "-o", executable], {
     input: harness, encoding: "utf8",
   });
   if (compiled.status !== 0) {

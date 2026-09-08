@@ -20,8 +20,8 @@ case_file = runpy.run_path(str(REPO / "tools/check-cso-ui-assets.py"))["case_fil
 
 def catalogue():
     source = r'''
-#include "cl_dll/vgui2/csmoe/BuyMenu/weaponcatalog.h"
-#include "cl_dll/vgui2/csmoe/BuyMenu/weaponimagepath.h"
+#include "game/client/menus/csmoe/BuyMenu/weaponcatalog.h"
+#include "game/client/menus/csmoe/BuyMenu/weaponimagepath.h"
 #include <iostream>
 int main() {
     for (const auto &weapon : GetBuyMenuWeapons())
@@ -34,8 +34,7 @@ int main() {
         cpp, executable = folder / "catalogue.cpp", folder / "catalogue"
         cpp.write_text(source)
         subprocess.run([os.environ.get("CXX", "c++"), "-std=c++17",
-                        "-I", str(REPO), "-I", str(REPO / "dlls"),
-                        "-I", str(REPO / "public"), str(cpp), "-o", str(executable)], check=True)
+                        "-I", str(REPO / "src"), "-I", str(REPO / "vendor"), str(cpp), "-o", str(executable)], check=True)
         return [line.split("\t") for line in subprocess.check_output([str(executable)], text=True).splitlines()]
 
 

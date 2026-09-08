@@ -38,13 +38,18 @@ def main():
     def found(asset):
         return any(case_file(root, asset) for root in roots)
 
-    cmake = (REPO / "dlls/CMakeLists.txt").read_text()
+    cmake = (REPO / "src/game/server/CMakeLists.txt").read_text()
     files = {
-        REPO / "dlls" / relative.removeprefix("../dlls/")
-        for relative in re.findall(r'\.\./dlls/wpn_shared/[^\s)]+\.cpp', cmake)
+        REPO / relative
+        for relative in re.findall(r'\$\{CMAKE_SOURCE_DIR\}/(src/game/shared/weapons/[^"\s)]+\.cpp)', cmake)
     }
     weapon_count = len(files)
-    files.update(REPO / "dlls" / filename for filename in ("weapons_precache.cpp", "ammo.cpp", "items.cpp"))
+    if not weapon_count:
+        raise RuntimeError("No weapon sources found in the server CMake list")
+    files.update(REPO / relative for relative in (
+        "src/game/server/combat/weapons_precache.cpp",
+        "src/game/server/combat/ammo.cpp",
+        "src/game/server/entities/items.cpp"))
     references = defaultdict(set)
     direct_precache = set()
     for source in sorted(files):

@@ -6,7 +6,7 @@
 # This module responds to the the flag:
 # SDL2_BUILDING_LIBRARY
 # If this is defined, then no SDL2main will be linked in because
-# only applications need main().
+# only applications need main()"${CMAKE_SOURCE_DIR}/cmake"
 # Otherwise, it is assumed you are building an application and this
 # module will attempt to locate and set the the proper link flags
 # as part of the returned SDL2_LIBRARY variable.
@@ -19,7 +19,7 @@
 #
 # Additional Note: If you see an empty SDL2_LIBRARY_TEMP in your configuration
 # and no SDL2_LIBRARY, it means CMake did not find your SDL2 library
-# (SDL2.dll, libsdl2.so, SDL2.framework, etc).
+# (SDL2.dll, libsdl2.so, SDL2.framework, etc)"${CMAKE_SOURCE_DIR}/cmake"
 # Set SDL2_LIBRARY_TEMP to point to your SDL2 library, and configure again.
 # Similarly, if you see an empty SDL2MAIN_LIBRARY, you should set this value
 # as appropriate. These values are used to generate the final SDL2_LIBRARY
@@ -35,7 +35,7 @@
 # Added code to assist with automated building by using environmental variables
 # and providing a more controlled/consistent search behavior.
 # Added new modifications to recognize OS X frameworks and
-# additional Unix paths (FreeBSD, etc).
+# additional Unix paths (FreeBSD, etc)"${CMAKE_SOURCE_DIR}/cmake"
 # Also corrected the header search path to follow "proper" SDL guidelines.
 # Added a search for SDL2main which is needed by some platforms.
 # Added a search for threads which is needed by some platforms.
@@ -49,7 +49,7 @@
 # Note that the header path has changed from SDL2/SDL.h to just SDL.h
 # This needed to change because "proper" SDL convention
 # is #include "SDL.h", not <SDL2/SDL.h>. This is done for portability
-# reasons because not all systems place things in SDL2/ (see FreeBSD).
+# reasons because not all systems place things in SDL2/ (see FreeBSD)"${CMAKE_SOURCE_DIR}/cmake"
 
 #=============================================================================
 # Copyright 2003-2009 Kitware, Inc.

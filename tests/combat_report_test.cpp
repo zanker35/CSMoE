@@ -1,4 +1,4 @@
-#include "../game_shared/combat_report.h"
+#include "game/shared/data/combat_report.h"
 #include <cassert>
 #include <iostream>
 

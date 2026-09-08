@@ -1,0 +1,35 @@
+//========= Copyright ?1996-2005, Valve Corporation, All rights reserved. ============//
+//
+// Purpose: 
+//
+// $NoKeywords: $
+//=============================================================================//
+
+#ifndef DIVIDER_H
+#define DIVIDER_H
+
+
+#include "ui/vgui2/vgui_controls/Panel.h"
+
+namespace vgui2
+{
+
+//-----------------------------------------------------------------------------
+// Purpose: Thin line used to divide sections in dialogs
+//-----------------------------------------------------------------------------
+class Divider : public Panel
+{
+	DECLARE_CLASS_SIMPLE( Divider, Panel );
+
+public:
+	Divider(Panel *parent, const char *name);
+	~Divider();
+
+	virtual void ApplySchemeSettings(IScheme *pScheme);
+};
+
+
+} // namespace vgui
+
+
+#endif // DIVIDER_H

@@ -1,0 +1,34 @@
+#ifndef CURSOR_H
+#define CURSOR_H
+
+
+#include "ui/vgui2/interfaces/vgui/VGUI.h"
+
+namespace vgui2
+{
+
+enum CursorCode
+{
+	dc_user,
+	dc_none,
+	dc_arrow,
+	dc_ibeam,
+	dc_hourglass,
+	dc_waitarrow,
+	dc_crosshair,
+	dc_up,
+	dc_sizenwse,
+	dc_sizenesw,
+	dc_sizewe,
+	dc_sizens,
+	dc_sizeall,
+	dc_no,
+	dc_hand,
+	dc_blank,
+	dc_last,
+};
+
+typedef unsigned long HCursor;
+}
+
+#endif
