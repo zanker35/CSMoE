@@ -18,9 +18,6 @@
 // for displaying a server-sent message of the day
 //
 
-#ifdef _WIN32
-#include "port.h"
-#endif
 
 #include "hud.h"
 #include "cl_util.h"

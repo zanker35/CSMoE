@@ -28,9 +28,6 @@
 #include <time.h>
 #include <fcntl.h>
 #endif
-#ifdef ANDROID
-#include <linux/stat.h>
-#endif
 
 #include "tier0/memdbgon.h"
 // Benchmark mode uses this heavy-handed method 
@@ -682,10 +679,6 @@ PLATFORM_INTERFACE uint64 Plat_Rdtsc()
 	return t.tv_sec * 1000000000ULL + t.tv_nsec;
 #elif defined( _X360 )
 	return (uint64)__mftb32();
-#elif defined( _WIN32 )
-	LARGE_INTEGER ret;
-	QueryPerformanceCounter(&ret);
-	return ret.QuadPart;
 #elif defined( __i386__ )
 	uint64 val;
 	__asm__ __volatile__("rdtsc" : "=A" (val));

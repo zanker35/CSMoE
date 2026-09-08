@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -469,13 +468,11 @@ void CL_CreateCmd( void )
 
 	active = ( cls.state == ca_active && !cl.refdef.paused && !cls.demoplayback );
 
-#ifdef XASH_SDL
 	if( m_ignore->integer )
 	{
 		int x, y;
 		SDL_GetRelativeMouseState( &x, &y );
 	}
-#endif
 
 	clgame.dllFuncs.CL_CreateMove( cl.time - cl.oldtime, &pcmd->cmd, active );
 	CL_PopPMStates();
@@ -1727,9 +1724,7 @@ void CL_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 			Msg( "Command packet from remote host. Ignored.\n" );
 			return;
 		}
-#ifdef XASH_SDL
 		SDL_RestoreWindow( host.hWnd );
-#endif
 		args = BF_ReadString( msg );
 		Cbuf_AddText( args );
 		Cbuf_AddText( "\n" );
@@ -2428,4 +2423,3 @@ void CL_Shutdown( void )
 	S_Shutdown ();
 	R_Shutdown ();
 }
-#endif // XASH_DEDICATED

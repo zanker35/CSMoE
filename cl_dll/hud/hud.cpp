@@ -18,9 +18,6 @@
 // implementation of CHud class
 //
 
-#ifdef _WIN32
-#include "basetypes.h"
-#endif
 
 #include <new>
 
@@ -141,11 +138,6 @@ int __MsgFunc_ServerName( const char *name, int size, void *buf )
 	return 1;
 }
 
-#ifdef __ANDROID__
-bool evdev_open = false;
-void __CmdFunc_MouseSucksOpen( void ) { evdev_open = true; }
-void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
-#endif
 
 
 // This is called every time the DLL is loaded
@@ -154,10 +146,6 @@ void CHud :: Init( void )
 	HOOK_COMMAND( "special", InputCommandSpecial );
 	//HOOK_COMMAND( "gunsmoke", GunSmoke );
 
-#ifdef __ANDROID__
-	HOOK_COMMAND( "evdev_mouseopen", MouseSucksOpen );
-	HOOK_COMMAND( "evdev_mouseclose", MouseSucksClose );
-#endif
 	
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
@@ -190,9 +178,6 @@ void CHud :: Init( void )
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 	cl_predict   = gEngfuncs.pfnGetCvarPointer( "cl_predict" );
-#ifdef __ANDROID__
-	cl_android_force_defaults  = CVAR_CREATE( "cl_android_force_defaults", "1", FCVAR_ARCHIVE );
-#endif
 	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );

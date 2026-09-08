@@ -14,11 +14,6 @@
 ****/
 #if !defined( PARTICLEDEF_H )
 #define PARTICLEDEF_H
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 typedef enum {
 	pt_static, 

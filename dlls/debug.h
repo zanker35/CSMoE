@@ -28,9 +28,6 @@
 
 #ifndef DEBUG_H
 #define DEBUG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 const int NUM_LEVELS = 6;
 const int DebugBufferSize = 1024;

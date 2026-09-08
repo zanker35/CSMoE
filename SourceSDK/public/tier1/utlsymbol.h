@@ -9,9 +9,6 @@
 #ifndef UTLSYMBOL_H
 #define UTLSYMBOL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier0/threadtools.h"
 #include "tier1/utlrbtree.h"
@@ -204,11 +201,7 @@ public:
 	}
 	
 private:
-#if defined(WIN32) || defined(_WIN32)
-	mutable CThreadSpinRWLock m_lock;
-#else
 	mutable CThreadRWLock m_lock;
-#endif
 };
 
 

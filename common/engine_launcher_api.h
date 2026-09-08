@@ -8,11 +8,6 @@
 // engine/launcher interface
 #if !defined( ENGINE_LAUNCHER_APIH )
 #define ENGINE_LAUNCHER_APIH
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 //typedef void ( *xcommand_t ) ( void );
 
@@ -86,17 +81,6 @@ typedef struct engine_api_s
 	void    ( *EngineTakingFocus )			( void );
 	void    ( *LauncherTakingFocus )		( void );
 
-#ifdef _WIN32
-	// Only filled in by rendertype RENDERTYPE_HARDWARE
-	void	( *GL_Init )					( void );
-	int		( *GL_SetMode )					( HWND hwndGame, HDC *pmaindc, HGLRC *pbaseRC, int fD3D, const char *p, const char *pszCmdLine );
-	void	( *GL_Shutdown )				( HWND hwnd, HDC hdc, HGLRC hglrc );
-
-	void	( *QGL_D3DShared )				( struct tagD3DGlobals *d3dGShared );
-
-	int		( WINAPI *glSwapBuffers )		( HDC dc );
-	void	( *DirectorProc ) ( unsigned int cmd, void * params );
-#else
 	// NOT USED IN LINUX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	void	( *GL_Init )					( void );
 	void	( *GL_SetMode )					( void );
@@ -105,7 +89,6 @@ typedef struct engine_api_s
 	void	( *glSwapBuffers )				( void );
 	void	( *DirectorProc )				( void );
 	// LINUX
-#endif
 
 } engine_api_t;
 

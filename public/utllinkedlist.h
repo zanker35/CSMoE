@@ -12,9 +12,6 @@
 #ifndef UTLLINKEDLIST_H
 #define UTLLINKEDLIST_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "UtlMemory.h"
 

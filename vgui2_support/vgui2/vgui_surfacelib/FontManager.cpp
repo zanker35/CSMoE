@@ -12,9 +12,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
-#ifdef WIN32
-extern bool s_bSupportsUnicode;
-#endif
 
 #if !defined( _X360 )
 #define MAX_INITIAL_FONTS	100
@@ -489,19 +486,7 @@ struct FallbackFont_t
 	const char *fallbackFont;
 };
 
-#ifdef WIN32
-const char *g_szValidAsianFonts[] = { "Marlett", NULL};
-// list of how fonts fallback
-FallbackFont_t g_FallbackFonts[] =
-{
-	{ "Times New Roman", "Courier New" },
-	{ "Courier New", "Courier" },
-	{ "Verdana", "Arial" },
-	{ "Trebuchet MS", "Arial" },
-	{ "Tahoma", NULL },
-	{ NULL, "Tahoma" },		// every other font falls back to this
-};
-#elif defined(OSX)
+#if   defined(OSX)
 static const char *g_szValidAsianFonts[] = { "Apple Symbols", "PingFangSC-Regular", NULL };
 // list of how fonts fallback
 FallbackFont_t g_FallbackFonts[] =
@@ -574,10 +559,7 @@ const char *CFontManager::GetFallbackFontName(const char *windowsFontName)
 //-----------------------------------------------------------------------------
 const char *CFontManager::GetForeignFallbackFontName()
 {
-#ifdef WIN32
-	// tahoma has all the necessary characters for asian/russian languages for winXP/2K+
-	return "Tahoma";
-#elif defined(OSX)
+#if   defined(OSX)
 	return "Helvetica";
 #elif defined(LINUX)
 	return "WenQuanYi Zen Hei";

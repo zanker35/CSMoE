@@ -1,8 +1,5 @@
 #ifndef _HTMLWINDOW_H_
 #define _HTMLWINDOW_H_
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include <vgui/IHTML.h>

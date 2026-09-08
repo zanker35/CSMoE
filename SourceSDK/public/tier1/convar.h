@@ -12,9 +12,6 @@
 #ifndef CONVAR_H
 #define CONVAR_H
 
-#if _WIN32
-#pragma once
-#endif
 
 #include "tier0/dbg.h"
 #include "tier1/iconvar.h"
@@ -22,9 +19,7 @@
 #include "tier1/utlstring.h"
 #include "icvar.h"
 
-#ifdef _WIN32
-#define FORCEINLINE_CVAR FORCEINLINE
-#elif POSIX
+#if   POSIX
 #define FORCEINLINE_CVAR inline
 #else
 #error "implement me"
@@ -627,9 +622,6 @@ void ConVar_PrintDescription( const ConCommandBase *pVar );
 //-----------------------------------------------------------------------------
 // Purpose: Utility class to quickly allow ConCommands to call member methods
 //-----------------------------------------------------------------------------
-#ifdef _WIN32
-#pragma warning (disable : 4355 )
-#endif
 
 template< class T >
 class CConCommandMemberAccessor : public ConCommand, public ICommandCallback, public ICommandCompletionCallback
@@ -676,9 +668,6 @@ private:
 	FnMemberCommandCompletionCallback_t m_CompletionFunc;
 };
 
-#ifdef _WIN32
-#pragma warning ( default : 4355 )
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Utility macros to quicky generate a simple console command

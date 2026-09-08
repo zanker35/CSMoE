@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef MOD_ZB1_H
 #define MOD_ZB1_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "mod_base.h"
 #include "zb1/zb1_zclass.h"

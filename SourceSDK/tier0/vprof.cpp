@@ -10,27 +10,13 @@
 #include "tier0/memalloc.h"
 #include "tier0/valve_off.h"
 
-#if defined(_WIN32) && !defined(_X360)
-#define WIN_32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 
 #include <assert.h>
 
-#ifdef _WIN32
-#pragma warning(disable:4073)
-#pragma init_seg( lib )
-#pragma warning(push, 1)
-#pragma warning(disable:4786)
-#pragma warning(disable:4530)
-#endif
 
 #include <map>
 #include <vector>
 #include <algorithm>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include "tier0/valve_on.h"
 #include "tier0/vprof.h"
@@ -1738,9 +1724,6 @@ void CVProfile::SpewWorstMultiFrame()
 
 #ifdef DBGFLAG_VALIDATE
 
-#ifdef _WIN64
-#error the below is presumably broken on 64 bit
-#endif // _WIN64
 
 const int k_cSTLMapAllocOffset = 4;
 #define GET_INTERNAL_MAP_ALLOC_PTR( pMap ) \

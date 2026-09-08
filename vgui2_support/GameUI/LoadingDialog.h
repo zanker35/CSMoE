@@ -1,9 +1,6 @@
 #ifndef LOADINGDIALOG_H
 #define LOADINGDIALOG_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/Frame.h>
 #include <vgui_controls/HTML.h>

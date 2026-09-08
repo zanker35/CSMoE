@@ -4610,13 +4610,7 @@ void Panel::PreparePanelMap( PanelMap_t *panelMap )
 //-----------------------------------------------------------------------------
 void Panel::OnDelete()
 {
-#ifdef WIN32
-	Assert( IsX360() || ( IsPC() && _heapchk() == _HEAPOK ) );
-#endif
 	delete this;
-#ifdef WIN32
-	Assert( IsX360() || ( IsPC() && _heapchk() == _HEAPOK ) );
-#endif
 }
 
 //-----------------------------------------------------------------------------

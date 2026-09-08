@@ -28,9 +28,6 @@
 
 #ifndef NAV_NODE_H
 #define NAV_NODE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

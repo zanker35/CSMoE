@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -1778,7 +1777,6 @@ void R_DrawStaticBrushes( void )
 	}
 }
 
-#ifndef XASH_QINDIEGL
 /*
 ==============================
 
@@ -2479,11 +2477,9 @@ static void R_AdditionalPasses( vboarray_t *vbo, int indexlen, void *indexarray,
 		pglScalef( glt->xscale, glt->yscale, 1 );
 
 		// draw
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 		if( pglDrawRangeElements )
 			pglDrawRangeElements( GL_TRIANGLES, 0, vbo->array_len, indexlen, GL_UNSIGNED_SHORT, indexarray );
 		else
-#endif
 		pglDrawElements( GL_TRIANGLES, indexlen, GL_UNSIGNED_SHORT, indexarray );
 
 
@@ -2521,11 +2517,9 @@ Draw array for given vbotexture_t. build and draw dynamic lightmaps if present
 */
 static void R_DrawLightmappedVBO( vboarray_t *vbo, vbotexture_t *vbotex, texture_t *texture, int lightmap, qboolean skiplighting )
 {
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 	if( pglDrawRangeElements )
 		pglDrawRangeElements( GL_TRIANGLES, 0, vbo->array_len, vbotex->curindex, GL_UNSIGNED_SHORT, vbotex->indexarray );
 	else
-#endif
 	pglDrawElements( GL_TRIANGLES, vbotex->curindex, GL_UNSIGNED_SHORT, vbotex->indexarray );
 
 	R_AdditionalPasses( vbo, vbotex->curindex, vbotex->indexarray, texture, false );
@@ -2538,11 +2532,9 @@ static void R_DrawLightmappedVBO( vboarray_t *vbo, vbotexture_t *vbotex, texture
 		GL_SelectTexture( XASH_TEXTURE0 );
 		pglDisable( GL_TEXTURE_2D );
 		pglDisable( GL_DEPTH_TEST );
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 		if( pglDrawRangeElements )
 			pglDrawRangeElements( GL_LINES, 0, vbo->array_len, vbotex->curindex, GL_UNSIGNED_SHORT, vbotex->indexarray );
 		else
-#endif
 		pglDrawElements( GL_LINES, vbotex->curindex, GL_UNSIGNED_SHORT, vbotex->indexarray );
 		pglEnable( GL_DEPTH_TEST );
 		pglEnable( GL_TEXTURE_2D );
@@ -2607,11 +2599,9 @@ static void R_DrawLightmappedVBO( vboarray_t *vbo, vbotexture_t *vbotex, texture
 				// out of free block space. Draw all generated index array and clear it
 				// upload already generated block
 				LM_UploadDynamicBlock();
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 				if( pglDrawRangeElements )
 					pglDrawRangeElements( GL_TRIANGLES, 0, vbo->array_len, dlightindex, GL_UNSIGNED_SHORT, dlightarray );
 				else
-#endif
 				pglDrawElements( GL_TRIANGLES, dlightindex, GL_UNSIGNED_SHORT, dlightarray );
 
 				// draw decals that lighted with this lightmap
@@ -2787,11 +2777,9 @@ static void R_DrawLightmappedVBO( vboarray_t *vbo, vbotexture_t *vbotex, texture
 			LM_UploadDynamicBlock();
 
 			// draw remaining array
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 			if( pglDrawRangeElements )
 				pglDrawRangeElements( GL_TRIANGLES, 0, vbo->array_len, dlightindex, GL_UNSIGNED_SHORT, dlightarray );
 			else
-#endif
 				pglDrawElements( GL_TRIANGLES, dlightindex, GL_UNSIGNED_SHORT, dlightarray );
 
 			R_AdditionalPasses( vbo, dlightindex, dlightarray, texture, true );
@@ -3234,9 +3222,6 @@ static qboolean R_CheckLightMap( msurface_t *fa )
 				R_BuildDeluxeMap( fa, temp, smax * 4 );
 
 				GL_Bind( XASH_TEXTURE0, tr.deluxemapTextures[fa->lightmaptexturenum] );
-#ifdef XASH_WES
-				pglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE );
-#endif
 
 				pglTexSubImage2D( GL_TEXTURE_2D, 0, fa->light_s, fa->light_t, smax, tmax,
 				GL_RGBA, GL_UNSIGNED_BYTE, temp );
@@ -3253,19 +3238,10 @@ static qboolean R_CheckLightMap( msurface_t *fa )
 		}
 
 		R_SetCacheState( fa );
-#ifdef XASH_WES
-		GL_Bind( XASH_TEXTURE1, tr.lightmapTextures[fa->lightmaptexturenum] );
-
-		pglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE );
-#else
 		GL_Bind( XASH_TEXTURE0, tr.lightmapTextures[fa->lightmaptexturenum] );
-#endif
 
 		pglTexSubImage2D( GL_TEXTURE_2D, 0, fa->light_s, fa->light_t, smax, tmax,
 		GL_RGBA, GL_UNSIGNED_BYTE, temp );
-#ifdef XASH_WES
-		GL_SelectTexture( XASH_TEXTURE0 );
-#endif
 	}
 	// add to dynamic chain
 	else
@@ -3332,34 +3308,6 @@ qboolean R_AddSurfToVBO( msurface_t *surf, qboolean buildlightmap )
 	}
 	return false;
 }
-#else
-
-qboolean R_AddSurfToVBO(msurface_t* surf, qboolean buildlightmap)
-{
-	return false;
-}
-
-void R_DrawVBO(qboolean drawlightmaps, qboolean drawtextures)
-{
-	
-}
-
-void R_ClearVBO()
-{
-	
-}
-
-void R_AddDecalVBO(decal_t* pdecal, msurface_t* surf)
-{
-	
-}
-
-void R_GenerateVBO()
-{
-	
-}
-
-#endif // #ifndef XASH_QINDIEGL
 
 
 /*
@@ -3685,9 +3633,7 @@ void R_DrawWorld( void )
 
 	R_DrawStaticBrushes();
 
-#ifndef XASH_QINDIEGL
 	R_DrawVBO( !r_fullbright->integer && !!cl.worldmodel->lightdata, true );
-#endif
 
 	R_DrawTextureChains();
 
@@ -4039,4 +3985,3 @@ void GL_BuildLightmaps( void )
 	if( !gl_keeptjunctions->integer )
 		MsgDev( D_INFO, "Eliminated %i vertices\n", nColinElim );
 }
-#endif // XASH_DEDICATED

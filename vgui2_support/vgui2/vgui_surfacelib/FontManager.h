@@ -7,9 +7,6 @@
 
 #ifndef FONTMANAGER_H
 #define FONTMANAGER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include "vgui_surfacelib/FontAmalgam.h"
@@ -17,9 +14,6 @@
 #include "vguifont.h"
 
 #if defined(LINUX) || defined(OSX) || defined(WIN32)
-#ifdef _WIN32
-#undef DLL_IMPORT
-#endif
 #include <ft2build.h>
 #include FT_FREETYPE_H
 typedef const void *(*FontDataHelper)( const char *pchFontName, int &size, const char *fontFileName );

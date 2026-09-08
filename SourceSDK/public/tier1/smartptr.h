@@ -7,9 +7,6 @@
 
 #ifndef SMARTPTR_H
 #define SMARTPTR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 class CRefCountAccessor

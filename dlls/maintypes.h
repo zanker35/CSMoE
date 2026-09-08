@@ -28,9 +28,6 @@
 
 #ifndef MAINTYPES_H
 #define MAINTYPES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "deprecated.h"
 #include "nodiscard.h"

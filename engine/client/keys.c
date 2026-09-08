@@ -12,7 +12,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "input.h"
@@ -861,17 +860,6 @@ Normal keyboard characters, already shifted / capslocked / etc
 void CL_CharEvent( int ch )
 {
 	// the console key should never be used as a char
-#ifdef _WIN32
-	if( ch == '`' || ch == '~' ) return;
-
-#if 0
-	if( cls.key_dest == key_console && !Con_Visible( ))
-	{
-		if((char)key == '�' || (char)key == '�' )
-			return; // don't pass '�' when we open the console 
-	}
-#endif
-#endif
 	// distribute the key down event to the apropriate handler
 
 #ifndef XASH_VGUI2
@@ -923,5 +911,3 @@ void CL_CharEventUTF(const char* str)
 		CL_CharEvent(ch);
 	}
 }
-
-#endif

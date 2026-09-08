@@ -28,9 +28,6 @@
 
 #ifndef PLANE_H
 #define PLANE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 class CPlane
 {

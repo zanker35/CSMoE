@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef PLAYER_ZOMBIE_SKILL_H
 #define PLAYER_ZOMBIE_SKILL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "player/player_mod_strategy.h"
 #include "gamemode/zb2/zb2_const.h"

@@ -570,21 +570,12 @@ NavErrorType CNavArea::PostLoad()
 
 inline void COM_FixSlashes(char *pname)
 {
-#ifdef _WIN32
-	while (*pname)
-	{
-		if (*pname == '/')
-			*pname = '\\';
-		pname++;
-	}
-#else
 	while (*pname)
 	{
 		if (*pname == '\\')
 			*pname = '/';
 		pname++;
 	}
-#endif // _WIN32
 }
 
 // Store AI navigation data to a file
@@ -597,11 +588,7 @@ bool SaveNavigationMap(const char *filename)
 	// Store the NAV file
 	COM_FixSlashes(const_cast<char *>(filename));
 
-#ifdef WIN32
-	int fd = _open(filename, _O_BINARY | _O_CREAT | _O_WRONLY, _S_IREAD | _S_IWRITE);
-#else
 	int fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP);
-#endif // WIN32
 
 	if (fd < 0)
 		return false;

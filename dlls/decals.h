@@ -28,9 +28,6 @@
 
 #ifndef DECALS_H
 #define DECALS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum decal_e
 {

@@ -28,9 +28,6 @@
 
 #ifndef STUDIO_EVENT_H
 #define STUDIO_EVENT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 typedef struct mstudioevent_s
 {

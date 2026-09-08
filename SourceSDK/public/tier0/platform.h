@@ -62,9 +62,6 @@
 #endif
 #endif
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 // feature enables
 #define NEW_SOFTWARE_LIGHTING
@@ -108,46 +105,7 @@
 // after confidence of xbox 1 code flush
 #define IsXbox()	false
 
-#ifdef _WIN32
-	#define IsLinux() false
-	#define IsOSX() false
-	#define IsPosix() false
-	#define PLATFORM_WINDOWS 1 // Windows PC or Xbox 360
-	#ifndef _X360
-		#define IsWindows() true
-		#define IsPC() true
-		#define IsConsole() false
-		#define IsX360() false
-		#define IsPS3() false
-		#define IS_WINDOWS_PC
-		#define PLATFORM_WINDOWS_PC 1 // Windows PC
-		#ifdef _WIN64
-			#define IsPlatformWindowsPC64() true
-			#define IsPlatformWindowsPC32() false
-			#define PLATFORM_WINDOWS_PC64 1
-		#else
-			#define IsPlatformWindowsPC64() false
-			#define IsPlatformWindowsPC32() true
-			#define PLATFORM_WINDOWS_PC32 1
-		#endif
-	#else
-		#define PLATFORM_X360 1
-		#ifndef _CONSOLE
-			#define _CONSOLE
-		#endif
-		#define IsWindows() false
-		#define IsPC() false
-		#define IsConsole() true
-		#define IsX360() true
-		#define IsPS3() false
-	#endif
-	// Adding IsPlatformOpenGL() to help fix a bunch of code that was using IsPosix() to infer if the DX->GL translation layer was being used.
-	#if defined( DX_TO_GL_ABSTRACTION )
-		#define IsPlatformOpenGL() true
-	#else
-		#define IsPlatformOpenGL() false
-	#endif
-#elif defined(POSIX)
+#if   defined(POSIX)
 	#define IsPC() true
 	#define IsWindows() false
 	#define IsConsole() false
@@ -174,41 +132,6 @@
 typedef unsigned char uint8;
 typedef signed char int8;
 
-#if defined( _WIN32 )
-
-	typedef __int16					int16;
-	typedef unsigned __int16		uint16;
-	typedef int						int32;
-	typedef unsigned int			uint32;
-	typedef __int64					int64;
-	typedef unsigned __int64		uint64;
-
-    typedef int64 lint64;
-    typedef uint64 ulint64;
-
-	#ifdef PLATFORM_64BITS
-		typedef long long intp;				// intp is an integer that can accomodate a pointer
-		typedef unsigned long long uintp;		// (ie, sizeof(intp) >= sizeof(int) && sizeof(intp) >= sizeof(void *)
-	#else
-		typedef int intp;
-		typedef unsigned int uintp;
-	#endif
-
-	#if defined( _X360 )
-		#ifdef __m128
-			#undef __m128
-		#endif
-		#define __m128				__vector4
-	#endif
-
-	// Use this to specify that a function is an override of a virtual function.
-	// This lets the compiler catch cases where you meant to override a virtual
-	// function but you accidentally changed the function signature and created
-	// an overloaded function. Usage in function declarations is like this:
-	// int GetData() const OVERRIDE;
-	#define OVERRIDE override
-
-#else // _WIN32
 
 	typedef short					int16;
 	typedef unsigned short			uint16;
@@ -242,7 +165,6 @@ typedef signed char int8;
 		#define OVERRIDE
 	#endif
 
-#endif // else _WIN32
 
 //-----------------------------------------------------------------------------
 // Set up platform type defines.
@@ -392,13 +314,7 @@ FIXME: Enable this when we no longer fear change =)
 */
 
 // portability / compiler settings
-#if defined(_WIN32) && !defined(WINDED)
-
-#if defined(_M_IX86)
-#define __i386__	1
-#endif
-
-#elif POSIX
+#if   POSIX
 #if defined( OSX ) && defined( CARBON_WORKAROUND )
 #define DWORD unsigned int
 #else
@@ -420,11 +336,7 @@ typedef void * HINSTANCE;
 #define MAX_PATH  260
 #endif
 
-#ifdef _WIN32
-#define MAX_UNICODE_PATH 32767
-#else
 #define MAX_UNICODE_PATH MAX_PATH
-#endif
 
 #define MAX_UNICODE_PATH_IN_UTF8 MAX_UNICODE_PATH*4
 
@@ -440,9 +352,7 @@ typedef void * HINSTANCE;
 #define ALIGN_VALUE( val, alignment ) ( ( val + alignment - 1 ) & ~( alignment - 1 ) ) //  need macro for constant expression
 
 // Used to step into the debugger
-#if defined( _WIN32 ) && !defined( _X360 )
-#define DebuggerBreak()  __debugbreak()
-#elif defined( _X360 )
+#if   defined( _X360 )
 #define DebuggerBreak() DebugBreak()
 #else
 	// On OSX, SIGTRAP doesn't really stop the thread cold when debugging.
@@ -474,11 +384,7 @@ typedef void * HINSTANCE;
 
 // C functions for external declarations that call the appropriate C++ methods
 #ifndef EXPORT
-	#ifdef _WIN32
-		#define EXPORT	_declspec( dllexport )
-	#else
 		#define EXPORT	/* */
-	#endif
 #endif
 
 #if defined __i386__ && !defined __linux__
@@ -488,10 +394,7 @@ typedef void * HINSTANCE;
 #endif  // __i386__
 
 // decls for aligning data
-#ifdef _WIN32
-        #define DECL_ALIGN(x) __declspec(align(x))
-
-#elif GNUC
+#if   GNUC
 	#define DECL_ALIGN(x) __attribute__((aligned(x)))
 #else
         #define DECL_ALIGN(x) /* */
@@ -549,9 +452,6 @@ typedef void * HINSTANCE;
 #else
 #error
 #endif
-#elif defined ( _WIN32 )
-	#define stackalloc( _size )		_alloca( ALIGN_VALUE( _size, 16 ) )
-	#define mallocsize( _p )		( _msize( _p ) )
 #endif
 
 #define  stackfree( _p )			0
@@ -587,23 +487,7 @@ typedef void * HINSTANCE;
 	#define FMTFUNCTION( a, b )
 #endif
 
-#if defined( _WIN32 )
-
-	// Used for dll exporting and importing
-	#define DLL_EXPORT				extern "C" __declspec( dllexport )
-	#define DLL_IMPORT				extern "C" __declspec( dllimport )
-
-	// Can't use extern "C" when DLL exporting a class
-	#define DLL_CLASS_EXPORT		__declspec( dllexport )
-	#define DLL_CLASS_IMPORT		__declspec( dllimport )
-
-	// Can't use extern "C" when DLL exporting a global
-	#define DLL_GLOBAL_EXPORT		extern __declspec( dllexport )
-	#define DLL_GLOBAL_IMPORT		extern __declspec( dllimport )
-
-	#define DLL_LOCAL
-
-#elif defined GNUC
+#if   defined GNUC
 // Used for dll exporting and importing
 #define  DLL_EXPORT   extern "C" __attribute__ ((visibility("default")))
 #define  DLL_IMPORT   extern "C"
@@ -623,14 +507,7 @@ typedef void * HINSTANCE;
 #endif
 
 // Used for standard calling conventions
-#if defined( _WIN32 ) && !defined( _X360 )
-	#define  STDCALL				__stdcall
-	#define  FASTCALL				__fastcall
-	#define  FORCEINLINE			__forceinline
-	// GCC 3.4.1 has a bug in supporting forced inline of templated functions
-	// this macro lets us not force inlining in that case
-	#define  FORCEINLINE_TEMPLATE		__forceinline
-#elif defined( _X360 )
+#if   defined( _X360 )
 	#define  STDCALL				__stdcall
 	#ifdef FORCEINLINE
 		#undef FORCEINLINE
@@ -677,40 +554,6 @@ typedef void * HINSTANCE;
 #define NO_DEFAULT default: UNREACHABLE();
 
 
-#ifdef _WIN32
-
-// Remove warnings from warning level 4.
-#pragma warning(disable : 4514) // warning C4514: 'acosl' : unreferenced inline function has been removed
-#pragma warning(disable : 4100) // warning C4100: 'hwnd' : unreferenced formal parameter
-#pragma warning(disable : 4127) // warning C4127: conditional expression is constant
-#pragma warning(disable : 4512) // warning C4512: 'InFileRIFF' : assignment operator could not be generated
-#pragma warning(disable : 4611) // warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
-#pragma warning(disable : 4710) // warning C4710: function 'x' not inlined
-#pragma warning(disable : 4702) // warning C4702: unreachable code
-#pragma warning(disable : 4505) // unreferenced local function has been removed
-#pragma warning(disable : 4239) // nonstandard extension used : 'argument' ( conversion from class Vector to class Vector& )
-#pragma warning(disable : 4097) // typedef-name 'BaseClass' used as synonym for class-name 'CFlexCycler::CBaseFlex'
-#pragma warning(disable : 4324) // Padding was added at the end of a structure
-#pragma warning(disable : 4244) // type conversion warning.
-#pragma warning(disable : 4305)	// truncation from 'const double ' to 'float '
-#pragma warning(disable : 4786)	// Disable warnings about long symbol names
-#pragma warning(disable : 4250) // 'X' : inherits 'Y::Z' via dominance
-#pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union
-#pragma warning(disable : 4481) // warning C4481: nonstandard extension used: override specifier 'override'
-#pragma warning(disable : 4748) // warning C4748: /GS can not protect parameters and local variables from local buffer overrun because optimizations are disabled in function
-
-#if _MSC_VER >= 1300
-#pragma warning(disable : 4511)	// Disable warnings about private copy constructors
-#pragma warning(disable : 4121)	// warning C4121: 'symbol' : alignment of a member was sensitive to packing
-#pragma warning(disable : 4530)	// warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc (disabled due to std headers having exception syntax)
-#endif
-
-#if _MSC_VER >= 1400
-#pragma warning(disable : 4996)	// functions declared deprecated
-#endif
-
-
-#endif // _WIN32
 
 #if defined( LINUX ) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
   // based on some Jonathan Wakely macros on the net...
@@ -741,11 +584,6 @@ typedef void * HINSTANCE;
 
 
 // When we port to 64 bit, we'll have to resolve the int, ptr vs size_t 32/64 bit problems...
-#if !defined( _WIN64 ) && defined( _WIN32 )
-#pragma warning( disable : 4267 )	// conversion from 'size_t' to 'int', possible loss of data
-#pragma warning( disable : 4311 )	// pointer truncation from 'char *' to 'int'
-#pragma warning( disable : 4312 )	// conversion from 'unsigned int' to 'memhandle_t' of greater size
-#endif
 
 
 #ifdef POSIX
@@ -1287,10 +1125,8 @@ PLATFORM_INTERFACE void	Plat_ApplyHardwareDataBreakpointsToNewThread( unsigned l
 // Process related functions
 //-----------------------------------------------------------------------------
 PLATFORM_INTERFACE const tchar *Plat_GetCommandLine();
-#ifndef _WIN32
 // helper function for OS's that don't have a ::GetCommandLine() call
 PLATFORM_INTERFACE void Plat_SetCommandLine( const char *cmdLine );
-#endif
 PLATFORM_INTERFACE const char *Plat_GetCommandLineA();
 
 //-----------------------------------------------------------------------------

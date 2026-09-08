@@ -28,9 +28,6 @@
 
 #ifndef LIGHT_H
 #define LIGHT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

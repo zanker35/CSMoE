@@ -8,9 +8,6 @@
 #ifndef VGUI2_H
 #define VGUI2_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 //#define null 0L
 
@@ -22,9 +19,6 @@
 #endif
 #endif
 
-#ifdef WIN32
-#pragma warning( disable: 4355 )	// disables 'this' : used in base member initializer list
-#endif
 
 typedef unsigned char  uchar;
 typedef unsigned short ushort;

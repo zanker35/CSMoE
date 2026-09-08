@@ -23,15 +23,10 @@
 #endif
 
 #ifdef _vsnprintf
-#ifdef _WIN32
-	#undef _vsnprintf
-#endif
 #endif
 
 #ifdef vsnprintf
-#ifndef _WIN32
 	#undef vsnprintf
-#endif
 #endif
 
 #if defined( strcat )
@@ -52,19 +47,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #define _getcwd getcwd
-#elif _WIN32
-#include <direct.h>
-#if !defined( _X360 )
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 #endif
 
-#ifdef _WIN32
-#ifndef CP_UTF8
-#define CP_UTF8 65001
-#endif
-#endif
 #include "tier0/dbg.h"
 #include "tier1/strtools.h"
 #include <string.h>
@@ -799,9 +783,7 @@ int V_snwprintf( wchar_t *pDest, int maxLen, const wchar_t *pFormat, ... )
 	va_list marker;
 
 	va_start( marker, pFormat );
-#ifdef _WIN32
-	int len = _vsnwprintf( pDest, maxLen, pFormat, marker );
-#elif POSIX
+#if   POSIX
 	int len = vswprintf( pDest, maxLen, pFormat, marker );
 #else
 #error "define vsnwprintf type."
@@ -823,9 +805,7 @@ int V_vsnwprintf( wchar_t *pDest, int maxLen, const wchar_t *pFormat, va_list pa
 {
 	Assert( maxLen > 0 );
 
-#ifdef _WIN32
-	int len = _vsnwprintf( pDest, maxLen, pFormat, params );
-#elif POSIX
+#if   POSIX
 	int len = vswprintf( pDest, maxLen, pFormat, params );
 #else
 #error "define vsnwprintf type."
@@ -853,9 +833,7 @@ int V_snprintf( char *pDest, int maxLen, char const *pFormat, ... )
 	va_list marker;
 
 	va_start( marker, pFormat );
-#ifdef _WIN32
-	int len = _vsnprintf( pDest, maxLen, pFormat, marker );
-#elif POSIX
+#if   POSIX
 	int len = vsnprintf( pDest, maxLen, pFormat, marker );
 #else
 	#error "define vsnprintf type."
@@ -1414,12 +1392,6 @@ int _V_UCS2ToUnicode( const ucs2 *pUCS2, wchar_t *pUnicode, int cubDestSizeInByt
 	AssertValidReadPtr(pUCS2);
 	
 	pUnicode[0] = 0;
-#ifdef _WIN32
-	int cchResult = V_wcslen( pUCS2 );
-	V_memcpy( pUnicode, pUCS2, cubDestSizeInBytes );
-#elif defined (__ANDROID__)
-    int cchResult = Q_UTF16ToUTF32(pUCS2, pUnicode, cubDestSizeInBytes);
-#else defined (POSIX)
 	iconv_t conv_t = iconv_open( "UCS-4LE", "UCS-2LE" );
 	int cchResult = -1;
 	size_t nLenUnicde = cubDestSizeInBytes;
@@ -1435,7 +1407,6 @@ int _V_UCS2ToUnicode( const ucs2 *pUCS2, wchar_t *pUnicode, int cubDestSizeInByt
 		else
 			cchResult = nMaxUTF8;
 	}
-#endif
 	pUnicode[(cubDestSizeInBytes / sizeof(wchar_t)) - 1] = 0;
 	return cchResult;	
 
@@ -1451,17 +1422,7 @@ int _V_UCS2ToUnicode( const ucs2 *pUCS2, wchar_t *pUnicode, int cubDestSizeInByt
 //-----------------------------------------------------------------------------
 int _V_UnicodeToUCS2( const wchar_t *pUnicode, int cubSrcInBytes, ucs2 *pUCS2, int cubDestSizeInBytes )
 {
-#ifdef _WIN32
-	// Figure out which buffer is smaller and convert from bytes to character
-	// counts.
-	int cchResult = min( (size_t)cubSrcInBytes/sizeof(wchar_t), cubDestSizeInBytes/sizeof(wchar_t) );
-	wchar_t *pDest = (wchar_t*)pUCS2;
-	wcsncpy( pDest, pUnicode, cchResult );
-	// Make sure we NULL-terminate.
-	pDest[ cchResult - 1 ] = 0;
-#elif defined (__ANDROID__)
-    int cchResult = Q_UTF32ToUTF16(pUnicode, pUCS2, cubDestSizeInBytes);
-#elif defined (POSIX)
+#if   defined (POSIX)
 	iconv_t conv_t = iconv_open( "UCS-2LE", "UTF-32LE" );
 	size_t cchResult = -1;
 	size_t nLenUnicde = cubSrcInBytes;
@@ -1493,12 +1454,7 @@ int _V_UCS2ToUTF8( const ucs2 *pUCS2, char *pUTF8, int cubDestSizeInBytes )
 	AssertValidReadPtr(pUCS2);
 	
 	pUTF8[0] = 0;
-#ifdef _WIN32
-	// under win32 wchar_t == ucs2, sigh
-	int cchResult = WideCharToMultiByte( CP_UTF8, 0, pUCS2, -1, pUTF8, cubDestSizeInBytes, NULL, NULL );
-#elif defined (__ANDROID__)
-    int cchResult = Q_UTF16ToUTF8(pUCS2, pUTF8, cubDestSizeInBytes);
-#elif defined(POSIX)
+#if   defined(POSIX)
 	iconv_t conv_t = iconv_open( "UTF-8", "UCS-2LE" );
 	size_t cchResult = -1;
 
@@ -1550,12 +1506,7 @@ int _V_UTF8ToUCS2( const char *pUTF8, int cubSrcInBytes, ucs2 *pUCS2, int cubDes
 	AssertValidReadPtr(pUCS2);
 
 	pUCS2[0] = 0;
-#ifdef _WIN32
-	// under win32 wchar_t == ucs2, sigh
-	int cchResult = MultiByteToWideChar( CP_UTF8, 0, pUTF8, -1, pUCS2, cubDestSizeInBytes / sizeof(wchar_t) );
-#elif defined (__ANDROID__)
-    int cchResult = Q_UTF8ToUTF16(pUTF8, pUCS2, cubDestSizeInBytes);
-#elif defined(POSIX)
+#if   defined(POSIX)
 	iconv_t conv_t = iconv_open( "UCS-2LE", "UTF-8" );
 	size_t cchResult = -1;
 	size_t nLenUnicde = cubSrcInBytes;
@@ -1922,10 +1873,7 @@ void  V_StripFilename (char *path)
 	path[ length ] = 0;
 }
 
-#ifdef _WIN32
-#define CORRECT_PATH_SEPARATOR '\\'
-#define INCORRECT_PATH_SEPARATOR '/'
-#elif POSIX
+#if   POSIX
 #define CORRECT_PATH_SEPARATOR '/'
 #define INCORRECT_PATH_SEPARATOR '\\'
 #endif
@@ -2398,9 +2346,6 @@ void V_FixupPathName( char *pOut, size_t nOutLen, const char *pPath )
 {
 	V_strncpy( pOut, pPath, nOutLen );
 	V_RemoveDotSlashes( pOut, CORRECT_PATH_SEPARATOR, true );
-#ifdef WIN32
-	V_strlower( pOut );
-#endif
 }
 
 
@@ -2617,36 +2562,7 @@ void V_StrRight( const char *pStr, int nChars, char *pOut, int outSize )
 void V_strtowcs( const char *pString, int nInSize, wchar_t *pWString, int nOutSizeInBytes )
 {
 	Assert( nOutSizeInBytes >= sizeof(pWString[0]) );
-#ifdef _WIN32
-	int nOutSizeInChars = nOutSizeInBytes / sizeof(pWString[0]);
-	int result = MultiByteToWideChar( CP_UTF8, 0, pString, nInSize, pWString, nOutSizeInChars );
-	// If the string completely fails to fit then MultiByteToWideChar will return 0.
-	// If the string exactly fits but with no room for a null-terminator then MultiByteToWideChar
-	// will happily fill the buffer and omit the null-terminator, returning nOutSizeInChars.
-	// Either way we need to return an empty string rather than a bogus and possibly not
-	// null-terminated result.
-	if ( result <= 0 || result >= nOutSizeInChars )
-	{
-		// If nInSize includes the null-terminator then a result of nOutSizeInChars is
-		// legal. We check this by seeing if the last character in the output buffer is
-		// a zero.
-		if ( result == nOutSizeInChars && pWString[ nOutSizeInChars - 1 ] == 0)
-		{
-			// We're okay! Do nothing.
-		}
-		else
-		{
-			// The string completely to fit. Null-terminate the buffer.
-			*pWString = L'\0';
-		}
-	}
-	else
-	{
-		// We have successfully converted our string. Now we need to null-terminate it, because
-		// MultiByteToWideChar will only do that if nInSize includes the source null-terminator!
-		pWString[ result ] = 0;
-	}
-#elif POSIX
+#if   POSIX
 	if ( mbstowcs( pWString, pString, nOutSizeInBytes / sizeof(pWString[0]) ) <= 0 )
 	{
 		*pWString = 0;
@@ -2656,34 +2572,7 @@ void V_strtowcs( const char *pString, int nInSize, wchar_t *pWString, int nOutSi
 
 void V_wcstostr( const wchar_t *pWString, int nInSize, char *pString, int nOutSizeInChars )
 {
-#ifdef _WIN32
-	int result = WideCharToMultiByte( CP_UTF8, 0, pWString, nInSize, pString, nOutSizeInChars, NULL, NULL );
-	// If the string completely fails to fit then MultiByteToWideChar will return 0.
-	// If the string exactly fits but with no room for a null-terminator then MultiByteToWideChar
-	// will happily fill the buffer and omit the null-terminator, returning nOutSizeInChars.
-	// Either way we need to return an empty string rather than a bogus and possibly not
-	// null-terminated result.
-	if ( result <= 0 || result >= nOutSizeInChars )
-	{
-		// If nInSize includes the null-terminator then a result of nOutSizeInChars is
-		// legal. We check this by seeing if the last character in the output buffer is
-		// a zero.
-		if ( result == nOutSizeInChars && pWString[ nOutSizeInChars - 1 ] == 0)
-		{
-			// We're okay! Do nothing.
-		}
-		else
-		{
-			*pString = '\0';
-		}
-	}
-	else
-	{
-		// We have successfully converted our string. Now we need to null-terminate it, because
-		// MultiByteToWideChar will only do that if nInSize includes the source null-terminator!
-		pString[ result ] = '\0';
-	}
-#elif POSIX
+#if   POSIX
 	if ( wcstombs( pString, pWString, nOutSizeInChars ) <= 0 )
 	{
 		*pString = '\0';
@@ -3081,12 +2970,7 @@ void V_LogMultiline( bool input, char const *label, const char *data, size_t len
 }
 
 
-#ifdef WIN32
-// Win32 CRT doesn't support the full range of UChar32, has no extended planes
-inline int V_iswspace( int c ) { return ( c <= 0xFFFF ) ? iswspace( (wint_t)c ) : 0; }
-#else
 #define V_iswspace(x) iswspace(x)
-#endif
 
 
 //-----------------------------------------------------------------------------
@@ -3180,17 +3064,7 @@ int V_StrTrim( char *pStr )
 	return pDest - pStart;
 }
 
-#ifdef _WIN32
-int64 V_strtoi64( const char *nptr, char **endptr, int base )
-{
-	return _strtoi64( nptr, endptr, base );
-}
-
-uint64 V_strtoui64( const char *nptr, char **endptr, int base )
-{
-	return _strtoui64( nptr, endptr, base );
-}
-#elif POSIX
+#if   POSIX
 int64 V_strtoi64( const char *nptr, char **endptr, int base )
 {
 	return strtoll( nptr, endptr, base );
@@ -3345,9 +3219,6 @@ const Tier1FullHTMLEntity_t g_Tier1_FullHTMLEntities[] =
 	{ L'\u00FF', "&yuml;", 6 },
 	{ 0, NULL, 0 } // sentinel for end of array
 };
-#ifdef _WIN32
-#pragma warning( pop )
-#endif
 
 
 bool V_BasicHtmlEntityEncode( char *pDest, const int nDestSize, char const *pIn, const int nInSize, bool bPreserveWhitespace /*= false*/ )

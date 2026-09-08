@@ -5,9 +5,7 @@
 #include "netadr.h"
 #include "Sequence.h"
 
-#ifndef _WIN32
 #include "enums.h"
-#endif
 #if 0
 #define	MAX_ALIAS_NAME	32
 

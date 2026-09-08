@@ -8,9 +8,6 @@
 #ifndef PROGRESSBOX_H
 #define PROGRESSBOX_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include "Frame.h"

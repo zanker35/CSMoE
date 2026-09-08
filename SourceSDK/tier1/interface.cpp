@@ -3,9 +3,6 @@
 // Purpose: 
 //
 //===========================================================================//
-#if defined( _WIN32 ) && !defined( _X360 )
-#include <windows.h>
-#endif
 
 #if !defined( DONT_PROTECT_FILEIO_FUNCTIONS )
 #define DONT_PROTECT_FILEIO_FUNCTIONS // for protected_things.h
@@ -25,9 +22,7 @@
 #include "tier0/icommandline.h"
 #include "tier0/dbg.h"
 #include "tier0/threadtools.h"
-#ifdef _WIN32
-#include <direct.h> // getcwd
-#elif POSIX
+#if   POSIX
 #include <dlfcn.h>
 #include <unistd.h>
 #define _getcwd getcwd
@@ -126,10 +121,6 @@ void *GetModuleHandle(const char *name)
 }
 #endif
 
-#if defined( _WIN32 ) && !defined( _X360 )
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: returns a pointer to a function, given a module
@@ -139,21 +130,13 @@ void *GetModuleHandle(const char *name)
 static void *Sys_GetProcAddress( const char *pModuleName, const char *pName )
 {
 	HMODULE hModule = (HMODULE)GetModuleHandle( pModuleName );
-#ifdef WIN32
-	return (void *)GetProcAddress( hModule, pName );
-#else
 	return (void *)dlsym( (void *)hModule, pName );
-#endif
 }
 
 #if !defined(LINUX)
 static void *Sys_GetProcAddress( HMODULE hModule, const char *pName )
 {
-#ifdef WIN32
-	return (void *)GetProcAddress( hModule, pName );
-#else
 	return (void *)dlsym( (void *)hModule, pName );
-#endif
 }
 #endif
 
@@ -168,28 +151,6 @@ struct ThreadedLoadLibaryContext_t
 	HMODULE m_hLibrary;
 };
 
-#ifdef _WIN32
-
-// wraps LoadLibraryEx() since 360 doesn't support that
-static HMODULE InternalLoadLibrary( const char *pName, Sys_Flags flags )
-{
-#if defined(_X360)
-	return LoadLibrary( pName );
-#else
-	if ( flags & SYS_NOLOAD )
-		return GetModuleHandle( pName );
-	else
-		return LoadLibraryEx( pName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH );
-#endif
-}
-uintp ThreadedLoadLibraryFunc( void *pParam )
-{
-	ThreadedLoadLibaryContext_t *pContext = (ThreadedLoadLibaryContext_t*)pParam;
-	pContext->m_hLibrary = InternalLoadLibrary( pContext->m_pLibraryName, SYS_NOFLAGS );
-	return 0;
-}
-
-#endif // _WIN32
 
 HMODULE Sys_LoadLibrary( const char *pLibraryName, Sys_Flags flags )
 {
@@ -217,40 +178,11 @@ HMODULE Sys_LoadLibrary( const char *pLibraryName, Sys_Flags flags )
 
 	Q_FixSlashes( str );
 
-#ifdef _WIN32
-	ThreadedLoadLibraryFunc_t threadFunc = GetThreadedLoadLibraryFunc();
-	if ( !threadFunc )
-		return InternalLoadLibrary( str, flags );
-
-	// We shouldn't be passing noload while threaded.
-	Assert( !( flags & SYS_NOLOAD ) );
-
-	ThreadedLoadLibaryContext_t context;
-	context.m_pLibraryName = str;
-	context.m_hLibrary = 0;
-
-	ThreadHandle_t h = CreateSimpleThread( ThreadedLoadLibraryFunc, &context );
-
-#ifdef _X360
-	ThreadSetAffinity( h, XBOX_PROCESSOR_3 );
-#endif
-
-	unsigned int nTimeout = 0;
-	while( ThreadWaitForObject( h, true, nTimeout ) == TW_TIMEOUT )
-	{
-		nTimeout = threadFunc();
-	}
-
-	ReleaseThreadHandle( h );
-	return context.m_hLibrary;
-
-#elif POSIX
+#if   POSIX
 	int dlopen_mode = RTLD_NOW;
 
-#ifndef ANDROID
 	if ( flags & SYS_NOLOAD )
 		dlopen_mode |= RTLD_NOLOAD;
-#endif
 
 	HMODULE ret = ( HMODULE )dlopen( str, dlopen_mode );
 	if ( !ret && !( flags & SYS_NOLOAD ) )
@@ -304,24 +236,6 @@ CSysModule *Sys_LoadModule( const char *pModuleName, Sys_Flags flags /* = SYS_NO
 
 		bool bUseLibPrefix = false;
 
-#ifdef ANDROID
-		struct stat statBuf;
-		char *dataPath = getenv("APP_DATA_PATH");
-
-		char *modLibPath = getenv("APP_MOD_LIB");
-		if( modLibPath && *modLibPath ) // first load library from mod launcher
-		{
-			Q_snprintf(szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/lib%s", modLibPath, pModuleName);
-			if( stat(szAbsoluteModuleName, &statBuf) != 0 )
-				Q_snprintf(szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/%s", modLibPath, pModuleName);
-			
-			hDLL = Sys_LoadLibrary(szAbsoluteModuleName, flags);
-		}
-
-		Q_snprintf(szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/lib/lib%s", dataPath ,pModuleName);
-		if( stat(szAbsoluteModuleName, &statBuf) != 0 )
-			Q_snprintf(szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/lib/%s", dataPath ,pModuleName);
-#else
 #ifdef POSIX
 		struct stat statBuf;
 		Q_snprintf(szModuleName, sizeof(szModuleName), "bin/lib%s", pModuleName);
@@ -331,7 +245,6 @@ CSysModule *Sys_LoadModule( const char *pModuleName, Sys_Flags flags /* = SYS_NO
 			Q_snprintf( szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/bin/lib%s", szCwd, pModuleName );
 		else
 			Q_snprintf( szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/bin/%s", szCwd, pModuleName );
-#endif // ANDROID
 		Msg("LoadLibrary: pModule: %s, path: %s\n", pModuleName, szAbsoluteModuleName);
 
 		if( !hDLL )
@@ -349,23 +262,7 @@ CSysModule *Sys_LoadModule( const char *pModuleName, Sys_Flags flags /* = SYS_NO
 		if ( !hDLL )
 		{
 // So you can see what the error is in the debugger...
-#if defined( _WIN32 ) && !defined( _X360 )
-			char *lpMsgBuf;
-			
-			FormatMessage( 
-				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-				FORMAT_MESSAGE_FROM_SYSTEM | 
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				GetLastError(),
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-				(LPTSTR) &lpMsgBuf,
-				0,
-				NULL 
-			);
-
-			LocalFree( (HLOCAL)lpMsgBuf );
-#elif defined( _X360 )
+#if   defined( _X360 )
 			DWORD error = GetLastError();
 			Msg( "Error(%d) - Failed to load %s:\n", error, pModuleName );
 #else
@@ -442,9 +339,7 @@ void Sys_UnloadModule( CSysModule *pModule )
 
 	HMODULE	hDLL = reinterpret_cast<HMODULE>(pModule);
 
-#ifdef _WIN32
-	FreeLibrary( hDLL );
-#elif defined(POSIX)
+#if   defined(POSIX)
 	dlclose((void *)hDLL);
 #endif
 }
@@ -461,9 +356,7 @@ CreateInterfaceFn Sys_GetFactory( CSysModule *pModule )
 		return NULL;
 
 	HMODULE	hDLL = reinterpret_cast<HMODULE>(pModule);
-#ifdef _WIN32
-	return reinterpret_cast<CreateInterfaceFn>(GetProcAddress( hDLL, CREATEINTERFACE_PROCNAME ));
-#elif defined(POSIX)
+#if   defined(POSIX)
 	// Linux gives this error:
 	//../public/interface.cpp: In function `IBaseInterface *(*Sys_GetFactory
 	//(CSysModule *)) (const char *, int *)':
@@ -491,9 +384,7 @@ CreateInterfaceFn Sys_GetFactoryThis( void )
 //-----------------------------------------------------------------------------
 CreateInterfaceFn Sys_GetFactory( const char *pModuleName )
 {
-#ifdef _WIN32
-	return static_cast<CreateInterfaceFn>( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
-#elif defined(POSIX)
+#if   defined(POSIX)
 	// see Sys_GetFactory( CSysModule *pModule ) for an explanation
 	return (CreateInterfaceFn)( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
 #endif
@@ -577,26 +468,3 @@ void CDllDemandLoader::Unload()
 		m_hModule = 0;
 	}
 }
-
-#if defined( STAGING_ONLY ) && defined( _WIN32 )
-
-typedef USHORT( WINAPI RtlCaptureStackBackTrace_FUNC )(
-	ULONG frames_to_skip,
-	ULONG frames_to_capture,
-	PVOID *backtrace,
-	PULONG backtrace_hash );
-
-extern "C" int backtrace( void **buffer, int size )
-{
-	HMODULE hNTDll = GetModuleHandleA( "ntdll.dll" );
-	static RtlCaptureStackBackTrace_FUNC * const pfnRtlCaptureStackBackTrace =
-		( RtlCaptureStackBackTrace_FUNC * )GetProcAddress( hNTDll, "RtlCaptureStackBackTrace" );
-
-	if ( !pfnRtlCaptureStackBackTrace )
-		return 0;
-
-	return (int)pfnRtlCaptureStackBackTrace( 2, size, buffer, 0 );
-}
-
-#endif // STAGING_ONLY && _WIN32
-

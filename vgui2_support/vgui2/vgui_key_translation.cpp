@@ -4,10 +4,6 @@
 //
 //===========================================================================//
 
-#ifdef _WIN32
-#include <wtypes.h>
-#include <winuser.h>
-#endif
 #include <tier0/dbg.h>
 #include "vgui_key_translation.h"
 #include "../engine/keydefs.h"

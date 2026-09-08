@@ -10,9 +10,6 @@
 #ifndef STRING_T_H
 #define STRING_T_H
 
-#if defined( _WIN32 )
-#pragma once
-#endif
 
 #include "osconfig.h"
 #include <stdio.h>

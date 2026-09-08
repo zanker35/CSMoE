@@ -28,8 +28,5 @@
 
 #ifndef H_EXPORT_H
 #define H_EXPORT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #endif // H_EXPORT_H

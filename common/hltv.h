@@ -28,9 +28,6 @@
 
 #ifndef HLTV_H
 #define HLTV_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define TYPE_CLIENT			0	// client is a normal HL client (default)
 #define TYPE_PROXY			1	// client is another proxy

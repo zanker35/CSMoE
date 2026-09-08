@@ -8,9 +8,6 @@
 // in_win.c -- windows 95 mouse and joystick code
 // 02/21/97 JCB Added extended DirectInput code to support external controllers.
 
-#ifdef _WIN32
-#include "port.h"
-#endif
 
 #include "hud.h"
 #include "cl_util.h"
@@ -32,13 +29,7 @@ int	g_iVisibleMouse = 0;
 
 extern "C" 
 {
-#ifdef XASH_STATIC_GAMELIB
 	
-#else
-	void DLLEXPORT IN_ActivateMouse(void);
-	void DLLEXPORT IN_DeactivateMouse(void);
-	void DLLEXPORT IN_MouseEvent(int mstate);
-#endif
 	void DLLEXPORT IN_Accumulate (void);
 	void DLLEXPORT IN_ClearStates (void);
 }
@@ -185,11 +176,7 @@ void Force_CenterView_f (void)
 IN_ActivateMouse
 ===========
 */
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT  IN_ActivateMouse_CL(void)
-#else
-void DLLEXPORT  IN_ActivateMouse(void)
-#endif
 {
 	if (mouseinitialized)
 	{
@@ -206,11 +193,7 @@ void DLLEXPORT  IN_ActivateMouse(void)
 IN_DeactivateMouse
 ===========
 */
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT  IN_DeactivateMouse_CL(void)
-#else
-void DLLEXPORT  IN_DeactivateMouse(void)
-#endif
 {
 	if (mouseinitialized)
 	{
@@ -298,11 +281,7 @@ void IN_ResetMouse( void )
 IN_MouseEvent
 ===========
 */
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT IN_MouseEvent_CL(int mstate)
-#else
-void DLLEXPORT IN_MouseEvent(int mstate)
-#endif
 {
 	int		i;
 

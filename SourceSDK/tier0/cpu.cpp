@@ -6,10 +6,7 @@
 //=============================================================================//
 #include "pch_tier0.h"
 
-#if defined(_WIN32) && !defined(_X360)
-#define WINDOWS_LEAN_AND_MEAN
-#include <windows.h>
-#elif defined(_LINUX)
+#if   defined(_LINUX)
 #include <stdlib.h>
 #elif defined(OSX)
 #include <sys/sysctl.h>
@@ -34,14 +31,6 @@ static bool cpuid(unsigned long function, unsigned long& out_eax, unsigned long&
 		"=d" (out_edx)
 		: "a" (function)
 		);
-	return true;
-#elif defined(_WIN64)
-	int pCPUInfo[4];
-	__cpuid( pCPUInfo, (int)function );
-	out_eax = pCPUInfo[0];
-	out_ebx = pCPUInfo[1];
-	out_ecx = pCPUInfo[2];
-	out_edx = pCPUInfo[3];
 	return true;
 #else
 	bool retval = true;
@@ -414,40 +403,7 @@ uint64 CalculateCPUFreq(); // from cpu_linux.cpp
 // for some fraction of a second, then measuring the elapsed number of cycles.
 static int64 CalculateClockSpeed()
 {
-#if defined( _WIN32 )
-#if !defined( _X360 )
-	LARGE_INTEGER waitTime, startCount, curCount;
-	CCycleCount start, end;
-
-	// Take 1/32 of a second for the measurement.
-	QueryPerformanceFrequency( &waitTime );
-	int scale = 5;
-	waitTime.QuadPart >>= scale;
-
-	QueryPerformanceCounter( &startCount );
-	start.Sample();
-	do
-	{
-		QueryPerformanceCounter( &curCount );
-	}
-	while ( curCount.QuadPart - startCount.QuadPart < waitTime.QuadPart );
-	end.Sample();
-
-	int64 freq = (end.m_Int64 - start.m_Int64) << scale;
-	if ( freq == 0 )
-	{
-		// Steam was seeing Divide-by-zero crashes on some Windows machines due to
-		// WIN64_AMD_DUALCORE_TIMER_WORKAROUND that can cause rdtsc to effectively
-		// stop. Staging doesn't have the workaround but I'm checking in the fix
-		// anyway. Return a plausible speed and get on with our day.
-		freq = 2000000000;
-	}
-	return freq;
-
-#else
-	return 3200000000LL;
-#endif
-#elif defined(POSIX)
+#if   defined(POSIX)
 	int64 freq =(int64)CalculateCPUFreq();
 	if ( freq == 0 ) // couldn't calculate clock speed
 	{
@@ -477,23 +433,7 @@ const CPUInformation* GetCPUInformation()
 	// Get the logical and physical processor counts:
 	pi.m_nLogicalProcessors = LogicalProcessorsPerPackage();
 
-#if defined(_WIN32) && !defined( _X360 )
-	SYSTEM_INFO si;
-	ZeroMemory( &si, sizeof(si) );
-
-	GetSystemInfo( &si );
-
-	pi.m_nPhysicalProcessors = (unsigned char)(si.dwNumberOfProcessors / pi.m_nLogicalProcessors);
-	pi.m_nLogicalProcessors = (unsigned char)(pi.m_nLogicalProcessors * pi.m_nPhysicalProcessors);
-
-	// Make sure I always report at least one, when running WinXP with the /ONECPU switch, 
-	// it likes to report 0 processors for some reason.
-	if ( pi.m_nPhysicalProcessors == 0 && pi.m_nLogicalProcessors == 0 )
-	{
-		pi.m_nPhysicalProcessors = 1;
-		pi.m_nLogicalProcessors  = 1;
-	}
-#elif defined( _X360 )
+#if   defined( _X360 )
 	pi.m_nPhysicalProcessors = 3;
 	pi.m_nLogicalProcessors  = 6;
 #elif defined(_LINUX)

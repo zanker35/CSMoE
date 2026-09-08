@@ -15,9 +15,6 @@
 
 #ifndef SOUNDENT_H
 #define SOUNDENT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // Soundent.h - the entity that spawns when the world
 // spawns, and handles the world's active and free sound

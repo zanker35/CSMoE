@@ -49,17 +49,9 @@ add_library(vgui2 STATIC
 		vgui2/src/VPanelWrapper.cpp
 		vgui_controls/controls.cpp
 		)
-if(WIN32)
-	target_sources(vgui2 PRIVATE
-			vgui2/src/system_win32.cpp
-			vgui2/src/HtmlWindow.cpp
-			)
-endif()
-if(POSIX)
 	target_sources(vgui2 PRIVATE
 			vgui2/src/system_posix.cpp
 			)
-endif()
 target_compile_definitions(vgui2 PRIVATE -DDONT_PROTECT_FILEIO_FUNCTIONS=1)
 target_include_directories(vgui2 PUBLIC
 		.
@@ -77,34 +69,12 @@ add_library(vgui_surfacelib STATIC
 		vgui2/vgui_surfacelib/FontManager.cpp
 		vgui2/vgui_surfacelib/FontEffects.cpp
 		)
-if(WIN32)
-	target_sources(vgui_surfacelib PRIVATE
-			# MoeMod : use freetype to support emoji...
-			#vgui2/vgui_surfacelib/Win32Font.cpp
-			vgui2/vgui_surfacelib/linuxfont.cpp
-			)
-	target_link_libraries(vgui_surfacelib PUBLIC freetype)
-endif()
-if(OSX)
 	target_sources(vgui_surfacelib PRIVATE
 			# MoeMod : We dont use Carbon API any more...
 			#vgui2/vgui_surfacelib/osxfont.cpp
 			vgui2/vgui_surfacelib/linuxfont.cpp
 			)
 	target_link_libraries(vgui_surfacelib PUBLIC 3rdparty-freetype)
-endif()
-if(LINUX)
-	target_sources(vgui_surfacelib PRIVATE
-			# MoeMod : We dont use Carbon API any more...
-			#vgui2/vgui_surfacelib/osxfont.cpp
-			vgui2/vgui_surfacelib/linuxfont.cpp
-			)
-if(NOT ANDROID)
-	find_package(Fontconfig REQUIRED)
-	target_link_libraries(vgui_surfacelib PUBLIC Fontconfig::Fontconfig)
-endif()
-	target_link_libraries(vgui_surfacelib PUBLIC 3rdparty-freetype)
-endif()
 target_include_directories(vgui_surfacelib PUBLIC
 		vgui2
 		interfaces/

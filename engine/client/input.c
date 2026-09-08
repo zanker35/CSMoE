@@ -12,7 +12,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "input.h"
@@ -22,13 +21,8 @@ GNU General Public License for more details.
 #include "wrect.h"
 #include "joyinput.h"
 
-#ifdef XASH_SDL
 #include <SDL.h>
-#endif
 
-#ifdef _WIN32
-#include "windows.h"
-#endif
 
 
 Xash_Cursor*	in_mousecursor;
@@ -146,19 +140,12 @@ int KeycodeFromEvdev(int keycode, int value);
 
 static void Evdev_CheckPermissions()
 {
-#ifdef __ANDROID__
-	system( "su 0 chmod 664 /dev/input/event*" );
-#endif
 }
 
 void Evdev_Setup( void )
 {
 	if( evdev.initialized )
 		return;
-#ifdef __ANDROID__
-	system( "su 0 supolicy --live \"allow appdomain input_device dir { ioctl read getattr search open }\" \"allow appdomain input_device chr_file { ioctl read write getattr lock append open }\"" );
-	system( "su 0 setenforce permissive" );
-#endif
 	evdev.initialized = true;
 }
 
@@ -452,9 +439,7 @@ static void IN_ActivateCursor( void )
 {
 	if( cls.key_dest == key_menu )
 	{
-#ifdef XASH_SDL
 		SDL_SetCursor( in_mousecursor );
-#endif
 	}
 }
 
@@ -484,7 +469,6 @@ void IN_ToggleClientMouse( int newstate, int oldstate )
 	else if( newstate == key_game )
 	{
 		// reset mouse pos, so cancel effect in game
-#ifdef XASH_SDL
 		if(touch_enable->integer)
 		{
 			SDL_SetRelativeMouseMode( SDL_FALSE );
@@ -497,30 +481,21 @@ void IN_ToggleClientMouse( int newstate, int oldstate )
 			if( clgame.dllFuncs.pfnLookEvent )
 				SDL_SetRelativeMouseMode( SDL_TRUE );
 		}
-#endif
 		if( cls.initialized )
 			clgame.dllFuncs.IN_ActivateMouse();
 	}
 
 	if( ( newstate == key_menu || newstate == key_console || newstate == key_message ) && ( !CL_IsBackgroundMap() || CL_IsBackgroundDemo()))
 	{
-#ifdef XASH_SDL
 		SDL_SetWindowGrab(host.hWnd, SDL_FALSE);
 		if( clgame.dllFuncs.pfnLookEvent )
 			SDL_SetRelativeMouseMode( SDL_FALSE );
-#endif
-#ifdef __ANDROID__
-		Android_ShowMouse( true );
-#endif
 #ifdef USE_EVDEV
 		Evdev_SetGrab( false );
 #endif
 	}
 	else
 	{
-#ifdef __ANDROID__
-		Android_ShowMouse( false );
-#endif
 #ifdef USE_EVDEV
 		Evdev_SetGrab( true );
 #endif
@@ -554,9 +529,7 @@ void IN_ActivateMouse( qboolean force )
 		{
 			if( in_mouse_suspended )
 			{
-#ifdef XASH_SDL
 				SDL_ShowCursor( false );
-#endif
 				UI_ShowCursor( false );
 			}
 		}
@@ -579,9 +552,7 @@ void IN_ActivateMouse( qboolean force )
 	if( cls.key_dest == key_game )
 	{
 		clgame.dllFuncs.IN_ActivateMouse();
-#ifdef XASH_SDL
 		SDL_GetRelativeMouseState( 0, 0 ); // Reset mouse position
-#endif
 	}
 
 }
@@ -603,9 +574,7 @@ void IN_DeactivateMouse( void )
 		clgame.dllFuncs.IN_DeactivateMouse();
 	}
 	in_mouseactive = false;
-#ifdef XASH_SDL
 	SDL_SetWindowGrab( host.hWnd, SDL_FALSE );
-#endif
 }
 
 /*
@@ -621,7 +590,6 @@ void IN_MouseMove( void )
 		return;
 
 	// find mouse movement
-#ifdef XASH_SDL
 	SDL_GetMouseState( &current_pos.x, &current_pos.y );
 	if( host.hWnd )
 	{
@@ -631,7 +599,6 @@ void IN_MouseMove( void )
 		if( width > 0 ) current_pos.x = (int)((float)current_pos.x * scr_width->value / width);
 		if( height > 0 ) current_pos.y = (int)((float)current_pos.y * scr_height->value / height);
 	}
-#endif
 
 
 	VGui_MouseMove( current_pos.x, current_pos.y );
@@ -640,10 +607,8 @@ void IN_MouseMove( void )
 		return;
 
 	// Show cursor in UI
-#ifdef XASH_SDL
 	if( UI_IsVisible() )
 		SDL_ShowCursor( SDL_TRUE );
-#endif
 
 	// if the menu is visible, move the menu cursor
 	UI_MouseMove( current_pos.x, current_pos.y );
@@ -668,7 +633,6 @@ void IN_MouseEvent( int mstate )
 
 	if( cls.key_dest == key_game )
 	{
-#if defined( XASH_SDL )
 		static qboolean ignore; // igonre mouse warp event
 		int x, y;
 		SDL_GetMouseState(&x, &y);
@@ -698,15 +662,12 @@ void IN_MouseEvent( int mstate )
 			SDL_GetRelativeMouseState( 0, 0 ); // reset relative state
 			ignore = 0;
 		}
-#endif
 		return;
 	}
 	else
 	{
-#if defined(XASH_SDL) && !defined(XASH_WINRT)
 		SDL_SetRelativeMouseMode( SDL_FALSE );
 		SDL_ShowCursor( SDL_TRUE );
-#endif
 		IN_MouseMove();
 	}
 
@@ -881,15 +842,6 @@ void IN_EngineAppendMove( float frametime, usercmd_t *cmd, qboolean active )
 			cl.refdef.cl_viewangles[YAW] -= mouse_x * m_yaw->value * sensitivity;
 		}
 #endif
-#ifdef __ANDROID__
-		if( !m_ignore->integer )
-		{
-			float mouse_x, mouse_y;
-			Android_MouseMove( &mouse_x, &mouse_y );
-			cl.refdef.cl_viewangles[PITCH] += mouse_y * m_pitch->value * sensitivity;
-			cl.refdef.cl_viewangles[YAW] -= mouse_x * m_yaw->value * sensitivity;
-		}
-#endif
 		Joy_FinalizeMove( &forward, &side, &dyaw, &dpitch );
 		Touch_GetMove( &forward, &side, &dyaw, &dpitch );
 		IN_JoyAppendMove( cmd, forward, side );
@@ -936,14 +888,6 @@ void Host_InputFrame( void )
 		}
 #endif
 
-#ifdef __ANDROID__
-		if( !m_ignore->integer )
-		{
-			float  mouse_x, mouse_y;
-			Android_MouseMove( &mouse_x, &mouse_y );
-			pitch += mouse_y * m_pitch->value, yaw -= mouse_x * m_yaw->value; //mouse speed
-		}
-#endif
 
 		Joy_FinalizeMove( &forward, &side, &yaw, &pitch );
 		Touch_GetMove( &forward, &side, &yaw, &pitch );
@@ -991,4 +935,3 @@ void Host_InputFrame( void )
 
 	IN_MouseMove();
 }
-#endif

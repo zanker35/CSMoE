@@ -10,9 +10,6 @@
 #ifndef BUMPVECTS_H
 #define BUMPVECTS_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "mathlib/mathlib.h"
 

@@ -28,9 +28,6 @@
 
 #ifndef CAREER_TASK_H
 #define CAREER_TASK_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

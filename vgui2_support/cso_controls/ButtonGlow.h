@@ -2,9 +2,6 @@
 #ifndef BUTTONGLOW_H
 #define BUTTONGLOW_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/IBorder.h>
 #include <vgui/IScheme.h>

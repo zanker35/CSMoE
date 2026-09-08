@@ -28,9 +28,6 @@
 
 #ifndef WEAPONS_H
 #define WEAPONS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "weapons_const.h"
 #include "weapons_buy.h"

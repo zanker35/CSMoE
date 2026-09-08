@@ -28,9 +28,6 @@
 
 #ifndef DOORS_H
 #define DOORS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "cbase/cbase_locksound.h"
 

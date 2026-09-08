@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -449,4 +448,3 @@ void V_PostRender( void )
 	SCR_MakeScreenShot();
 	R_EndFrame();
 }
-#endif // XASH_DEDICATED

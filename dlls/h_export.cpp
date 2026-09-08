@@ -27,9 +27,7 @@ auto EngineClock::now() noexcept -> time_point
 	#pragma comment (linker, "/SECTION:.data,RW")
 #endif
 
-#ifndef _WIN32
 #define WINAPI // LINUX SUPPORT
-#endif
 
 // Receive engine function table from engine.
 // This appears to be the _first_ DLL routine called by the engine, so we
@@ -55,7 +53,6 @@ static dllexport_t switch_server_exports[] = {
 		{ nullptr, nullptr }
 };
 
-#ifdef XASH_STATIC_GAMELIB
 
 namespace sv {
 namespace detail {
@@ -80,4 +77,3 @@ extern "C" int switch_installdll_server( void )
 	static auto list = sv::detail::WeaponEntityFindList_Create_Impl(sv::AllEntityTypeList(), std::make_index_sequence<ARRAYSIZE(switch_server_exports)>());
 	return dll_register( "server", list.data() );
 }
-#endif

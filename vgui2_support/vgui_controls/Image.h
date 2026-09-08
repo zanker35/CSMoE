@@ -8,9 +8,6 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <Color.h>
 

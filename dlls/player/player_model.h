@@ -1,8 +1,5 @@
 #ifndef PLAYER_MODEL_H
 #define PLAYER_MODEL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "player_const.h"
 

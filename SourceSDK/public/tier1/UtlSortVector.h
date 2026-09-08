@@ -9,9 +9,6 @@
 #ifndef UTLSORTVECTOR_H
 #define UTLSORTVECTOR_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "utlvector.h"
 
@@ -27,10 +24,8 @@
 //   into the constructor of the vector to determine the sort order.
 //-----------------------------------------------------------------------------
 
-#ifndef _WIN32
 // gcc has no qsort_s, so i need to use a static var to hold the sort context. this makes cutlsortvector _not_ thread sfae under linux
 extern void *g_pUtlSortVectorQSortContext;
-#endif
 
 template <class T>
 class CUtlSortVectorDefaultLess
@@ -112,17 +107,6 @@ protected:
 		LessFunc	*m_pLessFunc;
 	};
 
-#ifdef _WIN32
-	static int CompareHelper( void *context, const T *lhs, const T *rhs )
-	{
-		QSortContext_t *ctx = reinterpret_cast< QSortContext_t * >( context );
-		if ( ctx->m_pLessFunc->Less( *lhs, *rhs, ctx->m_pLessContext ) )
-			return -1;
-		if ( ctx->m_pLessFunc->Less( *rhs, *lhs, ctx->m_pLessContext ) )
-			return 1;
-		return 0;
-	}
-#else
 	static int CompareHelper( const T *lhs, const T *rhs )
 	{
 		QSortContext_t *ctx = reinterpret_cast< QSortContext_t * >( g_pUtlSortVectorQSortContext );
@@ -132,7 +116,6 @@ protected:
 			return 1;
 		return 0;
 	}
-#endif
 
 	void *m_pLessContext;
 	bool	m_bNeedsSort;
@@ -242,9 +225,7 @@ void CUtlSortVector<T, LessFunc, BaseVector>::QuickSort( LessFunc& less, int nLo
 		QSortContext_t ctx;
 		ctx.m_pLessContext = m_pLessContext;
 		ctx.m_pLessFunc = &less;
-#ifndef _WIN32
 		g_pUtlSortVectorQSortContext = &ctx;
-#endif
 
 		qsort( this->Base(), this->Count(), sizeof(T), (QSortCompareFunc_t)&CUtlSortVector<T, LessFunc>::CompareHelper );
 	}

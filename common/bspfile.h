@@ -28,9 +28,6 @@
 
 #ifndef BSPFILE_H
 #define BSPFILE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 // header

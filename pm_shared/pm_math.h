@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef PM_MATH_H
 #define PM_MATH_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define _USE_MATH_DEFINES
 #include <math.h>

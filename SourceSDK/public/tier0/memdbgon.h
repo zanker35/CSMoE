@@ -23,11 +23,7 @@
 #if (defined(_DEBUG) || !defined(_INC_CRTDBG)) || defined(MEMDBGON_H)
 
 #include "basetypes.h"
-#ifdef _WIN32
-#include <tchar.h>
-#else
 #include <wchar.h>
-#endif
 #include <string.h>
 #ifdef OSX
 #include <malloc/malloc.h>
@@ -43,9 +39,7 @@
 		#define _NORMAL_BLOCK 1
 		
 		#include <cstddef>
-		#ifndef ANDROID
 		#include <glob.h>
-		#endif
 		#include <new>
 		#include <sys/types.h>
 		#if !defined( DID_THE_OPERATOR_NEW )

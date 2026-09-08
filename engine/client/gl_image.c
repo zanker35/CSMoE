@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -161,15 +160,6 @@ void GL_TexFilter( gltexture_t *tex, qboolean update )
 		break;
 	}
 
-#ifdef __EMSCRIPTEN__
-	// glGenerateMipmaps may delay,
-	// but we need draw lightmaps after re-uploading
-	if( r_vbo->integer )
-	{
-		if( tex->texType == TEX_LIGHTMAP )
-			tex->flags |= TF_NOMIPMAP;
-	}
-#endif
 
 	// set texture filter
 	if( tex->flags & TF_DEPTHMAP )
@@ -1101,7 +1091,6 @@ static void GL_TextureImage( GLenum inFormat, GLenum outFormat, GLenum glTarget,
 
 static void GL_TextureImageDXT( GLenum format, GLenum glTarget, GLint side, GLint level, GLint width, GLint height, GLint depth, qboolean subImage, size_t size, const void *data )
 {
-#if !defined XASH_NANOGL && !defined XASH_WES
 	if( glTarget == GL_TEXTURE_1D )
 	{
 		if( subImage ) pglCompressedTexSubImage1DARB( glTarget, level, 0, width, format, size, data );
@@ -1122,7 +1111,6 @@ static void GL_TextureImageDXT( GLenum format, GLenum glTarget, GLint side, GLin
 		if( subImage ) pglCompressedTexSubImage2DARB( glTarget, level, 0, 0, width, height, format, size, data );
 		else pglCompressedTexImage2DARB( glTarget, level, format, width, height, 0, size, data );
 	}
-#endif
 }
 
 /*
@@ -4620,4 +4608,3 @@ void R_ShutdownImages( void )
 	Q_memset( r_textures, 0, sizeof( r_textures ));
 	r_numTextures = 0;
 }
-#endif // XASH_DEDICATED

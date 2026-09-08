@@ -28,9 +28,6 @@
 
 #ifndef PLATS_H
 #define PLATS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define TRAIN_STARTPITCH	60
 #define TRAIN_MAXPITCH		200

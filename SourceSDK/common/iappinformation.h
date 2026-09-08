@@ -7,9 +7,6 @@
 
 #ifndef IAPPINFORMATION_H
 #define IAPPINFORMATION_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "interface.h"
 

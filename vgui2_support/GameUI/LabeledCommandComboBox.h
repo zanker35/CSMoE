@@ -1,8 +1,5 @@
 #ifndef LABELEDCOMMANDCOMBOBOX_H
 #define LABELEDCOMMANDCOMBOBOX_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/ComboBox.h>
 #include <vgui_controls/Label.h>

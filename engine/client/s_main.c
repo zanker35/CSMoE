@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "sound.h"
@@ -1887,4 +1886,3 @@ void S_Shutdown( void )
 	Mem_FreePool( &sndpool );
 	dsp_room = NULL;
 }
-#endif // XASH_DEDICATED

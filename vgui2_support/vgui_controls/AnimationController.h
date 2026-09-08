@@ -6,9 +6,6 @@
 
 #ifndef ANIMATIONCONTROLLER_H
 #define ANIMATIONCONTROLLER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Panel.h"
 #include "PHandle.h"

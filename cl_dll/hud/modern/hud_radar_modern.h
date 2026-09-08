@@ -1,9 +1,6 @@
 #ifndef VGUI_HUD_RADAR_H
 #define VGUI_HUD_RADAR_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "hud_sub.h"
 #include "com_model.h"

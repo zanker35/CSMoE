@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef EVENTDISPATCHER_H
 #define EVENTDISPATCHER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vector>
 #include <algorithm>

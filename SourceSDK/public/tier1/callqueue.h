@@ -10,9 +10,6 @@
 #include "tier0/tslist.h"
 #include "functors.h"
 
-#if defined( _WIN32 )
-#pragma once
-#endif
 
 //-----------------------------------------------------
 // Avert thy eyes! Imagine rather:

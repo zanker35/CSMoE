@@ -1,8 +1,5 @@
 #ifndef RULEOF350_H
 #define RULEOF350_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 //  Private copy constructor and copy assignment ensure classes derived from
 //  class noncopyable cannot be copied.

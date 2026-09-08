@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -22,13 +21,7 @@ GNU General Public License for more details.
 #include "gl_local.h"
 #include "touch.h"
 
-#if defined(__ANDROID__)
-#include "platform/android/android-main.h"
-#endif
 
-#if defined(__APPLE__)
-#include "platform/iOS/TapicEngine.h"
-#endif
 
 mobile_engfuncs_t *gMobileEngfuncs;
 
@@ -49,13 +42,7 @@ static void pfnVibrate( float life, char flags )
 	//MsgDev( D_NOTE, "Vibrate: %f %d\n", life, flags );
 
 	// here goes platform-specific backends
-#ifdef __ANDROID__
-	Android_Vibrate( life * vibration_length->value, flags );
-#endif
 
-#if TARGET_OS_IPHONE
-	TapicEngine_Vibrate( life > 0 ? TapicEngine_Pop : TapicEngine_Peek );
-#endif
 }
 
 static void Vibrate_f()
@@ -107,11 +94,7 @@ static void *pfnGetNativeObject( const char *obj )
 
 	// Backend should handle NULL
 	// Backend should consider that obj is case-sensitive
-#ifdef __ANDROID__
-	return Android_GetNativeObject( obj );
-#else
 	return NULL;
-#endif
 }
 
 static mobile_engfuncs_t gpMobileEngfuncs =
@@ -156,4 +139,3 @@ void Mobile_Shutdown( void )
 {
 	Cmd_RemoveCommand( "vibrate" );
 }
-#endif // XASH_DEDICATED

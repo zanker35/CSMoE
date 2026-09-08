@@ -8,9 +8,6 @@
 #ifndef DBG_H
 #define DBG_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "basetypes.h"
 #include "dbgflag.h"
@@ -673,13 +670,6 @@ private:
 //
 // Purpose: Embed debug info in each file.
 //
-#if defined( _WIN32 ) && !defined( _X360 )
-
-	#ifdef _DEBUG
-		#pragma comment(compiler)
-	#endif
-
-#endif
 
 //-----------------------------------------------------------------------------
 //

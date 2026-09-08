@@ -9,9 +9,6 @@
 #ifndef IAPPSYSTEM_H
 #define IAPPSYSTEM_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier1/interface.h"
 

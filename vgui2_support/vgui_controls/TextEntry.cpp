@@ -293,25 +293,7 @@ void TextEntry::SetText(const char *text)
 		wchar_t *wsz = localize()->Find(text);
 		if (wsz)
 		{
-#ifdef _WIN32
-			size_t len = wcslen(wsz);
-			if (len < 1023)
-			{
-				uchar32 unicode[1024];
-				Q_UTF16ToUTF32(wsz, unicode, sizeof(unicode));
-				SetText(unicode);
-			}
-			else
-			{
-				size_t lenUnicode = (len * sizeof(uchar32) + 4);
-				uchar32* unicode = (uchar32*)malloc(lenUnicode);
-				Q_UTF16ToUTF32(wsz, unicode, lenUnicode);
-				SetText(unicode);
-				free(unicode);
-			}
-#else
 			SetText(wsz);
-#endif
 			return;
 		}
 	}
@@ -343,11 +325,7 @@ void TextEntry::SetText(const uchar32 *wszText)
 {
 	if (!wszText)
 	{
-#ifdef _WIN32
-		wszText = U"";
-#else
 		wszText = L"";
-#endif
 	}
 	int textLen = Q_strlen32(wszText);
 	m_TextStream.RemoveAll();
@@ -379,12 +357,6 @@ void TextEntry::SetText(const uchar32 *wszText)
 	InvalidateLayout();
 }
 
-#ifdef _WIN32
-void TextEntry::SetText(const wchar_t* wszText)
-{
-	SetText(UnicodeToUTF32(wszText).c_str());
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Sets the value of char at index position.
@@ -3083,25 +3055,7 @@ void TextEntry::InsertString(const char *text)
 		wchar_t *wsz = localize()->Find(text);
 		if (wsz)
 		{
-#ifdef _WIN32
-			size_t len = wcslen(wsz);
-			if (len < 1023)
-			{
-				uchar32 unicode[1024];
-				Q_UTF16ToUTF32(wsz, unicode, sizeof(unicode));
-				InsertString(unicode);
-			}
-			else
-			{
-				size_t lenUnicode = (len * sizeof(uchar32) + 4);
-				uchar32* unicode = (uchar32*)malloc(lenUnicode);
-				Q_UTF16ToUTF32(wsz, unicode, lenUnicode);
-				InsertString(unicode);
-				free(unicode);
-			}
-#else
 			InsertString(wsz);
-#endif
 			return;
 		}
 	}
@@ -3414,10 +3368,6 @@ void TextEntry::CopySelected()
 	int x0, x1;
 	if (GetSelectedRange(x0, x1))
 	{
-#ifdef _WIN32
-        auto str = UTF32ToUnicode(std::basic_string<uchar32>(m_TextStream.Base() + x0, x1 - x0));
-		system()->SetClipboardText(str.c_str(), str.size());
-#else
 		CUtlVector<wchar_t> buf;
 		for (int i = x0; i < x1; i++)
 		{
@@ -3429,7 +3379,6 @@ void TextEntry::CopySelected()
 		}
 		buf.AddToTail('\0');
 		system()->SetClipboardText(buf.Base(), x1 - x0);
-#endif
 	}
 	
 	// have to request focus if we used the menu
@@ -3468,9 +3417,6 @@ void TextEntry::Paste()
 	SaveUndoState();
 	bool bHaveMovedFocusAwayFromCurrentEntry = false;
 
-#ifdef _WIN32
-    InsertString(UnicodeToUTF32(std::wstring(buf.Base(), buf.Count())).data());
-#else
 	// insert all the characters
 	for (int i = 0; i < len && buf[i] != 0; i++)
 	{
@@ -3497,7 +3443,6 @@ void TextEntry::Paste()
 		// insert the character
 		InsertChar(buf[i]);
 	}
-#endif
 
 	// restore the original clipboard text if neccessary
 	if (m_bAutoProgressOnHittingCharLimit)
@@ -3712,11 +3657,7 @@ void TextEntry::GetText(wchar_t *wbuf, int bufLenInBytes)
 	if (m_TextStream.Count())
 	{
 		int terminator = min(len, (bufLenInBytes / (int)sizeof(uchar32)) - 1);
-#ifdef _WIN32
-		Q_UTF32ToUTF16(m_TextStream.Base(), wbuf, bufLenInBytes);
-#else
 		wcsncpy(wbuf, m_TextStream.Base(), terminator);
-#endif
 		wbuf[terminator] = 0;
 	}
 	else
@@ -3729,11 +3670,7 @@ void TextEntry::GetTextRange( wchar_t *buf, int from, int numchars )
 {
 	int len = m_TextStream.Count();
 	int cpChars = max( 0, min( numchars, len - from ) );
-#ifdef _WIN32
-	Q_UTF32ToUTF16(m_TextStream.Base() + max(0, min(len, from)), buf, cpChars + 1);
-#else
 	wcsncpy( buf, m_TextStream.Base() + max( 0, min( len, from ) ), cpChars );
-#endif
 	buf[ cpChars ] = 0;
 }
 

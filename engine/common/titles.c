@@ -232,7 +232,6 @@ static int ParseDirective( const char *pText )
 	}
 	return 0;
 }
-#ifndef XASH_DEDICATED
 void CL_TextMessageParse( byte *pMemFile, int fileSize )
 {
 	char			buf[512], trim[512], currentName[512];
@@ -369,4 +368,3 @@ void CL_TextMessageParse( byte *pMemFile, int fileSize )
 
 	clgame.numTitles = messageCount;
 }
-#endif

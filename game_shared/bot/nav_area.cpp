@@ -8,11 +8,7 @@
 #include "game.h"
 #include "bot_include.h"
 
-#ifdef _WIN32
-#include <io.h>
-#else
 #include <unistd.h>
-#endif // _WIN32
 
 namespace sv {
 

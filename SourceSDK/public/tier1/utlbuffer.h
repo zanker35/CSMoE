@@ -10,9 +10,6 @@
 #ifndef UTLBUFFER_H
 #define UTLBUFFER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier1/utlmemory.h"
 #include "tier1/byteswap.h"

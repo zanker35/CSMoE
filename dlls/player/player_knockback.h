@@ -1,8 +1,5 @@
 #ifndef PLAYER_KNOCKBACK_H
 #define PLAYER_KNOCKBACK_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifdef CLIENT_DLL
 namespace cl {

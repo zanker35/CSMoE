@@ -28,26 +28,13 @@
 
 #ifndef PERF_COUNTER_H
 #define PERF_COUNTER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
-#ifdef _WIN32
-	#include <windows.h>
-	#include <io.h>
-	#include <direct.h>
-#else
 	#include <sys/stat.h>
 	#include <sys/types.h>
 	#include <fcntl.h>
 	#include <unistd.h>
-	#ifdef __linux__
-		#include <linux/limits.h>
-	#else
 		#include <limits.h>
-	#endif
 	#include <sys/time.h>
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -83,98 +70,11 @@ inline CPerformanceCounter::CPerformanceCounter() :
 /* <2ebdd> ../game_shared/perf_counter.h:69 */
 inline void CPerformanceCounter::InitializePerformanceCounter()
 {
-#ifdef _WIN32
-
-	LARGE_INTEGER performanceFreq;
-	QueryPerformanceFrequency(&performanceFreq);
-
-	// get 32 out of the 64 time bits such that we have around
-	// 1 microsecond resolution
-	unsigned int lowpart, highpart;
-	lowpart = (unsigned int)performanceFreq.LowPart;
-	highpart = (unsigned int)performanceFreq.HighPart;
-	m_iLowShift = 0;
-
-	while (highpart || (lowpart > 2000000.0))
-	{
-		m_iLowShift++;
-		lowpart >>= 1;
-		lowpart |= (highpart & 1) << 31;
-		highpart >>= 1;
-	}
-
-	m_flPerfCounterFreq = 1.0 / (double)lowpart;
-
-#endif // _WIN32
 }
 
 /* <2ec16> ../game_shared/perf_counter.h:97 */
 inline double CPerformanceCounter::GetCurTime()
 {
-#ifdef _WIN32
-
-	static int sametimecount;
-	static unsigned int oldtime;
-	static int first = 1;
-	LARGE_INTEGER PerformanceCount;
-	unsigned int temp, t2;
-	double time;
-
-	QueryPerformanceCounter(&PerformanceCount);
-	if (m_iLowShift == 0)
-	{
-		temp = (unsigned int)PerformanceCount.LowPart;
-	}
-	else
-	{
-		temp = ((unsigned int)PerformanceCount.LowPart >> m_iLowShift) |
-			((unsigned int)PerformanceCount.HighPart << (32 - m_iLowShift));
-	}
-
-	if (first)
-	{
-		oldtime = temp;
-		first = 0;
-	}
-	else
-	{
-		// check for turnover or backward time
-		if ((temp <= oldtime) && ((oldtime - temp) < 0x10000000))
-		{
-			// so we can't get stuck
-			oldtime = temp;
-		}
-		else
-		{
-			t2 = temp - oldtime;
-
-			time = (double)t2 * m_flPerfCounterFreq;
-			oldtime = temp;
-
-			m_flCurrentTime += time;
-
-			if (m_flCurrentTime == m_flLastCurrentTime)
-			{
-				sametimecount++;
-
-				if (sametimecount > 100000)
-				{
-					m_flCurrentTime += 1.0;
-					sametimecount = 0;
-				}
-			}
-			else
-			{
-				sametimecount = 0;
-			}
-
-			m_flLastCurrentTime = m_flCurrentTime;
-		}
-	}
-
-	return m_flCurrentTime;
-
-#else // _WIN32
 
 	struct timeval tp;
 	static int secbase = 0;
@@ -189,7 +89,6 @@ inline double CPerformanceCounter::GetCurTime()
 
 	return ((tp.tv_sec - secbase) + tp.tv_usec / 1000000.0);
 
-#endif // _WIN32
 }
 
 #endif // PERF_COUNTER_H

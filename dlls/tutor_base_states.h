@@ -28,9 +28,6 @@
 
 #ifndef TUTOR_BASE_STATES_H
 #define TUTOR_BASE_STATES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

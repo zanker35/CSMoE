@@ -20,11 +20,6 @@
 #include <vgui/ISystem.h>
 #include <filesystem.h>
 
-#ifdef WIN32
-#include <direct.h>
-#include <stdio.h>
-#include <io.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 

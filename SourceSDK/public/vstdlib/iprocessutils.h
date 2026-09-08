@@ -7,9 +7,6 @@
 #ifndef IPROCESSUTILS_H
 #define IPROCESSUTILS_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include "appframework/IAppSystem.h"

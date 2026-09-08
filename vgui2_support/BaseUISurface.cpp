@@ -795,9 +795,6 @@ bool BaseUISurface::AddCustomFontFile(const char *fontFileName) {
     if ( BaseUISurface::FontDataHelper( nullptr, size, fontFileName ) )
         return true;
     return false;
-#elif defined WIN32
-    return AddFontResourceExA(fullPath, FR_PRIVATE, nullptr) > 0 ||
-        AddFontResourceA(fullPath) > 0;
 #endif
 }
 

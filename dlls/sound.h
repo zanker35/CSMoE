@@ -28,9 +28,6 @@
 
 #ifndef SOUND_H
 #define SOUND_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define CSENTENCEG_MAX		200			// max number of sentence groups
 #define CSENTENCE_LRU_MAX	32			// max number of elements per sentence group

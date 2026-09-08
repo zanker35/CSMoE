@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -195,21 +194,17 @@ void GL_SelectTexture( GLint tmu )
 		return;
 
 	glState.activeTMU = tmu;
-#ifndef XASH_NANOGL
 	if( pglActiveTextureARB )
-#endif
 	{
 		pglActiveTextureARB( tmu + GL_TEXTURE0_ARB );
 
 		if( tmu < glConfig.max_texture_coords )
 			pglClientActiveTextureARB( tmu + GL_TEXTURE0_ARB );
 	}
-#if !defined(XASH_NANOGL) && !defined(XASH_WES)
 	else if( pglSelectTextureSGIS )
 	{
 		pglSelectTextureSGIS( tmu + GL_TEXTURE0_SGIS );
 	}
-#endif
 }
 
 /*
@@ -258,18 +253,14 @@ GL_MultiTexCoord2f
 */
 void GL_MultiTexCoord2f( GLenum texture, GLfloat s, GLfloat t )
 {
-#ifndef XASH_NANOGL
 	if( pglMultiTexCoord2f )
-#endif
 	{
 		pglMultiTexCoord2f( texture + GL_TEXTURE0_ARB, s, t );
 	}
-#if !defined(XASH_NANOGL) && !defined(XASH_WES)
 	else if( pglMTexCoord2fSGIS )
 	{
 		pglMTexCoord2fSGIS( texture + GL_TEXTURE0_SGIS, s, t );
 	}
-#endif
 }
 
 /*
@@ -770,4 +761,3 @@ rebuild_page:
 }
 
 //=======================================================
-#endif // XASH_DEDICATED

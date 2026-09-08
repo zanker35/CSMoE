@@ -28,9 +28,6 @@
 
 #ifndef UTIL_H
 #define UTIL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "basetypes.h"
 #include <string.h>

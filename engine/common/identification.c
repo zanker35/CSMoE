@@ -15,9 +15,7 @@ GNU General Public License for more details.
 
 #include "common.h"
 #include <fcntl.h>
-#ifndef _WIN32
 #include <dirent.h>
-#endif
 static char id_md5[33];
 static char id_customid[MAX_STRING];
 
@@ -161,135 +159,6 @@ void ID_VerifyHEX_f( void )
 		Msg( "Bad\n" );
 }
 
-#ifdef __linux__
-
-qboolean ID_ProcessCPUInfo( bloomfilter_t *value )
-{
-	int cpuinfofd = open( "/proc/cpuinfo", O_RDONLY );
-	char buffer[1024], *pbuf, *pbuf2;
-	int ret;
-
-	if( cpuinfofd < 0 )
-		return false;
-
-	if( (ret = read( cpuinfofd, buffer, 1023 ) ) < 0 )
-		return false;
-
-	close( cpuinfofd );
-
-	buffer[ret] = 0;
-
-	if( !ret )
-		return false;
-
-	pbuf = Q_strstr( buffer, "Serial" );
-	if( !pbuf )
-		return false;
-	pbuf += 6;
-
-	if( ( pbuf2 = Q_strchr( pbuf, '\n' ) ) )
-		*pbuf2 = 0;
-	else
-		pbuf2 = pbuf + Q_strlen( pbuf );
-
-	if( !ID_VerifyHEX( pbuf ) )
-		return false;
-
-	*value |= BloomFilter_Process( pbuf, pbuf2 - pbuf );
-	return true;
-}
-
-qboolean ID_ValidateNetDevice( const char *dev )
-{
-	const char *prefix = "/sys/class/net";
-	byte *pfile;
-	int assignType;
-
-	// These devices are fake, their mac address is generated each boot, while assign_type is 0
-	if( Q_strnicmp( dev, "ccmni", sizeof( "ccmni" ) ) ||
-		Q_strnicmp( dev, "ifb", sizeof( "ifb" ) ) )
-		return false;
-
-	pfile = FS_LoadDirectFile( va( "%s/%s/addr_assign_type", prefix, dev ), NULL );
-
-	// if NULL, it may be old kernel
-	if( pfile )
-	{
-		assignType = Q_atoi( (char*)pfile );
-
-		Mem_Free( pfile );
-
-		// check is MAC address is constant
-		if( assignType != 0 )
-			return false;
-	}
-
-	return true;
-}
-
-int ID_ProcessNetDevices( bloomfilter_t *value )
-{
-	const char *prefix = "/sys/class/net";
-	DIR *dir;
-	struct dirent *entry;
-	int count = 0;
-
-	if( !( dir = opendir( prefix ) ) )
-		return 0;
-
-	while( ( entry = readdir( dir ) ) && BloomFilter_Weight( *value ) < MAXBITS_GEN )
-	{
-		if( !Q_strcmp( entry->d_name, "." ) || !Q_strcmp( entry->d_name, ".." ) )
-			continue;
-
-		if( !ID_ValidateNetDevice( entry->d_name ) )
-			continue;
-
-		count += ID_ProcessFile( value, va( "%s/%s/address", prefix, entry->d_name ) );
-	}
-	closedir( dir );
-	return count;
-}
-
-int ID_CheckNetDevices( bloomfilter_t value )
-{
-	const char *prefix = "/sys/class/net";
-
-	DIR *dir;
-	struct dirent *entry;
-	int count = 0;
-	bloomfilter_t filter = 0;
-
-	if( !( dir = opendir( prefix ) ) )
-		return 0;
-
-	while( ( entry = readdir( dir ) ) )
-	{
-		if( !Q_strcmp( entry->d_name, "." ) || !Q_strcmp( entry->d_name, ".." ) )
-			continue;
-
-		if( !ID_ValidateNetDevice( entry->d_name ) )
-			continue;
-
-		if( ID_ProcessFile( &filter, va( "%s/%s/address", prefix, entry->d_name ) ) )
-			count += ( value & filter ) == filter, filter = 0;
-	}
-
-	closedir( dir );
-	return count;
-}
-
-void ID_TestCPUInfo_f( void )
-{
-	bloomfilter_t value = 0;
-
-	if( ID_ProcessCPUInfo( &value ) )
-		Msg( "Got %016llX\n", value );
-	else
-		Msg( "Could not get serial\n" );
-}
-
-#endif
 
 qboolean ID_ProcessFile( bloomfilter_t *value, const char *path )
 {
@@ -317,7 +186,6 @@ qboolean ID_ProcessFile( bloomfilter_t *value, const char *path )
 	return true;
 }
 
-#ifndef _WIN32
 int ID_ProcessFiles( bloomfilter_t *value, const char *prefix, const char *postfix )
 {
 	DIR *dir;
@@ -360,127 +228,6 @@ int ID_CheckFiles( bloomfilter_t value, const char *prefix, const char *postfix 
 	closedir( dir );
 	return count;
 }
-#elif !defined(XASH_WINRT)
-int ID_GetKeyData( HKEY hRootKey, char *subKey, char *value, LPBYTE data, DWORD cbData )
-{
-	HKEY hKey;
-
-	if( RegOpenKeyEx( hRootKey, subKey, 0, KEY_QUERY_VALUE, &hKey ) != ERROR_SUCCESS )
-		return 0;
-	
-	if( RegQueryValueEx( hKey, value, NULL, NULL, data, &cbData ) != ERROR_SUCCESS )
-	{
-		RegCloseKey( hKey );
-		return 0;
-	}
-
-	RegCloseKey( hKey );
-	return 1;
-}
-int ID_SetKeyData( HKEY hRootKey, char *subKey, DWORD dwType, char *value, LPBYTE data, DWORD cbData)
-{
-	HKEY hKey;
-	if( RegCreateKey( hRootKey, subKey, &hKey ) != ERROR_SUCCESS )
-		return 0;
-	
-	if( RegSetValueEx( hKey, value, 0, dwType, data, cbData ) != ERROR_SUCCESS )
-	{
-		RegCloseKey( hKey );
-		return 0;
-	}
-	
-	RegCloseKey( hKey );
-	return 1;
-}
-
-#define BUFSIZE 4096
-
-int ID_RunWMIC(char *buffer, const char *cmdline)
-{
-	HANDLE g_IN_Rd = NULL;
-	HANDLE g_IN_Wr = NULL;
-	HANDLE g_OUT_Rd = NULL;
-	HANDLE g_OUT_Wr = NULL;
-	DWORD dwRead;
-	BOOL bSuccess = FALSE;
-	SECURITY_ATTRIBUTES saAttr;
-	
-	STARTUPINFO si = {0};
-	
-	PROCESS_INFORMATION pi = {0};
-	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-	saAttr.bInheritHandle = TRUE;
-	saAttr.lpSecurityDescriptor = NULL;
-	
-	CreatePipe( &g_IN_Rd, &g_IN_Wr, &saAttr, 0 );
-	CreatePipe( &g_OUT_Rd, &g_OUT_Wr, &saAttr, 0 );
-	SetHandleInformation( g_IN_Wr, HANDLE_FLAG_INHERIT, 0 );
-	
-	si.cb = sizeof(STARTUPINFO);
-	si.dwFlags = STARTF_USESTDHANDLES;
-	si.hStdInput = g_IN_Rd;
-	si.hStdOutput = g_OUT_Wr;
-	si.hStdError = g_OUT_Wr;
-	si.wShowWindow = SW_HIDE;
-	si.dwFlags |= STARTF_USESTDHANDLES;
-
-	CreateProcess( NULL, (char*)cmdline, NULL, NULL, true, CREATE_NO_WINDOW , NULL, NULL, &si, &pi );
-	
-	CloseHandle( g_OUT_Wr );
-	CloseHandle( g_IN_Wr );
-	
-	WaitForSingleObject( pi.hProcess, 500 );
-	
-	bSuccess = ReadFile( g_OUT_Rd, buffer, BUFSIZE, &dwRead, NULL );
-	buffer[BUFSIZE-1] = 0;
-	CloseHandle( g_IN_Rd );
-	CloseHandle( g_OUT_Rd );
-
-	return bSuccess;
-}
-
-int ID_ProcessWMIC( bloomfilter_t *value, const char *cmdline )
-{
-	char buffer[BUFSIZE], token[BUFSIZE], *pbuf;
-	int count = 0;
-
-	if( !ID_RunWMIC( buffer, cmdline ) )
-		return 0;
-	pbuf = COM_ParseFile( buffer, token ); // Header
-	while( pbuf = COM_ParseFile( pbuf, token ) )
-	{
-		if( !ID_VerifyHEX( token ) )
-			continue;
-
-		*value |= BloomFilter_ProcessStr( token );
-		count ++;
-	}
-
-	return count;
-}
-
-int ID_CheckWMIC( bloomfilter_t value, const char *cmdline )
-{
-	char buffer[BUFSIZE], token[BUFSIZE], *pbuf;
-	int count = 0;
-
-	if( !ID_RunWMIC( buffer, cmdline ) )
-		return 0;
-	pbuf = COM_ParseFile( buffer, token ); // Header
-	while( pbuf = COM_ParseFile( pbuf, token ) )
-	{
-		bloomfilter_t filter;
-
-		if( !ID_VerifyHEX( token ) )
-			continue;
-
-		filter = BloomFilter_ProcessStr( token );
-		count += ( filter & value ) == filter;
-	}
-
-	return count;
-}
-#endif
 
 
 #if TARGET_OS_IOS
@@ -492,25 +239,6 @@ bloomfilter_t ID_GenerateRawId( void )
 	bloomfilter_t value = 0;
 	int count = 0;
 
-#ifdef __linux__
-#if defined(__ANDROID__) && !defined(XASH_DEDICATED)
-	{
-		const char *androidid = Android_GetAndroidID();
-		if( androidid && ID_VerifyHEX( androidid ) )
-		{
-			value |= BloomFilter_ProcessStr( androidid );
-			count ++;
-		}
-	}
-#endif
-	count += ID_ProcessCPUInfo( &value );
-	count += ID_ProcessFiles( &value, "/sys/block", "device/cid" );
-	count += ID_ProcessNetDevices( &value );
-#endif
-#if defined(_WIN32) && !defined(XASH_WINRT)
-	count += ID_ProcessWMIC( &value, "wmic path win32_physicalmedia get SerialNumber " );
-	count += ID_ProcessWMIC( &value, "wmic bios get serialnumber " );
-#endif
 #if TARGET_OS_IOS
 	{
 		value |= BloomFilter_ProcessStr(IOS_GetUDID());
@@ -525,28 +253,7 @@ uint ID_CheckRawId( bloomfilter_t filter )
 	bloomfilter_t value = 0;
 	int count = 0;
 
-#ifdef __linux__
-#if defined(__ANDROID__) && !defined(XASH_DEDICATED)
-	{
-		const char *androidid = Android_GetAndroidID();
-		if( androidid && ID_VerifyHEX( androidid ) )
-		{
-			value = BloomFilter_ProcessStr( androidid );
-			count += (filter & value) == value;
-			value = 0;
-		}
-	}
-#endif
-	count += ID_CheckNetDevices( filter );
-	count += ID_CheckFiles( filter, "/sys/block", "device/cid" );
-	if( ID_ProcessCPUInfo( &value ) )
-		count += (filter & value) == value;
-#endif
 	
-#if defined(_WIN32) && !defined(XASH_WINRT)
-	count += ID_CheckWMIC( filter, "wmic path win32_physicalmedia get SerialNumber" );
-	count += ID_CheckWMIC( filter, "wmic bios get serialnumber" );
-#endif
 
 #if TARGET_OS_IOS
 	{
@@ -617,28 +324,7 @@ void ID_Init( void )
 
 	Cmd_AddCommand( "bloomfilter", ID_BloomFilter_f, "print bloomfilter raw value of arguments set");
 	Cmd_AddCommand( "verifyhex", ID_VerifyHEX_f, "check if id source seems to be fake" );
-#ifdef __linux__
-	Cmd_AddCommand( "testcpuinfo", ID_TestCPUInfo_f, "try read cpu serial" );
-#endif
 
-#if defined(__ANDROID__) && !defined(XASH_DEDICATED)
-	sscanf( Android_LoadID(), "%016llX", &id );
-	if( id )
-	{
-		id ^= SYSTEM_XOR_MASK;
-		ID_Check();
-	}
-	
-#elif defined(_WIN32) && !defined(XASH_WINRT)
-	{
-		CHAR szBuf[MAX_PATH];
-		ID_GetKeyData( HKEY_CURRENT_USER, "Software\\Xash3D\\", "xash_id", szBuf, MAX_PATH );
-		
-		sscanf(szBuf, "%016llX", &id);
-		id ^= SYSTEM_XOR_MASK;
-		ID_Check();
-	}
-#else
 	{
 #ifndef __HAIKU__
 		const char *home = getenv( "HOME" );
@@ -664,7 +350,6 @@ void ID_Init( void )
 			}
 		}
 	}
-#endif
 	if( !id )
 	{
 		const char *buf = (const char*) FS_LoadFile( ".xash_id", NULL, false );
@@ -685,15 +370,6 @@ void ID_Init( void )
 	for( i = 0; i < 16; i++ )
 		Q_sprintf( &id_md5[i*2], "%02hhx", md5[i] );
 
-#if defined(__ANDROID__) && !defined(XASH_DEDICATED)
-	Android_SaveID( va("%016llX", id^SYSTEM_XOR_MASK ) );
-#elif defined(_WIN32) && !defined(XASH_WINRT)
-	{
-		CHAR Buf[MAX_PATH];
-		sprintf( Buf, "%016llX", id^SYSTEM_XOR_MASK );
-		ID_SetKeyData( HKEY_CURRENT_USER, "Software\\Xash3D\\", REG_SZ, "xash_id", Buf, Q_strlen(Buf) );
-	}
-#else
 	{
 #ifndef __HAIKU__
 		const char *home = getenv( "HOME" );
@@ -715,7 +391,6 @@ void ID_Init( void )
 			}
 		}
 	}
-#endif
 	FS_WriteFile( ".xash_id", va("%016llX", id^GAME_XOR_MASK), 16 );
 #if 0
 	Msg("MD5 id: %s\nRAW id:%016llX\n", id_md5, id );

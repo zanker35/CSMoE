@@ -8,9 +8,6 @@
 #ifndef STRINGPOOL_H
 #define STRINGPOOL_H
 
-#if defined( _WIN32 )
-#pragma once
-#endif
 
 #include "utlrbtree.h"
 #include "utlvector.h"

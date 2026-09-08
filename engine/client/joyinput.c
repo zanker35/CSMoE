@@ -14,7 +14,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "input.h"
@@ -23,9 +22,7 @@ GNU General Public License for more details.
 #include "client.h"
 #include "gl_local.h"
 
-#if defined(XASH_SDL)
 #include "platform/sdl/events.h"
-#endif
 
 #ifndef SHRT_MAX
 #define SHRT_MAX 0x7FFF
@@ -389,14 +386,9 @@ void Joy_FinalizeMove( float *fw, float *side, float *dpitch, float *dyaw )
 
 	*fw     -= joy_forward->value * (float)joyaxis[JOY_AXIS_FWD ].val/(float)SHRT_MAX;  // must be form -1.0 to 1.0
 	*side   += joy_side->value    * (float)joyaxis[JOY_AXIS_SIDE].val/(float)SHRT_MAX;
-#if !defined(XASH_SDL)
-	*dpitch += joy_pitch->value * (float)joyaxis[JOY_AXIS_PITCH].val/(float)SHRT_MAX * host.realframetime;  // abs axis rotate is frametime related
-	*dyaw   -= joy_yaw->value   * (float)joyaxis[JOY_AXIS_YAW  ].val/(float)SHRT_MAX * host.realframetime;
-#else
 	// HACKHACK: SDL have inverted look axis.
 	*dpitch -= joy_pitch->value * (float)joyaxis[JOY_AXIS_PITCH].val/(float)SHRT_MAX * host.realframetime;
 	*dyaw   += joy_yaw->value   * (float)joyaxis[JOY_AXIS_YAW  ].val/(float)SHRT_MAX * host.realframetime;
-#endif
 }
 
 /*
@@ -441,14 +433,8 @@ void Joy_Init( void )
 		return;
 	}
 
-#if defined(XASH_SDL)
 	// SDL can tell us about connected joysticks
 	Cvar_SetFloat( "joy_found", SDLash_JoyInit( joy_index->integer ) );
-#elif defined(ANDROID)
-	// Initalized after first Joy_AddEvent
-#else
-#warning "Any platform must implement platform-dependent JoyInit, start event system. Otherwise no joystick support"
-#endif
 
 	if( joy_found->integer > 0 )
 		initialized = true;
@@ -469,5 +455,3 @@ void Joy_Shutdown( void )
 
 	initialized = false;
 }
-
-#endif // XASH_DEDICATED

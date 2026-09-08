@@ -7,9 +7,6 @@
 
 #ifndef OPTIONS_SUB_MOESETTINGS_H
 #define OPTIONS_SUB_MOESETTINGS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyPage.h>
 class CLabeledCommandComboBox;

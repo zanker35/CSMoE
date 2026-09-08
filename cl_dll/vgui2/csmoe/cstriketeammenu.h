@@ -1,9 +1,6 @@
 #ifndef CSTEAMMENU_H
 #define CSTEAMMENU_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "game_controls/teammenu.h"
 

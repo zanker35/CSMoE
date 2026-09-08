@@ -15,11 +15,6 @@
 // cl_entity.h
 #if !defined( CL_ENTITY_H )
 #define CL_ENTITY_H
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 typedef struct efrag_s
 {

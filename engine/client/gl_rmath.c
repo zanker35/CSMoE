@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "gl_local.h"
@@ -323,4 +322,3 @@ void Matrix4x4_ConcatScale3( matrix4x4 out, float x, float y, float z )
 	Matrix4x4_CreateScale3( temp, x, y, z );
 	Matrix4x4_Concat( out, base, temp );
 }
-#endif // XASH_DEDICATED

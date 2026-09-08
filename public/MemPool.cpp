@@ -1,15 +1,8 @@
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 #include <basetypes.h>
 #include <math.h>
 
-#ifdef __APPLE__ 
 #include <malloc/malloc.h>
-#else
-#include <malloc.h>
-#endif
 
 #include "MemPool.h"
 #include "common.h"
@@ -45,17 +38,9 @@ void CMemoryPool::AddNewBlob()
 
 	_memBlob[_numBlobs] = malloc(blobSize);
 
-#ifdef _WIN32
-	if (!_memBlob[_numBlobs])
-		DebugBreak();
-#endif // _WIN32
 
 	_headOfFreeList = _memBlob[_numBlobs];
 
-#ifdef _WIN32
-	if (!_headOfFreeList)
-		DebugBreak();
-#endif // _WIN32
 
 	void **newBlob = (void **)_headOfFreeList;
 	for (int j = 0; j < nElements - 1; ++j)
@@ -69,10 +54,6 @@ void CMemoryPool::AddNewBlob()
 	_numElements += nElements;
 	++_numBlobs;
 
-#ifdef _WIN32
-	if (_numBlobs >= MAX_BLOBS - 1)
-		DebugBreak();
-#endif // _WIN32
 
 }
 
@@ -89,10 +70,6 @@ void *CMemoryPool::Alloc(unsigned int amount)
 	if (_blocksAllocated >= _numElements)
 		AddNewBlob();
 
-#ifdef _WIN32
-	if (!_headOfFreeList)
-		DebugBreak();
-#endif // _WIN32
 
 	returnBlock = _headOfFreeList;
 	_headOfFreeList = *((void **)_headOfFreeList);

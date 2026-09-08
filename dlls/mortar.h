@@ -28,9 +28,6 @@
 
 #ifndef MORTAR_H
 #define MORTAR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

@@ -28,9 +28,6 @@
 
 #ifndef R_STUDIOINT_H
 #define R_STUDIOINT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define STUDIO_INTERFACE_VERSION 1
 

@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -2348,12 +2347,10 @@ static void R_StudioDrawMesh( short *ptricmds, float s, float t, float a, float 
 		pglColorPointer( 4, GL_UNSIGNED_BYTE, 0, g_xarraycolor );
 	}
 
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 	if( pglDrawRangeElements )
 		pglDrawRangeElements( GL_TRIANGLES, startArrayVerts, g_nNumArrayVerts,
 			g_nNumArrayElems - startArrayElems, GL_UNSIGNED_SHORT, &g_xarrayelems[startArrayElems] );
 	else
-#endif
 		pglDrawElements( GL_TRIANGLES, g_nNumArrayElems - startArrayElems, GL_UNSIGNED_SHORT, &g_xarrayelems[startArrayElems] );
 	pglDisableClientState( GL_VERTEX_ARRAY );
 	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
@@ -3056,11 +3053,9 @@ static void R_StudioDrawPlanarShadow( void )
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, 12, g_xarrayverts );
 
-#if !defined XASH_NANOGL || defined XASH_WES && defined __EMSCRIPTEN__ // WebGL need to know array sizes
 	if( pglDrawRangeElements )
 		pglDrawRangeElements( GL_TRIANGLES, 0, g_nNumArrayVerts, g_nNumArrayElems, GL_UNSIGNED_SHORT, g_xarrayelems );
 	else
-#endif
 		pglDrawElements( GL_TRIANGLES, g_nNumArrayElems, GL_UNSIGNED_SHORT, g_xarrayelems );
 
 	if( glState.stencilEnabled )
@@ -4189,4 +4184,3 @@ void CL_InitStudioAPI( void )
 	// just restore pointer to builtin function
 	pStudioDraw = &gStudioDraw;
 }
-#endif // XASH_DEDICATED

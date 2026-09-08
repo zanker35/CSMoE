@@ -6,9 +6,6 @@
 
 #ifndef IFILESYSTEMOPENDIALOG_H
 #define IFILESYSTEMOPENDIALOG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 

@@ -8,9 +8,6 @@
 #ifndef PANEL_H
 #define PANEL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 // undefine windows function macros that overlap 
 #ifdef PostMessage

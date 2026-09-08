@@ -15,24 +15,17 @@ GNU General Public License for more details.
 
 #include "common.h"
 
-#if defined(XASH_SDL)
 #include <SDL.h>
-#endif
 
 #include <stdarg.h>  // va_args
 #include <errno.h> // errno
 #include <string.h> // strerror
 
-#ifndef _WIN32
 #include <unistd.h> // fork
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#endif
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#endif
 
 #include "netchan.h"
 #include "server.h"
@@ -44,9 +37,7 @@ GNU General Public License for more details.
 #include "engine_features.h"
 #include "render_api.h"	// decallist_t
 #include "library.h"
-#ifdef XASH_SDL
 #include "platform/sdl/events.h"
-#endif
 
 typedef void (*pfnChangeGame)( const char *progname );
 
@@ -78,12 +69,7 @@ void Sys_PrintUsage( void )
 
 	const char *usage_str = "Usage:\n"
 	"\t    "
-	#ifndef __ANDROID__
 		"<xash_binary>"
-		#ifdef _WIN32
-			".exe"
-		#endif
-	#endif
 	" [options] [+command1] [+command2 arg]\n"
 	"Available options:\n"
 	O("-dev <level>     ","set developer level")
@@ -95,14 +81,11 @@ void Sys_PrintUsage( void )
 		O("-daemonize       ", "run engine in background(only for dedicated)")
 	#endif
 
-	#ifndef XASH_DEDICATED
 		O("-width <n>       ","specifies width of engine window")
 		O("-height <n>      ","specifies height of engine window")
 
-	#ifndef __ANDROID__
 		O("-fullscreen      ","runs engine in fullscreen mode")
 		O("-windowed        ","runs engine in windowed mode")
-	#endif
 
 		O("-nojoy           ","disable joystick support")
 		O("-nosound         ","disable sound")
@@ -110,33 +93,17 @@ void Sys_PrintUsage( void )
 	#ifndef XASH_MOBILE_PLATFORM
 			O("-dedicated       ","run in dedicated server mode")
 	#endif
-	#endif
 
-	#ifdef __ANDROID__
-		O("-nonativeegl  ","use java egl implementation. Use if screen does not update")
-	#endif
 
-	#ifdef _WIN32
-		O("-noavi           ","disable AVI support")
-		O("-nointro         ","disable intro video")
-		O("-nowcon          ","disable win32 console")
-	#endif
 
-	#ifdef XASH_IPX
-		O("-noipx           ","disable IPX")
-	#endif
 	O("-noip            ","disable TCP/IP")
 	O("-noch            ","disable crashhandler")
 	O("-disablehelp     ","disable this message")
 	O("-dll <path>      ","override server DLL path")
-	#ifndef XASH_DEDICATED
 		O("-clientlib <path>","override client DLL path")
-	#endif
 	O("-rodir <path>    ","set read-only base directory, experimental")
 
-	#if !defined(XASH_GLES) || !defined(XASH_NANOGL) || !defined(XASH_DEDICATED)
 		O("-gldebug         ","enable OpenGL debug log through GL_EXT_debug_output, depends on platform")
-	#endif
 	;
 #undef O
 
@@ -277,28 +244,15 @@ void Host_RunFrame()
 	Host_Frame( newtime - oldtime );
 
 	oldtime = newtime;
-#ifdef __EMSCRIPTEN__
-#ifdef EMSCRIPTEN_ASYNC
-	emscripten_sleep(1);
-#else
-	if( host.crashed || host.shutdown_issued )
-		emscripten_cancel_main_loop();
-#endif
-#endif
 }
 
 void Host_FrameLoop()
 {
-#if defined __EMSCRIPTEN__ && !defined EMSCRIPTEN_ASYNC
-	emscripten_cancel_main_loop();
-	emscripten_set_main_loop( Host_RunFrame, 0, 0 );
-#else
 	// main window message loop
 	while( !host.crashed && !host.shutdown_issued )
 	{
 		Host_RunFrame();
 	}
-#endif
 }
 
 void EXPORT Host_AbortCurrentFrame( void )
@@ -311,11 +265,7 @@ void EXPORT Host_AbortCurrentFrame( void )
 #else // sj/lj not supported, so re-run main loop with shifted stack
 	Host_FrameLoop();
 #endif
-#ifdef __EMSCRIPTEN__
-	EM_ASM(throw 'SimulateInfiniteLoop');
-#else
 	exit(127);
-#endif
 }
 
 /*
@@ -442,9 +392,7 @@ Clear all consoles
 */
 void Host_Clear_f( void )
 {
-#ifndef XASH_DEDICATED
 	Con_Clear();
-#endif
 #ifdef XASH_W32CON
 	Wcon_Clear();
 #endif
@@ -475,10 +423,8 @@ void Host_MemStats_f( void )
 
 void Host_Minimize_f( void )
 {
-#ifdef XASH_SDL
 	if( host.hWnd )
 		SDL_MinimizeWindow( host.hWnd );
-#endif
 }
 
 qboolean Host_IsLocalGame( void )
@@ -786,9 +732,7 @@ void Host_Frame( float time )
 
 	Host_InputFrame ();	// input frame
 
-#ifndef XASH_DEDICATED
 	Host_ClientBegin(); // prepare client command
-#endif
 
 	Host_GetConsoleCommands ();
 
@@ -832,9 +776,7 @@ void Host_Error( const char *error, ... )
 	if( host.mouse_visible && !CL_IsInMenu( ))
 	{
 		// hide VGUI mouse
-#ifdef XASH_SDL
 		SDL_ShowCursor( false );
-#endif
 		host.mouse_visible = false;
 	}
 
@@ -1037,10 +979,6 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 
 	host.shutdown_issued = false;
 	host.crashed = false;
-#ifdef DLL_LOADER
-	if( host.enabledll )
-		Setup_LDT_Keeper( ); // Must call before creating any thread
-#endif
 
 	if(( baseDir = getenv( "XASH3D_BASEDIR" )))
 	{
@@ -1051,26 +989,11 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 #if TARGET_OS_IOS
 		const char *IOS_GetDocsDir();
 		Q_strncpy( host.rootdir, IOS_GetDocsDir(), sizeof( host.rootdir ));
-#elif defined(__SAILFISH__)
-		Q_strncpy( host.rootdir, GAMEPATH, sizeof( host.rootdir ));
-#elif defined(XASH_SDL)
-# ifdef XASH_WINRT
-		if (!(baseDir = SDL_WinRTGetFSPathUTF8(SDL_WINRT_PATH_LOCAL_FOLDER)))
-			Sys_Error("couldn't determine current directory: %s", SDL_GetError());
-
-		Q_strncpy(host.rootdir, baseDir, strlen(baseDir));
-# else
+#else
 		if( !( baseDir = SDL_GetBasePath() ) )
 			Sys_Error( "couldn't determine current directory: %s", SDL_GetError() );
 		Q_strncpy( host.rootdir, baseDir, sizeof( host.rootdir ) );
 		SDL_free( baseDir );
-# endif
-#else
-		if( !getcwd( host.rootdir, sizeof(host.rootdir) ) )
-		{
-			Sys_Error( "couldn't determine current directory: %s", strerror( errno ) );
-			host.rootdir[0] = 0;
-		}
 #endif
 	}
 
@@ -1090,13 +1013,6 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		{
 			const char *IOS_GetBundleDir();
 			Q_strncpy( host.rodir, IOS_GetBundleDir(), sizeof( host.rodir ));
-		}
-#elif defined XASH_WINRT
-		else
-		{
-			size_t len = Q_strncpy(host.rodir, SDL_WinRTGetFSPathUTF8(SDL_WINRT_PATH_INSTALLED_LOCATION), sizeof(host.rodir));
-			host.rodir[len] = '\\';
-			host.rodir[len + 1] = '\0';
 		}
 #endif
 	}
@@ -1138,9 +1054,6 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		else host.developer++; // -dev == 1, -dev -console == 2
 	}
 
-#ifdef XASH_DEDICATED
-	host.type = HOST_DEDICATED; // predict state
-#else
 	if( Sys_CheckParm("-dedicated") || progname[0] == '#' )
 	{
 		host.type = HOST_DEDICATED;
@@ -1149,12 +1062,10 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	{
 		host.type = HOST_NORMAL;
 	}
-#endif
 
 	host.con_showalways = true;
 	host.mouse_visible = false;
 
-#ifdef XASH_SDL
 	// should work even if it failed
 	SDL_Init( SDL_INIT_TIMER );
 
@@ -1164,22 +1075,11 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		host.type = HOST_DEDICATED;
 	}
 	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
-#if defined XASH_GLES && !defined __EMSCRIPTEN__ && !TARGET_OS_IOS && defined SDL_HINT_OPENGL_ES_DRIVER
-	SDL_SetHint( SDL_HINT_OPENGL_ES_DRIVER, "1" );
-#endif
-#endif
 
-#ifdef XASH_WINRT
-	if (!host.rootdir[0] || SetCurrentDirectory(SDL_WinRTGetFSPathUNICODE(SDL_WINRT_PATH_LOCAL_FOLDER)) != 0)
-		MsgDev(D_INFO, "%s is working directory now\n", host.rootdir);
-	else
-		Sys_Error("Changing working directory to %s failed.\n", host.rootdir);
-#else
 	if ( !host.rootdir[0] || SetCurrentDirectory( host.rootdir ) != 0)
 		MsgDev( D_INFO, "%s is working directory now\n", host.rootdir );
 	else
 		Sys_Error( "Changing working directory to %s failed.\n", host.rootdir );
-#endif
 
 	Sys_InitLog();
 
@@ -1265,7 +1165,6 @@ Host_Main
 */
 int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func )
 {
-#ifdef XASH_STATIC_GAMELIB
 #ifdef XASH_VGUI2
 	extern int switch_installdll_vgui( void );
 	switch_installdll_vgui();
@@ -1276,7 +1175,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
  	switch_installdll_client(); // cl_dll/cdll_int.cpp
  	extern int switch_installdll_server( void );
  	switch_installdll_server();
-#endif
 
 	pChangeGame = func;	// may be NULL
 
@@ -1341,9 +1239,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	SV_Init();
 	CL_Init();
 
-#if defined(__ANDROID__) && !defined( XASH_SDL ) && !defined( XASH_DEDICATED )
-	Android_Init();
-#endif
 
 	HTTP_Init();
 
@@ -1423,9 +1318,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 
 	Touch_InitConfig();
 	SCR_CheckStartupVids();	// must be last
-#ifdef XASH_SDL
 	SDL_StopTextInput(); // disable text input event. Enable this in chat/console?
-#endif
 
 	if( host.state == HOST_INIT )
 		host.state = HOST_FRAME; // initialization is finished
@@ -1458,7 +1351,6 @@ void EXPORT Host_Shutdown( void )
 			host.state = HOST_SHUTDOWN;
 		break;
 	default:
-#ifndef XASH_DEDICATED
 		if( !Host_IsDedicated() && !host.skip_configs )
 		{
 			// restore all latched cheat cvars
@@ -1467,7 +1359,6 @@ void EXPORT Host_Shutdown( void )
 			Touch_WriteConfig();
 			host.skip_configs = false;
 		}
-#endif
 		host.state = HOST_SHUTDOWN; // prepare host to normal shutdown
 	}
 

@@ -28,9 +28,6 @@
 
 #ifndef HOSTAGE_IMPROV_H
 #define HOSTAGE_IMPROV_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "hostage/hostage.h"
 #include "hostage/hostage_states.h"

@@ -3290,13 +3290,7 @@ void SV_TSourceEngineQuery( netadr_t from )
 	BF_WriteByte  ( &buf, sv_maxclients->integer );
 	BF_WriteByte  ( &buf, bots );
 	BF_WriteByte  ( &buf, Host_IsDedicated() ? 'd' : 'l');
-#if defined(_WIN32)
-	BF_WriteByte  ( &buf, 'w' );
-#elif defined(__APPLE__)
 	BF_WriteByte  ( &buf, 'm' );
-#else
-	BF_WriteByte  ( &buf, 'l' );
-#endif
 	BF_WriteByte  ( &buf, havePassword ); // visibility
 	BF_WriteByte  ( &buf, 0 ); // secure
 #else // GS format
@@ -3315,11 +3309,7 @@ void SV_TSourceEngineQuery( netadr_t from )
 	BF_WriteByte( &buf, sv_maxclients->integer );
 	BF_WriteByte( &buf, PROTOCOL_VERSION );
 	BF_WriteByte( &buf, Host_IsDedicated() ? 'D' : 'L');
-#if defined(_WIN32)
-	BF_WriteByte( &buf, 'W' );
-#else
 	BF_WriteByte( &buf, 'L' );
-#endif
 	BF_WriteByte( &buf, havePassword );
 	if( Q_stricmp( GI->gamedir, "valve" ) )
 	{

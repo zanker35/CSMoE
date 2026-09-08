@@ -10,9 +10,6 @@
 #ifndef SIMDVECTORMATRIX_H
 #define SIMDVECTORMATRIX_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include <string.h>

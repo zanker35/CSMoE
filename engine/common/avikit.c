@@ -16,9 +16,6 @@ GNU General Public License for more details.
 #include "common.h"
 #include "client.h"
 #include "gl_local.h"
-#if defined(_WIN32) && !defined(XASH_DEDICATED) && !defined( XASH_WINRT )
-#define USE_VFW
-#endif
 #ifdef USE_VFW
 #ifdef __MINGW32__
 #include <mmreg.h>

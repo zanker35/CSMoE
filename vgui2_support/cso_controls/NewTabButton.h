@@ -1,9 +1,6 @@
 #ifndef NEWTABBUTTON_H
 #define NEWTABBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/IBorder.h>
 #include <vgui/IScheme.h>

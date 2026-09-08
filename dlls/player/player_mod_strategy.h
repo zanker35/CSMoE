@@ -18,9 +18,6 @@ GNU General Public License for more details.
 
 #include <player.h>
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

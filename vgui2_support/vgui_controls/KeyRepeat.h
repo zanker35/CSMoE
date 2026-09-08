@@ -6,9 +6,6 @@
 
 #ifndef KEYREPEAT_H
 #define KEYREPEAT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "vgui/KeyCode.h"
 

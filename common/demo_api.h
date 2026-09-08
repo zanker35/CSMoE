@@ -14,11 +14,6 @@
 ****/
 #if !defined ( DEMO_APIH )
 #define DEMO_APIH
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 typedef struct demo_api_s
 {

@@ -51,11 +51,7 @@ float	vJumpAngles[3];
 extern engine_studio_api_t IEngineStudio;
 }
 
-#ifdef XASH_STATIC_GAMELIB
 int DLLEXPORT CL_IsThirdPerson_CL( void );
-#else
-int DLLEXPORT CL_IsThirdPerson( void );
-#endif
 
 using namespace cl;
 
@@ -973,11 +969,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	v_angles = pparams->viewangles;
 	v_lastAngles = pparams->viewangles;
 	//	v_cl_angles = pparams->cl_viewangles;	// keep old user mouse angles !
-#ifdef XASH_STATIC_GAMELIB
     if ( CL_IsThirdPerson_CL() )
-#else
-    if ( CL_IsThirdPerson() )
-#endif
 	{
 		VectorCopy( camAngles, pparams->viewangles);
 		float pitch = camAngles[ 0 ];
@@ -1840,11 +1832,7 @@ void V_CalcThirdPersonRefdef( ref_params_t *pparams )
 	ent->latched.prevangles[PITCH] = pitch;
 }
 
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT V_CalcRefdef_CL( struct ref_params_s *pparams )
-#else
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
-#endif
 {
 	// intermission / finale rendering
 	if ( pparams->intermission )
@@ -1855,11 +1843,7 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcSpectatorRefdef ( pparams );
 	}
-#ifdef XASH_STATIC_GAMELIB
     else if ( CL_IsThirdPerson_CL() )
-#else
-    else if ( CL_IsThirdPerson() )
-#endif
 	{
 		V_CalcThirdPersonRefdef ( pparams );
 	}

@@ -9,9 +9,6 @@
 #ifndef UTLLINKEDLIST_H
 #define UTLLINKEDLIST_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier0/basetypes.h"
 #include "utlmemory.h"
@@ -539,10 +536,6 @@ inline I  CUtlLinkedList<T,S,ML,I,M>::PrivateNext( I i ) const
 // Are nodes in the list or valid?
 //-----------------------------------------------------------------------------
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning( disable: 4310 ) // Allows "(I)(S)M::INVALID_INDEX" below
-#endif
 template <class T, class S, bool ML, class I, class M>
 inline bool CUtlLinkedList<T,S,ML,I,M>::IndexInRange( I index ) // Static method
 {
@@ -561,9 +554,6 @@ inline bool CUtlLinkedList<T,S,ML,I,M>::IndexInRange( I index ) // Static method
 
 	return ( ( (S)index == index ) && ( (S)index != InvalidIndex() ) );
 }
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 template <class T, class S, bool ML, class I, class M>
 inline bool CUtlLinkedList<T,S,ML,I,M>::IsValidIndex( I i ) const  

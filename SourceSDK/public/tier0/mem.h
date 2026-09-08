@@ -8,9 +8,6 @@
 #ifndef TIER0_MEM_H
 #define TIER0_MEM_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <stddef.h>
 

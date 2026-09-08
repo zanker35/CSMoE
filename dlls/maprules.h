@@ -28,9 +28,6 @@
 
 #ifndef MAPRULES_H
 #define MAPRULES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

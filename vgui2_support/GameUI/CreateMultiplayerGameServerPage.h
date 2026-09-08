@@ -7,9 +7,6 @@
 
 #ifndef CREATEMULTIPLAYERGAMESERVERPAGE_H
 #define CREATEMULTIPLAYERGAMESERVERPAGE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyPage.h>
 #include "cvartogglecheckbutton.h"

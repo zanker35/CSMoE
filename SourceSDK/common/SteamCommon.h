@@ -33,22 +33,10 @@ extern "C"
 
 /* Applications should not define STEAM_EXPORTS. */
 
-#if defined ( _WIN32 )
-
-#ifdef STEAM_EXPORTS
-#define STEAM_API __declspec(dllexport)
-#else
-#define STEAM_API __declspec(dllimport)
-#endif
-
-#define STEAM_CALL __cdecl
-
-#else
 
 #define STEAM_API /* */
 #define STEAM_CALL /* */
 
-#endif
 
 typedef void (STEAM_CALL  *KeyValueIteratorCallback_t )(const char *Key, const char *Val, void *pvParam);
 
@@ -658,11 +646,7 @@ const unsigned int										STEAM_USE_LATEST_VERSION = 0xFFFFFFFF;
 typedef	unsigned short		SteamInstanceID_t;		// MUST be 16 bits
 
 
-#if defined ( _WIN32 )
-typedef	unsigned __int64	SteamLocalUserID_t;		// MUST be 64 bits
-#else
 typedef	unsigned long long	SteamLocalUserID_t;		// MUST be 64 bits
-#endif
 
 /******************************************************************************
 **

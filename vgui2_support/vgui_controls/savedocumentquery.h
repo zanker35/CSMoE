@@ -7,9 +7,6 @@
 #ifndef SAVEDOCUMENTQUERY_H
 #define SAVEDOCUMENTQUERY_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 //-----------------------------------------------------------------------------

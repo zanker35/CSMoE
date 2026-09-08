@@ -1,8 +1,5 @@
 #ifndef ARRAYSIZE_H
 #define ARRAYSIZE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifndef __cplusplus
 #ifndef ARRAYSIZE

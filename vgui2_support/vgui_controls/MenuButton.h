@@ -8,9 +8,6 @@
 #ifndef MENUBUTTON_H
 #define MENUBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "vgui/KeyCode.h"
 #include "Button.h"

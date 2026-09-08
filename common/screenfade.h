@@ -28,9 +28,6 @@
 
 #ifndef SCREENFADE_H
 #define SCREENFADE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 typedef struct screenfade_s
 {

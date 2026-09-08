@@ -28,9 +28,6 @@
 
 #ifndef HOSTAGE_LOCALNAV_H
 #define HOSTAGE_LOCALNAV_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

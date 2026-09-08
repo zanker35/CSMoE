@@ -8,9 +8,6 @@
 #ifndef CHECKBUTTON_H
 #define CHECKBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include "ToggleButton.h"

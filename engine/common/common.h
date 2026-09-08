@@ -33,21 +33,11 @@ extern "C" {
 	#error "Please select timer backend"
 #endif
 
-#ifndef XASH_DEDICATED
 	#if XASH_VIDEO == VIDEO_NULL
 		#error "Please select video backend"
 	#endif
-#endif
 
-#ifndef XASH_SDL
 
-#if XASH_TIMER == TIMER_SDL || XASH_VIDEO == VIDEO_SDL || XASH_SOUND == SOUND_SDL || XASH_INPUT == INPUT_SDL
-#error "SDL backends without XASH_SDL not allowed"
-#endif
-
-#endif
-
-#ifndef _WIN32
 #include <stddef.h> // size_t
 #include <stdio.h> // off_t
 #include <stdarg.h> // va_list
@@ -57,15 +47,6 @@ extern "C" {
 #define EXPORT __attribute__ ((visibility ("default"),force_align_arg_pointer))
 #else
 #define EXPORT __attribute__ ((visibility ("default")))
-#endif
-#else
-#include <sys/types.h> // off_t
-#include <stdio.h>
-#include <stdlib.h> // rand, adbs
-#include <stdarg.h> // va
-#define EXPORT		__declspec( dllexport )
-#undef PATH_MAX
-#define PATH_MAX 4096 // Try workaround some strange bugs
 #endif
 
 #define MAX_STRING		256	// generic string
@@ -155,11 +136,7 @@ typedef enum
 	HOST_DEDICATED,
 } instance_t;
 
-#ifdef XASH_DEDICATED
-#define Host_IsDedicated() ( true )
-#else
 #define Host_IsDedicated() ( host.type == HOST_DEDICATED )
-#endif
 
 #include "system.h"
 #include "ref_params.h"
@@ -404,11 +381,7 @@ typedef struct host_parm_s
 
 	// list of unique decal indexes
 	signed char		draw_decals[MAX_DECALS][CS_SIZE];
-#ifdef XASH_SDL
     SDL_Window*		hWnd;		// main window
-#else
-	void *hWnd;
-#endif
 	int		developer;	// show all developer's message
 	int		old_developer;	// keep real dev state (we need enable dev-mode in multiplayer)
 	qboolean		key_overstrike;	// key overstrike mode
@@ -1105,9 +1078,6 @@ void BuildGammaTable( float gamma, float texGamma );
 byte TextureToTexGamma( byte b );
 byte TextureToGamma( byte b );
 
-#ifdef __ANDROID__
-#include "platform/android/android-main.h"
-#endif
 
 #ifdef __HAIKU__
 #include <FindDirectory.h>

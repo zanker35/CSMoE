@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -29,11 +28,9 @@ int	g_textureId = 0;
 int	g_iBoundTexture;
 static enum VGUI_KeyCode s_pVirtualKeyTrans[256];
 static enum VGUI_DefaultCursor s_currentCursor;
-#ifdef XASH_SDL
 #include <SDL_events.h>
 #include "platform/sdl/events.h"
 static SDL_Cursor* s_pDefaultCursor[20];
-#endif
 static void *s_pVGuiSupport; // vgui_support library
 
 void VGUI_DrawInit( void );
@@ -81,7 +78,6 @@ void GAME_EXPORT VGUI_GetMousePos( int *_x, int *_y )
 	int x, y;
 
 	CL_GetMousePosition( &x, &y );
-#ifdef XASH_SDL
 	if( host.hWnd )
 	{
 		int width, height;
@@ -90,13 +86,11 @@ void GAME_EXPORT VGUI_GetMousePos( int *_x, int *_y )
 		if( width > 0 ) x = (int)((float)x * scr_width->value / width);
 		if( height > 0 ) y = (int)((float)y * scr_height->value / height);
 	}
-#endif
 	*_x = x / xscale, *_y = y / yscale;
 }
 
 void GAME_EXPORT VGUI_SetMousePos( int x, int y )
 {
-#ifdef XASH_SDL
 	if( host.hWnd )
 	{
 		int width, height;
@@ -107,13 +101,11 @@ void GAME_EXPORT VGUI_SetMousePos( int x, int y )
 		if( ui_height > 0 ) y = (int)((float)y * height / ui_height);
 		SDL_WarpMouseInWindow( host.hWnd, x, y );
 	}
-#endif
 }
 
 void VGUI_InitCursors( void )
 {
 	// load up all default cursors
-#ifdef XASH_SDL
 	s_pDefaultCursor[dc_none] = NULL;
 	s_pDefaultCursor[dc_arrow] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
 	s_pDefaultCursor[dc_ibeam] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
@@ -129,7 +121,6 @@ void VGUI_InitCursors( void )
 	s_pDefaultCursor[dc_hand] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
 	//host.mouse_visible = true;
 	SDL_SetCursor( s_pDefaultCursor[dc_arrow] );
-#endif
 }
 
 void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
@@ -153,7 +144,6 @@ void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 		break;
 	}
 
-#ifdef XASH_SDL
 	if( visible )
 	{
 		SDL_SetRelativeMouseMode( SDL_FALSE );
@@ -171,7 +161,6 @@ void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 			SDL_SetRelativeMouseMode( SDL_TRUE );
 #endif
 	}
-#endif
 	s_currentCursor = cursor;
 	host.mouse_visible = visible;
 }
@@ -186,7 +175,6 @@ byte GAME_EXPORT VGUI_GetColor( int i, int j)
 void GAME_EXPORT VGUI_SetVisible( qboolean state )
 {
 	host.mouse_visible=state;
-#ifdef XASH_SDL
 	if( state )
 		SDL_SetRelativeMouseMode( SDL_FALSE );
 	SDL_ShowCursor( state );
@@ -195,7 +183,6 @@ void GAME_EXPORT VGUI_SetVisible( qboolean state )
 
 #ifndef XASH_VGUI2
 	SDLash_EnableTextInput( state, true );
-#endif
 #endif
 }
 
@@ -307,11 +294,7 @@ void VGui_Startup( int width, int height )
 			Q_strncpy( vguiloader, VGUI_SUPPORT_DLL, 256 );
 
 #ifdef XASH_VGUI2
-#ifdef XASH_STATIC_GAMELIB
 		s_pVGuiSupport = Com_LoadLibrary( "vgui2_support", false );
-#else
-		s_pVGuiSupport = Com_LoadLibrary( VGUI2_SUPPORT_DLL, false );
-#endif
 #else
 		s_pVGuiSupport = Com_LoadLibrary( vguiloader, false );
 #endif
@@ -358,10 +341,6 @@ void VGui_Startup( int width, int height )
 		width = 1280;
 	else if( width <= 1600 )
 		width = 1600;
-#ifdef DLL_LOADER
-	else if ( Q_strstr( vguiloader, ".dll" ) )
-		width = 1600;
-#endif
 
 
 	if( vgui.initialized )
@@ -391,14 +370,12 @@ void VGui_Shutdown( void )
 	s_pVGuiSupport = NULL;
 
 	vgui.initialized = false;
-#ifdef XASH_SDL
 	for( int i = 0; i < dc_last; ++i )
 	{
 		if( s_pDefaultCursor[i] )
 			SDL_FreeCursor( s_pDefaultCursor[i] );
 		s_pDefaultCursor[i] = NULL;
 	}
-#endif
 }
 
 
@@ -829,4 +806,3 @@ void *GAME_EXPORT pfnVGui_GetPanel()
 		return vgui.GetPanel();
 	return NULL;
 }
-#endif

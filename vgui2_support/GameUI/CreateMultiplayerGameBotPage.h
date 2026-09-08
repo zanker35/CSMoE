@@ -7,9 +7,6 @@
 
 #ifndef CREATEMULTIPLAYERGAMEBOTPAGE_H
 #define CREATEMULTIPLAYERGAMEBOTPAGE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyPage.h>
 

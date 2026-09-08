@@ -2,9 +2,6 @@
 #ifndef TexturedButton_H
 #define TexturedButton_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <VGUI/IScheme.h>
 #include <KeyValues.h>

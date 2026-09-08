@@ -7,9 +7,6 @@
 
 #ifndef BITMAPIMAGEPANEL_H
 #define BITMAPIMAGEPANEL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Label.h"
 

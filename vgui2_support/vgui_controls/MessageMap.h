@@ -8,9 +8,6 @@
 #ifndef MESSAGEMAP_H
 #define MESSAGEMAP_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier1/utlvector.h"
 
@@ -349,7 +346,6 @@ private:
 // It creates a function which instances an object of the specified type
 // It them hooks that function up to the helper list so that the CHud objects can create
 //  the elements by name, with no header file dependency, etc.
-#ifdef XASH_STATIC_GAMELIB
 #define DECLARE_BUILD_FACTORY( className ) \
     vgui2::Panel *Create_##className( void ) \
     { \
@@ -370,32 +366,6 @@ private:
 #define DECLARE_BUILD_FACTORY_CUSTOM_ALIAS( className, factoryName, createFunc ) \
 	className *g_##factoryName##LinkerHack = NULL;
 
-#else
-#define DECLARE_BUILD_FACTORY( className )										\
-	static vgui2::Panel *Create_##className( void )							\
-		{																		\
-			return new className( NULL, NULL );									\
-		};																		\
-		static vgui2::CBuildFactoryHelper g_##className##_Helper( #className, Create_##className );\
-	className *g_##className##LinkerHack = NULL;
-
-#define DECLARE_BUILD_FACTORY_DEFAULT_TEXT( className, defaultText )			\
-	static vgui2::Panel *Create_##className( void )							\
-		{																		\
-			return new className( NULL, NULL, #defaultText );					\
-		};																		\
-	static vgui2::CBuildFactoryHelper g_##className##_Helper( #className, Create_##className );\
-	className *g_##className##LinkerHack = NULL;
-
-// This one allows passing in a special function with calls new panel( xxx ) with arbitrary default parameters
-#define DECLARE_BUILD_FACTORY_CUSTOM( className, createFunc )					\
-	static vgui2::CBuildFactoryHelper g_##className##_Helper( #className, createFunc );\
-	className *g_##className##LinkerHack = NULL;
-
-#define DECLARE_BUILD_FACTORY_CUSTOM_ALIAS( className, factoryName, createFunc )					\
-	static vgui2::CBuildFactoryHelper g_##factoryName##_Helper( #factoryName, createFunc );\
-	className *g_##factoryName##LinkerHack = NULL;
-#endif
 } // namespace vgui
 
 

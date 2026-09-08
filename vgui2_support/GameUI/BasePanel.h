@@ -1,9 +1,6 @@
 #ifndef BASEPANEL_H
 #define BASEPANEL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "vgui_controls/Panel.h"
 #include "vgui_controls/PHandle.h"

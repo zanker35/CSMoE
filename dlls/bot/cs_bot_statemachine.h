@@ -1,8 +1,5 @@
 #ifndef CS_BOT_STATEMACHINE_H
 #define CS_BOT_STATEMACHINE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

@@ -42,7 +42,6 @@ using namespace cl;
 
 //#include "vgui_TeamFortressViewport.h"
 
-#ifndef __linux__
 
 void sincosf (float rad, float *sine, float *cosine)
 {
@@ -50,7 +49,6 @@ void sincosf (float rad, float *sine, float *cosine)
    *cosine = cosf (rad);
 }
 
-#endif
 
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item

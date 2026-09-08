@@ -10,9 +10,6 @@
 #ifndef TIER0_MEMALLOC_H
 #define TIER0_MEMALLOC_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 // These memory debugging switches aren't relevant under Linux builds since memoverride.cpp
 // isn't built into Linux projects
@@ -22,9 +19,6 @@
 #endif
 
 #if defined( _MEMTEST )
-#ifdef _WIN32
-#define USE_MEM_DEBUG 1
-#endif
 #endif
 
 // Undefine this if using a compiler lacking threadsafe RTTI (like vc6)
@@ -379,36 +373,9 @@ public:
 
 //-----------------------------------------------------------------------------
 
-#if defined(_WIN32) && ( defined(_DEBUG) || defined(USE_MEM_DEBUG) )
-
-	#pragma warning(disable:4290)
-	#pragma warning(push)
-	#include <typeinfo>
-
-	// MEM_DEBUG_CLASSNAME is opt-in.
-	// Note: typeid().name() is not threadsafe, so if the project needs to access it in multiple threads
-	// simultaneously, it'll need a mutex.
-	#if defined(_CPPRTTI) && defined(MEM_DEBUG_CLASSNAME)
-		#define MEM_ALLOC_CREDIT_CLASS()	MEM_ALLOC_CREDIT_( typeid(*this).name() )
-		#define MEM_ALLOC_CLASSNAME(type) (typeid((type*)(0)).name())
-	#else
-		#define MEM_ALLOC_CREDIT_CLASS()	MEM_ALLOC_CREDIT_( __FILE__ )
-		#define MEM_ALLOC_CLASSNAME(type) (__FILE__)
-	#endif
-
-	// MEM_ALLOC_CREDIT_FUNCTION is used when no this pointer is available ( inside 'new' overloads, for example )
-	#ifdef _MSC_VER
-		#define MEM_ALLOC_CREDIT_FUNCTION()		MEM_ALLOC_CREDIT_( __FUNCTION__ )
-	#else
-		#define MEM_ALLOC_CREDIT_FUNCTION() (__FILE__)
-	#endif
-
-	#pragma warning(pop)
-#else
 	#define MEM_ALLOC_CREDIT_CLASS()
 	#define MEM_ALLOC_CLASSNAME(type) NULL
 	#define MEM_ALLOC_CREDIT_FUNCTION() 
-#endif
 
 //-----------------------------------------------------------------------------
 

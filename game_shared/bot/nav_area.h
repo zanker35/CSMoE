@@ -28,9 +28,6 @@
 
 #ifndef NAV_AREA_H
 #define NAV_AREA_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <list>
 

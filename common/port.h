@@ -31,55 +31,21 @@ GNU General Public License for more details.
 #define XASH_MOBILE_PLATFORM
 #endif
 
-#ifdef _WIN32
-#define PATH_SPLITTER "\\"
-#else
 #define PATH_SPLITTER "/"
-#endif
 
-#if !defined(_WIN32)
 	#include <limits.h>
 	#include <dlfcn.h>
 	#include <stdlib.h>
 	#include <unistd.h>
 
-	#if defined(__APPLE__)
 		#include <sys/syslimits.h>
 		#define OS_LIB_EXT "dylib"
         #define OPEN_COMMAND "open"
 		#include "TargetConditionals.h"
-	#else
-		#define OS_LIB_EXT "so"
-        #define OPEN_COMMAND "xdg-open"
-	#endif
 
 
-	#ifdef __EMSCRIPTEN__
-	#include <emscripten.h>
-	#endif
 
-	#if defined(__ANDROID__)
-		#if defined(LOAD_HARDFP)
-			#define POSTFIX "_hardfp"
-		#else
-			#define POSTFIX
-		#endif
-
-		// don't change these names
-		#define MENUDLL   "libmenu"   POSTFIX "." OS_LIB_EXT
-		#define CLIENTDLL "libclient" POSTFIX "." OS_LIB_EXT
-		#define SERVERDLL "libserver" POSTFIX "." OS_LIB_EXT
-		#define GAMEPATH "/sdcard/xash"
-	#elif defined(__SAILFISH__)
-		#define POSTFIX
-		// don't change these names
-		#define MENUDLL   "libmenu"   POSTFIX "." OS_LIB_EXT
-		#define CLIENTDLL "libclient" POSTFIX "." OS_LIB_EXT
-		#define SERVERDLL "libserver" POSTFIX "." OS_LIB_EXT
-		#define GAMEPATH "/home/nemo/xash"
-		#define LIBPATH "/usr/lib/xash3d/"
-		#define SHAREPATH "/usr/share/xash3d/"
-	#elif defined(__HAIKU__)
+	#if   defined(__HAIKU__)
 		#define POSTFIX   "-haiku"
  		#define MENUDLL   "libmenu"                       "." OS_LIB_EXT
  		#define CLIENTDLL "libclient" POSTFIX ARCH_SUFFIX "." OS_LIB_EXT
@@ -135,71 +101,6 @@ GNU General Public License for more details.
 	{
 		int x, y;
 	} POINT;
-#else // WIN32
-	#ifdef __MINGW32__
-		#define _inline static inline
-	#endif
-
-	#define strcasecmp _stricmp
-	#define strncasecmp _strnicmp
-	#define strcasestr StrStrIA
-	#define open _open
-	#define read _read
-
-	// shut-up compiler warnings
-	#pragma warning(disable : 4244)	// MIPS
-	#pragma warning(disable : 4018)	// signed/unsigned mismatch
-	#pragma warning(disable : 4305)	// truncation from const double to float
-	#pragma warning(disable : 4115)	// named type definition in parentheses
-	#pragma warning(disable : 4100)	// unreferenced formal parameter
-	#pragma warning(disable : 4127)	// conditional expression is constant
-	#pragma warning(disable : 4057)	// differs in indirection to slightly different base types
-	#pragma warning(disable : 4201)	// nonstandard extension used
-	#pragma warning(disable : 4706)	// assignment within conditional expression
-	#pragma warning(disable : 4054)	// type cast' : from function pointer
-	#pragma warning(disable : 4310)	// cast truncates constant value
-
-	#define HSPRITE WINAPI_HSPRITE
-		#include <windows.h>
-	#undef HSPRITE
-
-	#define OS_LIB_EXT "dll"
-	#define MENUDLL "menu"ARCH_SUFFIX"." OS_LIB_EXT
-	#define CLIENTDLL "client"ARCH_SUFFIX"." OS_LIB_EXT
-	#define VGUI_SUPPORT_DLL "../vgui_support." OS_LIB_EXT
-	#include <limits.h>
-
-	#include <io.h>
-	#include <shlwapi.h>
-	#pragma comment(lib,"shlwapi.lib")
-
-#ifdef WINAPI_FAMILY
-#if (!WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP))
-#define XASH_WINRT
-#endif
-#endif
-	
-#if defined(_MSC_VER) && (_MSC_VER < 1700) 
-#include <math.h>
-static __inline int round(float f)
-{
-    return (int)(f + 0.5);
-
-}
-static __inline float cbrt(float f)
-{
-    return pow(f,1.0/3.0);
-
-}
-
-#endif
-
-
-#ifdef XASH_64BIT
-// windows NameForFunction not implemented yet
-#define XASH_ALLOW_SAVERESTORE_OFFSETS
-#endif
-#endif //WIN32
 
 #ifndef INT_MAX
 #define INT_MAX 2147483647

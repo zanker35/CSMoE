@@ -14,11 +14,6 @@
 ****/
 #if !defined( QFONT_H )
 #define QFONT_H
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 // Font stuff
 

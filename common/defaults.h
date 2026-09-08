@@ -25,9 +25,7 @@ SETUP BACKENDS DEFINITIONS
 
 ===================================================================
 */
-#ifndef XASH_DEDICATED
 
-	#ifdef XASH_SDL
 
 		// by default, use SDL subsystems
 		#ifndef XASH_VIDEO
@@ -46,36 +44,12 @@ SETUP BACKENDS DEFINITIONS
 			#define XASH_SOUND SOUND_SDL
 		#endif
 
-	#endif //XASH_SDL
 
-	#if defined __ANDROID__ && !defined XASH_SDL
 
-		#ifndef XASH_VIDEO
-			#define XASH_VIDEO VIDEO_ANDROID
-		#endif
-
-		#ifndef XASH_TIMER
-			#define XASH_TIMER TIMER_LINUX
-		#endif
-
-		#ifndef XASH_INPUT
-			#define XASH_INPUT INPUT_ANDROID
-		#endif
-
-		#ifndef XASH_SOUND
-			#define XASH_SOUND SOUND_OPENSLES
-		#endif
-	#endif // android case
-
-#endif // XASH_DEDICATED
 
 // select crashhandler based on defines
 #ifndef XASH_CRASHHANDLER
-	#ifdef _WIN32
-		#ifdef DBGHELP
-			#define XASH_CRASHHANDLER CRASHHANDLER_DBGHELP
-		#endif
-	#elif defined CRASHHANDLER
+	#if   defined CRASHHANDLER
 		#define XASH_CRASHHANDLER CRASHHANDLER_UCONTEXT
 	#else
 		#define XASH_CRASHHANDLER CRASHHANDLER_NULL
@@ -84,11 +58,7 @@ SETUP BACKENDS DEFINITIONS
 
 // no timer - no xash
 #ifndef XASH_TIMER
-	#ifdef _WIN32
-		#define XASH_TIMER TIMER_WIN32
-	#else
 		#define XASH_TIMER TIMER_LINUX
-	#endif
 #endif
 
 //
@@ -122,16 +92,12 @@ Default build-depended cvar and constant values
 	#define DEFAULT_M_IGNORE "0"
 #endif
 
-#if defined __ANDROID__ || TARGET_OS_IPHONE || defined __SAILFISH__ || defined __EMSCRIPTEN__ || defined XASH_STATIC_GAMELIB
 // this means that libraries are provided with engine, but not in game data
 // You need add library loading code to library.c when adding new platform
 #define XASH_INTERNAL_GAMELIBS
-#endif
 
 #if defined XASH_NANOGL || defined XASH_WES || defined XASH_REGAL
-#ifndef XASH_GLES
 #define XASH_GLES
-#endif // XASH_GLES
 #ifndef XASH_GL_STATIC
 #define XASH_GL_STATIC
 #endif // XASH_GL_STATIC
@@ -141,11 +107,7 @@ Default build-depended cvar and constant values
 #define DEFAULT_SECONDARY_MASTER "ms2.xash.su:27010"
 // Set ForceSimulating to 1 by default for dedicated, because AMXModX timers require this
 // TODO: enable simulating for any server?
-#ifdef XASH_DEDICATED
-	#define DEFAULT_SV_FORCESIMULATING "1"
-#else
 	#define DEFAULT_SV_FORCESIMULATING "0"
-#endif
 
 // allow override for developer/debug builds
 #ifndef DEFAULT_DEV

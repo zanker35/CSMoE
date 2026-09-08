@@ -814,9 +814,6 @@ void CCSTutor::CancelEvent(TutorMessageID mid)
 
 NOXREF void CCSTutor::LookupHotKey(TutorMessageID mid, int paramNum, wchar_t *buf, int buflen)
 {
-#ifdef _WIN32
-	_snwprintf(buf, buflen - 1, L"KEY%d", paramNum);
-#endif // _WIN32
 }
 
 TutorMessageEvent *CCSTutor::CreateTutorMessageEvent(TutorMessageID mid, CBaseEntity *entity, CBaseEntity *other)

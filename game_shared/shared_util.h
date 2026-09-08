@@ -28,16 +28,11 @@
 
 #ifndef SHARED_UTIL
 #define SHARED_UTIL
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "../dlls/maintypes.h"
 
-#ifndef _WIN32
 #include <string.h>
 #include <wchar.h>
-#endif // _WIN32
 
 NOXREF wchar_t *SharedWVarArgs(wchar_t *format, ...);
 char *SharedVarArgs(const char *format, ...);

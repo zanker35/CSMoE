@@ -6,9 +6,7 @@
 //
 //=============================================================================//
 
-#if defined( _WIN32 ) && !defined( _X360 )
-#include <windows.h>		// for WideCharToMultiByte and MultiByteToWideChar
-#elif defined(POSIX)
+#if   defined(POSIX)
 #include <wchar.h> // wcslen()
 #define _alloca alloca
 #define _wtoi(arg) wcstol(arg, NULL, 10)
@@ -649,9 +647,6 @@ bool KeyValues::LoadFromFile( IBaseFileSystem *filesystem, const char *resourceN
 	TM_ZONE_DEFAULT_PARAM( TELEMETRY_LEVEL0, resourceName );
 
 	Assert(filesystem);
-#ifdef WIN32
-	Assert( IsX360() || ( IsPC() && _heapchk() == _HEAPOK ) );
-#endif
 
 #ifdef STAGING_ONLY
 	static bool s_bCacheEnabled = !!CommandLine()->FindParm( "-enable_keyvalues_cache" );
@@ -927,11 +922,7 @@ void KeyValues::SaveKeyToFile( KeyValues *dat, IBaseFileSystem *filesystem, File
 
 				char buf[32];
 				// write "0x" + 16 char 0-padded hex encoded 64 bit value
-#ifdef WIN32
-				Q_snprintf( buf, sizeof( buf ), "0x%016I64X", *( (uint64 *)dat->m_sValue ) );
-#else
 				Q_snprintf( buf, sizeof( buf ), "0x%016llX", *( (uint64 *)dat->m_sValue ) );
-#endif
 
 				INTERNALWRITE(buf, Q_strlen(buf));
 				INTERNALWRITE("\"\n", 2);
@@ -1382,12 +1373,8 @@ float KeyValues::GetFloat( const char *keyName, float defaultValue )
 		case TYPE_STRING:
 			return (float)atof(dat->m_sValue);
 		case TYPE_WSTRING:
-#ifdef WIN32
-			return (float) _wtof(dat->m_wsValue);		// no wtof
-#else
 			Assert( !"impl me" );
 			return 0.0;
-#endif
 			case TYPE_FLOAT:
 			return dat->m_flValue;
 		case TYPE_INT:

@@ -28,9 +28,6 @@
 
 #ifndef BOT_MANAGER_H
 #define BOT_MANAGER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <list>
 

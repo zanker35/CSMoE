@@ -11,9 +11,6 @@
 #ifndef TEXTENTRY_H
 #define TEXTENTRY_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 
@@ -93,9 +90,6 @@ public:
 	virtual ~TextEntry();
 
 	virtual void SetText(const uchar32 *wszText);
-#ifdef _WIN32
-	virtual void SetText(const wchar_t* wszText);
-#endif
 	virtual void SetText(const char *text);
 	virtual void GetText(char *buf, int bufLen);
 	virtual void GetText(wchar_t *buf, int bufLen);

@@ -8,9 +8,6 @@
 #ifndef EDITABLEPANEL_H
 #define EDITABLEPANEL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Panel.h"
 #include "FocusNavGroup.h"

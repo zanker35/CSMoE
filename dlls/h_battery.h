@@ -28,9 +28,6 @@
 
 #ifndef H_BATTERY_H
 #define H_BATTERY_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

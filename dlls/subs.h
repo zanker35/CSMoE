@@ -28,9 +28,6 @@
 
 #ifndef SUBS_H
 #define SUBS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

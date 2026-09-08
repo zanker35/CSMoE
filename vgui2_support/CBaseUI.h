@@ -23,13 +23,6 @@ private:
 	CreateInterfaceFn m_FactoryList[MAX_NUM_FACTORIES];
 	int m_iNumFactories;
 
-#ifndef XASH_STATIC_GAMELIB
-	CSysModule *m_hFileSystemModule;
-	CSysModule *m_hVGuiModule;
-	CSysModule *m_hChromeModule;
-	CSysModule *m_hClientModule;
-	CSysModule *m_hStaticGameUIModule;
-#endif
 	
 	bool m_bHidingGameUI = false;
 };

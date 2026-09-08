@@ -10,8 +10,6 @@
 #ifdef _X360
 #include "xbox/xbox_console.h"
 #include "xbox/xbox_vxconsole.h"
-#elif defined( _WIN32 )
-#include <windows.h>
 #elif defined( POSIX )
 #include <stdlib.h>
 #endif
@@ -59,18 +57,11 @@ public:
 	CAssertDisable *m_pNext;
 };
 
-#ifdef _WIN32
-static HINSTANCE g_hTier0Instance = 0;
-#endif
 
 static bool g_bAssertsEnabled = true;
 
 static CAssertDisable *g_pAssertDisables = NULL;
 
-#if ( defined( _WIN32 ) && !defined( _X360 ) )
-static int g_iLastLineRange = 5;
-static int g_nLastIgnoreNumTimes = 1;
-#endif
 #if defined( _X360 )
 static int g_VXConsoleAssertReturnValue = -1;
 #endif
@@ -85,22 +76,6 @@ static CDialogInitInfo g_Info;
 // Internal functions.
 // -------------------------------------------------------------------------------- //
 
-#if defined(_WIN32) && !defined(STATIC_TIER0)
-extern "C" BOOL APIENTRY MemDbgDllMain( HMODULE hDll, DWORD dwReason, PVOID pvReserved );
-
-BOOL WINAPI DllMain(
-  HINSTANCE hinstDLL,  // handle to the DLL module
-  DWORD fdwReason,     // reason for calling function
-  LPVOID lpvReserved   // reserved
-)
-{
-	g_hTier0Instance = hinstDLL;
-#ifdef DEBUG
-	MemDbgDllMain( hinstDLL, fdwReason, lpvReserved );
-#endif
-	return true;
-}
-#endif
 
 static bool IsDebugBreakEnabled()
 {
@@ -192,155 +167,6 @@ CAssertDisable* IgnoreAssertsNearby( int nRange )
 }
 
 
-#if ( defined( _WIN32 ) && !defined( _X360 ) )
-INT_PTR CALLBACK AssertDialogProc(
-  HWND hDlg,  // handle to dialog box
-  UINT uMsg,     // message
-  WPARAM wParam, // first message parameter
-  LPARAM lParam  // second message parameter
-)
-{
-	switch( uMsg )
-	{
-		case WM_INITDIALOG:
-		{
-#ifdef TCHAR_IS_WCHAR
-			SetDlgItemTextW( hDlg, IDC_ASSERT_MSG_CTRL, g_Info.m_pExpression );
-			SetDlgItemTextW( hDlg, IDC_FILENAME_CONTROL, g_Info.m_pFilename );
-#else
-			SetDlgItemText( hDlg, IDC_ASSERT_MSG_CTRL, g_Info.m_pExpression );
-			SetDlgItemText( hDlg, IDC_FILENAME_CONTROL, g_Info.m_pFilename );
-#endif
-			SetDlgItemInt( hDlg, IDC_LINE_CONTROL, g_Info.m_iLine, false );
-			SetDlgItemInt( hDlg, IDC_IGNORE_NUMLINES, g_iLastLineRange, false );
-			SetDlgItemInt( hDlg, IDC_IGNORE_NUMTIMES, g_nLastIgnoreNumTimes, false );
-		
-			// Center the dialog.
-			RECT rcDlg, rcDesktop;
-			GetWindowRect( hDlg, &rcDlg );
-			GetWindowRect( GetDesktopWindow(), &rcDesktop );
-			SetWindowPos( 
-				hDlg, 
-				HWND_TOP, 
-				((rcDesktop.right-rcDesktop.left) - (rcDlg.right-rcDlg.left)) / 2,
-				((rcDesktop.bottom-rcDesktop.top) - (rcDlg.bottom-rcDlg.top)) / 2,
-				0,
-				0,
-				SWP_NOSIZE );
-		}
-		return true;
-
-		case WM_COMMAND:
-		{
-			switch( LOWORD( wParam ) )
-			{
-				case IDC_IGNORE_FILE:
-				{
-					IgnoreAssertsInCurrentFile();
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-
-				// Ignore this assert N times.
-				case IDC_IGNORE_THIS:
-				{
-					BOOL bTranslated = false;
-					UINT value = GetDlgItemInt( hDlg, IDC_IGNORE_NUMTIMES, &bTranslated, false );
-					if ( bTranslated && value > 1 )
-					{
-						CAssertDisable *pDisable = IgnoreAssertsNearby( 0 );
-						pDisable->m_nIgnoreTimes = value - 1;
-						g_nLastIgnoreNumTimes = value;
-					}
-
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-
-				// Always ignore this assert.
-				case IDC_IGNORE_ALWAYS:
-				{
-					IgnoreAssertsNearby( 0 );
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-				
-				case IDC_IGNORE_NEARBY:
-				{
-					BOOL bTranslated = false;
-					UINT value = GetDlgItemInt( hDlg, IDC_IGNORE_NUMLINES, &bTranslated, false );
-					if ( !bTranslated || value < 1 )
-						return true;
-
-					IgnoreAssertsNearby( value );
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-
-				case IDC_IGNORE_ALL:
-				{
-					g_bAssertsEnabled = false;
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-
-				case IDC_BREAK:
-				{
-					g_bBreak = true;
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-			}
-
-			case WM_KEYDOWN:
-			{
-				// Escape?
-				if ( wParam == 2 )
-				{
-					// Ignore this assert.
-					EndDialog( hDlg, 0 );
-					return true;
-				}
-			}
-					
-		}
-		return true;
-	}
-
-	return FALSE;
-}
-
-
-static HWND g_hBestParentWindow;
-
-
-static BOOL CALLBACK ParentWindowEnumProc(
-  HWND hWnd,      // handle to parent window
-  LPARAM lParam   // application-defined value
-)
-{
-	if ( IsWindowVisible( hWnd ) )
-	{
-		DWORD procID;
-		GetWindowThreadProcessId( hWnd, &procID );
-		if ( procID == (DWORD)lParam )
-		{
-			g_hBestParentWindow = hWnd;
-			return FALSE; // don't iterate any more.
-		}
-	}
-	return TRUE;
-}
-
-
-static HWND FindLikelyParentWindow()
-{
-	// Enumerate top-level windows and take the first visible one with our processID.
-	g_hBestParentWindow = NULL;
-	EnumWindows( ParentWindowEnumProc, GetCurrentProcessId() );
-	return g_hBestParentWindow;
-}
-#endif // ( defined( _WIN32 ) && !defined( _X360 ) )
 
 // -------------------------------------------------------------------------------- //
 // Interface functions.
@@ -441,9 +267,7 @@ DBG_INTERFACE bool DoNewAssertDialog( const tchar *pFilename, int line, const tc
 		        pFilename, line, pExpression);
 		if ( getenv( "POSIX_ASSERT_BACKTRACE" ) )
 		{
-#if !defined ( ANDROID )
 			SpewBacktrace();
-#endif
 		}
 	}
 	else
@@ -514,44 +338,9 @@ DBG_INTERFACE bool DoNewAssertDialog( const tchar *pFilename, int line, const tc
 		}
 	}
 
-#elif defined( _WIN32 )
-
-	if ( !ThreadInMainThread() )
-	{
-		int result = MessageBox( NULL,  pExpression, "Assertion Failed", MB_SYSTEMMODAL | MB_CANCELTRYCONTINUE );
-
-		if ( result == IDCANCEL )
-		{
-			IgnoreAssertsNearby( 0 );
-		}
-		else if ( result == IDCONTINUE )
-		{
-			g_bBreak = true;
-		}
-	}
-	else
-	{
-		HWND hParentWindow = FindLikelyParentWindow();
-
-		DialogBox( g_hTier0Instance, MAKEINTRESOURCE( IDD_ASSERT_DIALOG ), hParentWindow, AssertDialogProc );
-	}
-
 #elif defined( POSIX ) && defined ( USE_SDL )
 	static FUNC_SDL_ShowMessageBox *pfnSDLShowMessageBox = NULL;
-#ifdef XASH_STATIC_GAMELIB
     pfnSDLShowMessageBox = SDL_ShowMessageBox;
-#else
-	if( !pfnSDLShowMessageBox )
-	{
-#ifdef OSX
-		void *ret = dlopen( "libSDL2-2.0.0.dylib", RTLD_LAZY );
-#else
-		void *ret = dlopen( "libSDL2-2.0.so.0", RTLD_LAZY );
-#endif
-		if ( ret )
-			{ pfnSDLShowMessageBox = ( FUNC_SDL_ShowMessageBox * )dlsym( ret, "SDL_ShowMessageBox" ); }
-	}
-#endif
 
 	if( pfnSDLShowMessageBox )
 	{

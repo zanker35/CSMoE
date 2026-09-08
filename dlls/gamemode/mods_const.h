@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef BTE_MOD_CONST_H
 #define BTE_MOD_CONST_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum GameMode_e : byte
 {

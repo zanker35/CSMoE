@@ -7,9 +7,6 @@
 
 #ifndef MESSAGEDIALOG_H
 #define MESSAGEDIALOG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // styles
 #define MD_WARNING				0x0001

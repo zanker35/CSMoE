@@ -7,9 +7,6 @@
 #ifndef _FONTEFFECTS_H
 #define _FONTEFFECTS_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 void ApplyScanlineEffectToTexture( int rgbaWide, int rgbaTall, unsigned char *rgba, int iScanLines );
 void ApplyGaussianBlurToTexture(int rgbaWide, int rgbaTall, unsigned char *rgba, int iBlur );

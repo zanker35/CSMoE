@@ -3,34 +3,14 @@
 #include <algorithm>
 #include <iterator>
 #include <cstdio>
-#if _WIN32
-#include <Windows.h>
-#endif
 
 typedef void(*pfnChangeGame)(const char *progname);
 typedef int(*pfnInit)(int argc, char **argv, const char *progname, int bChangeGame, pfnChangeGame func);
 
 extern "C" int Host_Main(int szArgc, const char** szArgv, const char* szGameDir, int chg, void* callback);
 
-#ifdef _WIN32
-int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int nShow)
-{
-	int argc;
-	LPWSTR* lpArgv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	char** argv = (char**)malloc(argc * sizeof(char*));
-
-	for (int i = 0; i < argc; ++i)
-	{
-		int size = wcslen(lpArgv[i]) + 1;
-		argv[i] = (char*)malloc(size);
-		wcstombs(argv[i], lpArgv[i], size);
-	}
-
-	LocalFree(lpArgv);
-#else
 int main(int argc, char **argv)
 {
-#endif
 	// Keep argv[0] as the executable and preserve diagnostics when piped to a log.
 	std::setvbuf(stdout, NULL, _IOLBF, 0);
 	std::vector<const char*> av(argv, argv + argc);

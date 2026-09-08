@@ -28,9 +28,6 @@
 
 #ifndef NODES_H
 #define NODES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

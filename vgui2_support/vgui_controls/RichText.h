@@ -8,9 +8,6 @@
 #ifndef RICHTEXT_H
 #define RICHTEXT_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Panel.h"
 #include <tier1/utlvector.h>

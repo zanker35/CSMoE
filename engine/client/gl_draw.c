@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -293,5 +292,3 @@ void GL_Scissor(int enable, int x, int y, int width, int height)
 		pglDisable(GL_SCISSOR_TEST);
 	}
 }
-
-#endif // XASH_DEDICATED

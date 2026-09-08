@@ -28,9 +28,6 @@
 
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // these MoveFlag values are assigned to a WayPoint's TYPE in order to demonstrate the
 // type of movement the monster should use to get there.

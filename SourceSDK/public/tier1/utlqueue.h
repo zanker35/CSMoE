@@ -7,9 +7,6 @@
 
 #ifndef UTLQUEUE_H
 #define UTLQUEUE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "utlmemory.h"
 

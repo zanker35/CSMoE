@@ -7,9 +7,6 @@
 
 #ifndef GAMECONSOLE_H
 #define GAMECONSOLE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "GameUI/IGameConsole.h"
 

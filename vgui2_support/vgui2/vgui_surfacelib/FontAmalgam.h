@@ -7,9 +7,6 @@
 
 #ifndef FONTAMALGAM_H
 #define FONTAMALGAM_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "vguifont.h"
 #include "utlvector.h"

@@ -1,9 +1,6 @@
 #ifndef OPTIONS_SUB_LANGUAGE_H
 #define OPTIONS_SUB_LANGUAGE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/Label.h>
 #include <vgui_controls/PropertyPage.h>

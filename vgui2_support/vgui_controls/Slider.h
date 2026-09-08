@@ -8,9 +8,6 @@
 #ifndef SLIDER_H
 #define SLIDER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include "Panel.h"

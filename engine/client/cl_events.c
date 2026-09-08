@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -514,4 +513,3 @@ void GAME_EXPORT CL_PlaybackEvent( int flags, const edict_t *pInvoker, word even
 
 	CL_QueueEvent( flags, eventindex, delay, &args );
 }
-#endif // XASH_DEDICATED

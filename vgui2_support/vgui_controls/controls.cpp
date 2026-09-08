@@ -81,10 +81,6 @@ namespace vgui2
 	static char g_szControlsModuleName[256] = "root";
 
 	bool VGuiControls_Init(const char *moduleName, CreateInterfaceFn *factoryList, int numFactories) {
-#ifndef XASH_STATIC_GAMELIB
-		strncpy(g_szControlsModuleName, moduleName, sizeof(g_szControlsModuleName));
-		g_szControlsModuleName[sizeof(g_szControlsModuleName) - 1] = 0;
-#endif
 
 		setlocale(LC_CTYPE, "");
 		setlocale(LC_TIME, "");

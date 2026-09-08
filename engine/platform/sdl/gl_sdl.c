@@ -20,17 +20,7 @@ GNU General Public License for more details.
 #include "gl_vidnt.h"
 #include <SDL.h>
 #include <SDL_syswm.h>
-#ifdef XASH_NANOGL
-#include <GL/nanogl.h>
-#endif
 
-#ifdef WIN32
-// Enable NVIDIA High Performance Graphics while using Integrated Graphics.
-__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-
-// Enable AMD High Performance Graphics while using Integrated Graphics.
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-#endif
 
 #ifndef XASH_GL_STATIC
 #define GL_CALL( x ) #x, (void **)&p##x
@@ -399,14 +389,7 @@ GL_GetProcAddress
 */
 void EXPORT *GL_GetProcAddress( const char *name )
 {
-#if defined( XASH_NANOGL )
-	void *func = nanoGL_GetProcAddress(name);
-#elif defined( XASH_QINDIEGL )
-	PROC wrap_wglGetProcAddress(LPCSTR s);
-	void* func = wrap_wglGetProcAddress(name);
-#else
 	void *func = SDL_GL_GetProcAddress(name);
-#endif
 
 	if( !func )
 	{
@@ -480,13 +463,8 @@ void GL_UpdateSwapInterval( void )
 	if( gl_swapInterval->modified )
 	{
 		gl_swapInterval->modified = false;
-#ifndef XASH_QINDIEGL
 		if( SDL_GL_SetSwapInterval( gl_swapInterval->integer ) )
 			MsgDev( D_ERROR, "SDL_GL_SetSwapInterval: %s\n", SDL_GetError( ) );
-#else
-		BOOL wglSwapInterval(int interval);
-		wglSwapInterval(gl_swapInterval->integer);
-#endif
 	}
 }
 
@@ -504,36 +482,19 @@ GL_SetupAttributes
 */
 void GL_SetupAttributes()
 {
-#ifdef XASH_QINDIEGL
-	// stub
-#else
 	int samples;
 
-#if !defined(_WIN32)
 	SDL_SetHint( "SDL_VIDEO_X11_XRANDR", "1" );
 	SDL_SetHint( "SDL_VIDEO_X11_XVIDMODE", "1" );
 
 	// Hints for Sailfish OS
 	// NOTE: landscape is just a hint to compositor, it will NOT rotate window
 	SDL_SetHint( "SDL_QTWAYLAND_CONTENT_ORIENTATION", "landscape" );
-#endif
 
 	SDL_GL_ResetAttributes();
 
 
-#ifdef XASH_GLES
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_EGL, 1 );
-
-#ifdef XASH_NANOGL
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 1 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
-#elif defined( XASH_WES ) || defined( XASH_REGAL )
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
-#endif
-
-#elif !defined XASH_GL_STATIC
+#if   !defined XASH_GL_STATIC
 	if( Sys_CheckParm( "-gldebug" ) && host.developer >= 1 )
 	{
 		MsgDev( D_NOTE, "Creating an extended GL context for debug...\n" );
@@ -611,61 +572,8 @@ void GL_SetupAttributes()
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
-#endif
 }
 
-#ifdef XASH_GLES
-void GL_InitExtensionsGLES( void )
-{
-	// initalize until base opengl functions loaded
-	GL_SetExtension( GL_DRAW_RANGEELEMENTS_EXT, true );
-	GL_SetExtension( GL_ARB_MULTITEXTURE, true );
-	pglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texture_units );
-	glConfig.max_texture_coords = glConfig.max_texture_units = 4;
-
-	GL_SetExtension( GL_ENV_COMBINE_EXT, true );
-	GL_SetExtension( GL_DOT3_ARB_EXT, true );
-	GL_SetExtension( GL_TEXTURE_3D_EXT, false );
-	GL_SetExtension( GL_SGIS_MIPMAPS_EXT, true ); // gles specs
-	GL_SetExtension( GL_ARB_VERTEX_BUFFER_OBJECT_EXT, true ); // gles specs
-
-	// hardware cubemaps
-	GL_CheckExtension( "GL_OES_texture_cube_map", NULL, "gl_texture_cubemap", GL_TEXTURECUBEMAP_EXT );
-
-	if( GL_Support( GL_TEXTURECUBEMAP_EXT ))
-		pglGetIntegerv( GL_MAX_CUBE_MAP_TEXTURE_SIZE_ARB, &glConfig.max_cubemap_size );
-
-	GL_SetExtension( GL_ARB_SEAMLESS_CUBEMAP, false );
-
-	GL_SetExtension( GL_EXT_POINTPARAMETERS, false );
-	GL_CheckExtension( "GL_OES_texture_npot", NULL, "gl_texture_npot", GL_ARB_TEXTURE_NPOT_EXT );
-
-	GL_SetExtension( GL_TEXTURE_COMPRESSION_EXT, false );
-	GL_SetExtension( GL_CUSTOM_VERTEX_ARRAY_EXT, false );
-	GL_SetExtension( GL_CLAMPTOEDGE_EXT, true ); // by gles1 specs
-	GL_SetExtension( GL_ANISOTROPY_EXT, false );
-	GL_SetExtension( GL_TEXTURE_LODBIAS, false );
-	GL_SetExtension( GL_CLAMP_TEXBORDER_EXT, false );
-	GL_SetExtension( GL_BLEND_MINMAX_EXT, false );
-	GL_SetExtension( GL_BLEND_SUBTRACT_EXT, false );
-	GL_SetExtension( GL_SEPARATESTENCIL_EXT, false );
-	GL_SetExtension( GL_STENCILTWOSIDE_EXT, false );
-	GL_SetExtension( GL_TEXTURE_ENV_ADD_EXT,false  );
-	GL_SetExtension( GL_SHADER_OBJECTS_EXT, false );
-	GL_SetExtension( GL_SHADER_GLSL100_EXT, false );
-	GL_SetExtension( GL_VERTEX_SHADER_EXT,false );
-	GL_SetExtension( GL_FRAGMENT_SHADER_EXT, false );
-	GL_SetExtension( GL_SHADOW_EXT, false );
-	GL_SetExtension( GL_ARB_DEPTH_FLOAT_EXT, false );
-	GL_SetExtension( GL_OCCLUSION_QUERIES_EXT,false );
-	GL_CheckExtension( "GL_OES_depth_texture", NULL, "gl_depthtexture", GL_DEPTH_TEXTURE );
-
-	glConfig.texRectangle = glConfig.max_2d_rectangle_size = 0; // no rectangle
-
-	Cvar_FullSet( "gl_allow_mirrors", "0", CVAR_READ_ONLY); // No support for GLES
-
-}
-#else
 void GL_InitExtensionsBigGL()
 {
 	// initalize until base opengl functions loaded
@@ -832,7 +740,6 @@ void GL_InitExtensionsBigGL()
 	}
 #endif
 }
-#endif
 
 void GL_InitExtensions( void )
 {
@@ -846,11 +753,7 @@ void GL_InitExtensions( void )
 	glConfig.extensions_string = pglGetString( GL_EXTENSIONS );
 	MsgDev( D_INFO, "Video: %s\n", glConfig.renderer_string );
 
-#ifdef XASH_GLES
-	GL_InitExtensionsGLES();
-#else
 	GL_InitExtensionsBigGL();
-#endif
 
 	glConfig.max_2d_texture_size = 0;
 	pglGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.max_2d_texture_size );
@@ -873,10 +776,6 @@ void GL_InitExtensions( void )
 		Image_AddCmdFlags( IL_DDS_HARDWARE );
 
 	// MCD has buffering issues
-#ifdef _WIN32
-	if( Q_strstr( glConfig.renderer_string, "gdi" ))
-		Cvar_SetFloat( "gl_finish", 1 );
-#endif
 
 	glw_state.initialized = true;
 
@@ -892,36 +791,6 @@ GL_CreateContext
 qboolean GL_CreateContext( void )
 {
 	int colorBits[3];
-#ifdef XASH_NANOGL
-	nanoGL_Init();
-#endif
-#ifdef XASH_QINDIEGL
-	void QindieGL_Init(void);
-	HGLRC wrap_wglCreateContext(HDC hdc);
-	QindieGL_Init();
-
-	SDL_SysWMinfo wmInfo;
-	SDL_VERSION(&wmInfo.version);
-	SDL_GetWindowWMInfo(host.hWnd, &wmInfo);
-	HWND hwnd = wmInfo.info.win.window;
-	if ((glw_state.context = wrap_wglCreateContext(GetDC(hwnd))) == NULL)
-	{
-		MsgDev(D_ERROR, "GL_CreateContext: QindieGL wrap_wglCreateContext failed\n");
-		return GL_DeleteContext();
-	}
-
-	pglGetIntegerv(GL_RED_BITS, &colorBits[0]);
-	pglGetIntegerv(GL_GREEN_BITS, &colorBits[1]);
-	pglGetIntegerv(GL_BLUE_BITS, &colorBits[2]);
-	glConfig.color_bits = colorBits[0] + colorBits[1] + colorBits[2];
-	pglGetIntegerv(GL_ALPHA_BITS, &glConfig.alpha_bits);
-	pglGetIntegerv(GL_DEPTH_BITS, &glConfig.depth_bits);
-	pglGetIntegerv(GL_STENCIL_BITS, &glConfig.stencil_bits);
-	glState.stencilEnabled = glConfig.stencil_bits ? true : false;
-
-	pglGetIntegerv(GL_SAMPLES_ARB, &glConfig.msaasamples);
-	
-#else
 	if( ( glw_state.context = SDL_GL_CreateContext( host.hWnd ) ) == NULL)
 	{
 		MsgDev(D_ERROR, "GL_CreateContext: %s\n", SDL_GetError());
@@ -940,11 +809,6 @@ qboolean GL_CreateContext( void )
 
 	SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &glConfig.msaasamples );
 	
-#endif
-#ifdef XASH_WES
-	void wes_init();
-	wes_init();
-#endif
 
 	return true;
 }
@@ -956,24 +820,11 @@ GL_UpdateContext
 */
 qboolean GL_UpdateContext( void )
 {
-#ifdef XASH_QINDIEGL
-	BOOL wrap_wglMakeCurrent(HDC hdc, HGLRC hglrc);
-	SDL_SysWMinfo wmInfo;
-	SDL_VERSION(&wmInfo.version);
-	SDL_GetWindowWMInfo(host.hWnd, &wmInfo);
-	HWND hwnd = wmInfo.info.win.window;
-	if(!wrap_wglMakeCurrent(GetDC(hwnd), glw_state.context))
-	{
-		MsgDev(D_ERROR, "GL_UpdateContext: QindieGL wrap_wglMakeCurrent failed");
-		return GL_DeleteContext();
-	}
-#else
 	if(!( SDL_GL_MakeCurrent( host.hWnd, glw_state.context ) ) )
 	{
 		MsgDev(D_ERROR, "GL_UpdateContext: %s", SDL_GetError());
 		return GL_DeleteContext();
 	}
-#endif
 
 	return true;
 }
@@ -989,19 +840,11 @@ GL_DeleteContext
 */
 qboolean GL_DeleteContext( void )
 {
-#ifdef XASH_QINDIEGL
-	HGLRC wrap_wglGetCurrentContext();
-	BOOL wrap_wglDeleteContext(HGLRC hglrc);
-	wrap_wglDeleteContext(wrap_wglGetCurrentContext());
-	void QindieGL_Destroy(void);
-	QindieGL_Destroy();
-#else
 	if (glw_state.context)
 	{
 		SDL_GL_DeleteContext(glw_state.context);
 		glw_state.context = NULL;
 	}
-#endif
 	
 	return false;
 }
@@ -1034,9 +877,6 @@ qboolean R_Init_OpenGL( void )
 		return false;
 
 
-#ifdef XASH_QINDIEGL
-	
-#else
 	GL_SetupAttributes();
 	
 	if( SDL_GL_LoadLibrary( EGL_LIB ) )
@@ -1044,7 +884,6 @@ qboolean R_Init_OpenGL( void )
 		MsgDev(D_ERROR, "Couldn't initialize OpenGL: %s\n", SDL_GetError());
 		return false;
 	}
-#endif
 
 	return VID_SetMode();
 }
@@ -1061,11 +900,7 @@ void R_Free_OpenGL( void )
 
 	VID_DestroyWindow ();
 
-#ifdef XASH_QINDIEGL
-
-#else
 	SDL_GL_UnloadLibrary ();
-#endif
 
 	// now all extensions are disabled
 	Q_memset( glConfig.extension, 0, sizeof( glConfig.extension[0] ) * GL_EXTCOUNT );

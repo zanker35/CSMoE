@@ -9,9 +9,6 @@
 #ifndef ENGINEINTERFACE_H
 #define ENGINEINTERFACE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 // these stupid set of includes are required to use the cdll_int interface
 #include <assert.h>

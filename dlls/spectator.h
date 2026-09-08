@@ -28,9 +28,6 @@
 
 #ifndef SPECTATOR_H
 #define SPECTATOR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

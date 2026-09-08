@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifdef XASH_SDL
 #include <SDL.h>
 
 #include "common.h"
@@ -671,6 +670,3 @@ int SDLash_JoyInit( int numjoy )
 
 	return SDLash_JoyInit_New(numjoy);
 }
-
-
-#endif // XASH_SDL

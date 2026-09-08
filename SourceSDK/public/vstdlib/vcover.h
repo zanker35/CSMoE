@@ -10,9 +10,6 @@
 #include "tier1/utlrbtree.h"
 #include "vstdlib.h"
 
-#if defined( _WIN32 )
-#pragma once
-#endif
 
 class CVCoverage
 {

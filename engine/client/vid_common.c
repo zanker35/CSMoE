@@ -14,7 +14,6 @@ GNU General Public License for more details.
 */
 
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -23,9 +22,6 @@ GNU General Public License for more details.
 #include "input.h"
 #include "gl_vidnt.h"
 
-#if defined(XASH_WINRT)
-#include "platform/winrt/winrt_interop.h"
-#endif
 
 extern convar_t *renderinfo;
 convar_t	*gl_allow_software;
@@ -662,9 +658,6 @@ void R_SaveVideoMode( int w, int h )
 
 	MsgDev( D_NOTE, "Set: [%dx%d]\n", w, h );
 
-#ifdef XASH_WINRT
-	WinRT_SaveVideoMode(w, h);
-#endif
 }
 
 
@@ -790,13 +783,11 @@ static void GL_SetDefaults( void )
 	GL_FrontFace( 0 );
 
 	R_SetTextureParameters();
-#if !defined(XASH_QINDIEGL)
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-#endif
 }
 
 /*
@@ -936,81 +927,6 @@ void GL_RemoveCommands( void )
 	Cmd_RemoveCommand( "texturelist" );
 }
 
-#if defined( WIN32 ) && !defined( XASH_WINRT ) // win32 only, no ned for uwp
-typedef enum _XASH_DPI_AWARENESS
-{
-	XASH_DPI_UNAWARE = 0,
-	XASH_SYSTEM_DPI_AWARE = 1,
-	XASH_PER_MONITOR_DPI_AWARE = 2
-} XASH_DPI_AWARENESS;
-
-void Win_SetDPIAwareness( void )
-{
-	HMODULE hModule;
-	HRESULT ( __stdcall *pSetProcessDpiAwareness )( XASH_DPI_AWARENESS );
-	BOOL ( __stdcall *pSetProcessDPIAware )( void );
-	BOOL bSuccess = FALSE;
-
-	if( ( hModule = LoadLibrary( "shcore.dll" ) ) )
-	{
-		if( ( pSetProcessDpiAwareness = (void*)GetProcAddress( hModule, "SetProcessDpiAwareness" ) ) )
-		{
-			// I hope SDL don't handle WM_DPICHANGED message
-			HRESULT hResult = pSetProcessDpiAwareness( XASH_SYSTEM_DPI_AWARE );
-
-			if( hResult == S_OK )
-			{
-				MsgDev( D_NOTE, "SetDPIAwareness: Success\n" );
-				bSuccess = TRUE;
-			}
-			else if( hResult == E_INVALIDARG ) MsgDev( D_NOTE, "SetDPIAwareness: Invalid argument\n" );
-			else if( hResult == E_ACCESSDENIED ) MsgDev( D_NOTE, "SetDPIAwareness: Access Denied\n" );
-		}
-		else MsgDev( D_NOTE, "SetDPIAwareness: Can't get SetProcessDpiAwareness\n" );
-		FreeLibrary( hModule );
-	}
-	else MsgDev( D_NOTE, "SetDPIAwareness: Can't load shcore.dll\n" );
-
-
-	if( !bSuccess )
-	{
-		MsgDev( D_NOTE, "SetDPIAwareness: Trying SetProcessDPIAware...\n" );
-
-		if( ( hModule = LoadLibrary( "user32.dll" ) ) )
-		{
-			if( ( pSetProcessDPIAware = ( void* )GetProcAddress( hModule, "SetProcessDPIAware" ) ) )
-			{
-				// I hope SDL don't handle WM_DPICHANGED message
-				BOOL hResult = pSetProcessDPIAware();
-
-				if( hResult )
-				{
-					MsgDev( D_NOTE, "SetDPIAwareness: Success\n" );
-					bSuccess = TRUE;
-				}
-				else MsgDev( D_NOTE, "SetDPIAwareness: fail\n" );
-			}
-			else MsgDev( D_NOTE, "SetDPIAwareness: Can't get SetProcessDPIAware\n" );
-			FreeLibrary( hModule );
-		}
-		else MsgDev( D_NOTE, "SetDPIAwareness: Can't load user32.dll\n" );
-	}
-}
-
-float WIN_GetDpiForWindow(HWND hwnd)
-{
-    HMODULE hModule;
-    static UINT (__stdcall *pfnGetDpiForWindow)(HWND hwnd) = NULL;
-
-    if( ( hModule = LoadLibrary( "user32.dll" ) ) ) {
-        if (pfnGetDpiForWindow || (pfnGetDpiForWindow = ( UINT (__stdcall *)(HWND) )(GetProcAddress(hModule, "GetDpiForWindow")))) {
-            return pfnGetDpiForWindow(hwnd);
-        }
-    }
-    return 96.0f;
-}
-
-#endif
 
 /*
 ===============
@@ -1121,9 +1037,6 @@ qboolean R_Init( void )
 
 	GL_SetDefaultState();
 
-#if defined( WIN32 ) && !defined( XASH_WINRT ) // win32 only, no ned for uwp
-	Win_SetDPIAwareness( );
-#endif
 
 	// create the window and set up the context
 	if( !R_Init_OpenGL( ))
@@ -1229,4 +1142,3 @@ void GL_CheckForErrors_( const char *filename, const int fileline )
 
 	Host_Error( "GL_CheckForErrors: %s (called at %s:%i)\n", str, filename, fileline );
 }
-#endif // XASH_DEDICATED

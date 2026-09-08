@@ -28,9 +28,6 @@
 
 #ifndef BTE_MOD_H
 #define BTE_MOD_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "gamerules.h"
 #include "mods_const.h"

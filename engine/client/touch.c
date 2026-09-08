@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 #include "common.h"
 #include "gl_local.h"
 #include "input.h"
@@ -21,10 +20,8 @@ GNU General Public License for more details.
 #include "touch.h"
 #include "math.h"
 #include "vgui_draw.h"
-#ifdef XASH_SDL
 #include <SDL_hints.h>
 #include <SDL_keyboard.h>
-#endif
 
 
 typedef enum
@@ -446,7 +443,6 @@ void Touch_SetClientOnly( qboolean state )
 	touch.move_finger = touch.look_finger = -1;
 	touch.forward = touch.side = 0;
 
-#ifdef XASH_SDL
 	if( state )
 	{
 		SDL_SetRelativeMouseMode( SDL_FALSE );
@@ -459,7 +455,6 @@ void Touch_SetClientOnly( qboolean state )
 		SDL_ShowCursor( false );
 		SDL_SetRelativeMouseMode( SDL_TRUE );
 	}
-#endif
 }
 
 void Touch_SetClientOnly_f( void )
@@ -994,9 +989,6 @@ void Touch_Init( void )
 
 	// input devices cvar
 	touch_enable = Cvar_Get( "touch_enable", DEFAULT_TOUCH_ENABLE, CVAR_ARCHIVE, "enable touch controls" );
-#if defined(XASH_SDL) && defined(__ANDROID__)
-	SDL_SetHint( SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1" );
-#endif
 #if defined(XASH_SDL) && defined(__APPLE__) && ( TARGET_OS_IOS || TARGET_OS_IPHONE )
     // iOS Settings...
 	SDL_SetHint(SDL_HINT_IOS_HIDE_HOME_INDICATOR, "2");
@@ -1951,4 +1943,3 @@ void Touch_Shutdown( void )
 	touch.initialized = false;
 	Mem_FreePool( &touch.mempool );
 }
-#endif

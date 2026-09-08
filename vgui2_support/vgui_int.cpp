@@ -140,7 +140,6 @@ extern "C" void EXPORT InitAPI(vguiapi_t * api) {
 	g_api->MouseMove = VGUI_MouseMove;
 }
 
-#ifdef XASH_STATIC_GAMELIB
     typedef struct dllexport_s
     {
         const char *name;
@@ -158,6 +157,5 @@ extern "C" void EXPORT InitAPI(vguiapi_t * api) {
     {
         return dll_register( "vgui2_support", switch_vgui_exports );
     }
-#endif
 
 }

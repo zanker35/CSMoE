@@ -14,11 +14,6 @@
 ****/
 #if !defined( CON_NPRINTH )
 #define CON_NPRINTH
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 typedef struct con_nprint_s
 {

@@ -28,9 +28,6 @@
 
 #ifndef BMODELS_H
 #define BMODELS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define FANPITCHMIN		30
 #define FANPITCHMAX		100

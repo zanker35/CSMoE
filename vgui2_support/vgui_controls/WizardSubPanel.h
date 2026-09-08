@@ -8,9 +8,6 @@
 #ifndef WIZARDSUBPANEL_H
 #define WIZARDSUBPANEL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "EditablePanel.h"
 

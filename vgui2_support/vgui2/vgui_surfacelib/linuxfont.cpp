@@ -17,11 +17,6 @@
 #else
 #include <malloc.h>
 #endif
-#if defined(_WIN32) && !defined( _X360 )
-#define WIN32_LEAN_AND_MEAN
-#define OEMRESOURCE
-#include <windows.h>
-#endif
 #ifdef GetCharABCWidths
 #undef GetCharABCWidths
 #endif
@@ -415,81 +410,18 @@ bool CLinuxFont::CreateFromMemory(const char *windowsFontName, const void *data,
 	return true;
 }
 
-#ifdef ANDROID
-char *FindFontAndroid(bool bBold, int italic)
-{
-	const char *fontFileName, *fontFileNamePost = NULL;
 
-	fontFileName = "Roboto";
-
-	if( bBold )
-	{
-		if( italic )
-			fontFileNamePost = "BoldItalic";
-		else
-			fontFileNamePost = "Bold";
-	}
-	else if( italic )
-		fontFileNamePost = "Italic";
-	else
-		fontFileNamePost = "Regular";
-
-	static char dataFile[MAX_PATH];
-
-	if( fontFileNamePost )
-		snprintf( dataFile, sizeof dataFile, "/system/fonts/%s-%s.ttf", fontFileName, fontFileNamePost );
-	else
-		snprintf( dataFile, sizeof dataFile, "/system/fonts/%s.ttf", fontFileName );
-
-	if( access( dataFile, R_OK ) != 0 )
-	{
-		fontFileNamePost = NULL;
-		fontFileName = "DroidSans";
-		if( bBold )
-			fontFileNamePost = "Bold";
-
-		if( fontFileNamePost )
-			snprintf( dataFile, sizeof dataFile, "/system/fonts/%s-%s.ttf", fontFileName, fontFileNamePost );
-		else
-			snprintf( dataFile, sizeof dataFile, "/system/fonts/%s.ttf", fontFileName );
-
-		if( access( dataFile, R_OK ) != 0 )
-			return NULL;
-	}
-
-	return dataFile;
-}
-#endif
-
-#ifdef WIN32
-const char *FindFontWin32(bool bBold, int italic)
-{
-	static char buffer[MAX_PATH];
-	GetSystemDirectoryA(buffer, sizeof(buffer));
-	strcat(buffer, "\\..\\Fonts\\simhei.ttf");
-
-	return buffer;
-}
-#endif
 
 #ifdef OSX
 const char *FindFontApple(bool bBold, int italic)
 {
     const char *dataFile = nullptr;
 
-#ifdef IOS
-    dataFile = "/System/Library/Fonts/LanguageSupport/PingFang.ttc";
-#else
     dataFile = "/System/Library/Fonts/PingFang.ttc";
-#endif
 
 	if( access( dataFile, R_OK ) != 0 )
 	{
-#ifdef IOS
-        dataFile = "/System/Library/Fonts/Core/Helvetica.ttc";
-#else
         dataFile = "/System/Library/Fonts/Helvetica.ttc";
-#endif
 
 		if( access( dataFile, R_OK ) != 0 )
 			return NULL;
@@ -513,21 +445,11 @@ char *CLinuxFont::GetFontFileName( const char *windowsFontName, int flags )
 		bBold = true;
 
 
-#ifdef ANDROID
-	char *filename = FindFontAndroid( bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC );
-	Msg("Android font: %s\n", filename);
-	if( !filename ) return NULL;
-	return strdup( filename );
-#elif defined(OSX)
+#if   defined(OSX)
     const char *filename = FindFontApple( bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC );
     Msg("Apple font: %s\n", filename);
     if( !filename ) return NULL;
     return strdup( filename );
-#elif defined(WIN32)
-	const char* filename = FindFontWin32(bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC);
-	Msg("Apple font: %s\n", filename);
-	if (!filename) return NULL;
-	return strdup(filename);
 #else
     const int italic = ( flags & vgui2::ISurface::FONTFLAG_ITALIC ) ? FC_SLANT_ITALIC : FC_SLANT_ROMAN;
 	const int nFcWeight = bBold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL;

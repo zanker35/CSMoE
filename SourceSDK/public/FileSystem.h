@@ -8,9 +8,6 @@
 #ifndef IFILESYSTEM_H
 #define IFILESYSTEM_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <tier1/interface.h>
 

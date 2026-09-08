@@ -107,38 +107,16 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 		return;
 	}
 
-#ifndef XASH_STATIC_GAMELIB
-	m_hFileSystemModule = Sys_LoadModule("FileSystem_stdio.dll");
-	m_hVGuiModule = Sys_LoadModule("vgui2.dll");
-	m_hChromeModule = Sys_LoadModule("chromehtml.dll");
-	m_FactoryList[0] = factories[0];
-	m_FactoryList[1] = Sys_GetFactory(m_hVGuiModule);
-	m_FactoryList[2] = Sys_GetFactory(m_hFileSystemModule);
-	m_FactoryList[3] = Sys_GetFactory(m_hChromeModule);
-	m_iNumFactories = 4;
-#else
     m_FactoryList[0] = factories[0];
     m_FactoryList[1] = Sys_GetFactoryThis();
     m_FactoryList[2] = Sys_GetFactoryThis();
     m_FactoryList[3] = Sys_GetFactoryThis();
     m_iNumFactories = 4;
-#endif
 	
 	vgui2::VGuiControls_Init("BaseUI", m_FactoryList, m_iNumFactories);
 
-#ifdef XASH_STATIC_GAMELIB
     auto gameUIFactory = Sys_GetFactoryThis();
     m_FactoryList[m_iNumFactories] = gameUIFactory;
-#else
-	if(!(m_hStaticGameUIModule = Sys_LoadModule("GameUI.dll")))
-	{
-		char szGameUIDLLPath[_MAX_PATH];
-		g_pFullFileSystem->GetLocalPath("cl_dlls/GameUI.dll", szGameUIDLLPath, sizeof(szGameUIDLLPath));
-		m_hStaticGameUIModule = Sys_LoadModule(szGameUIDLLPath);
-	}
-	auto gameUIFactory = Sys_GetFactory(m_hStaticGameUIModule);
-	m_FactoryList[m_iNumFactories] = gameUIFactory;
-#endif
 
 	if (gameUIFactory)
 	{
@@ -298,27 +276,12 @@ void CBaseUI::Shutdown() {
 		staticClient->Shutdown();
 	}
 
-#ifndef XASH_STATIC_GAMELIB
-	Sys_UnloadModule(m_hStaticGameUIModule);
-	m_hStaticGameUIModule = nullptr;
-#endif
 
 	staticGameUIFuncs = nullptr;
 	staticGameConsole = nullptr;
 	staticCareerUI = nullptr;
 
 	vgui2::system()->SaveUserConfigFile();
-#ifndef XASH_STATIC_GAMELIB
-	Sys_UnloadModule(m_hClientModule);
-	m_hClientModule = NULL;
-	staticSurface->Shutdown();
-	Sys_UnloadModule(m_hChromeModule);
-	m_hChromeModule = NULL;
-	Sys_UnloadModule(m_hVGuiModule);
-	m_hVGuiModule = NULL;
-	Sys_UnloadModule(m_hFileSystemModule);
-	m_hFileSystemModule = NULL;
-#endif
 }
 
 int CBaseUI::Key_Event(int down, int keynum, const char* pszCurrentBinding) {

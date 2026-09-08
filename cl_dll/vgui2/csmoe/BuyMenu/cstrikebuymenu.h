@@ -1,9 +1,6 @@
 #ifndef CSTRIKEBUYMENU_H
 #define CSTRIKEBUYMENU_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/WizardPanel.h>
 #include "game_controls/buymenu.h"

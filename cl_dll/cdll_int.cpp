@@ -341,12 +341,6 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// *callback = renderInterface;
 
 	// we have here a Host_Error, so check Xash for version
-#ifdef __ANDROID__
-	if( g_iXash < 3224 )
-	{
-		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
-	}
-#endif
 
 	return true;
 }
@@ -363,12 +357,6 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n",
 			mobileapi->version, MOBILITY_API_VERSION);
 
-#ifdef __ANDROID__
-		if( gRenderAPI.Host_Error )
-		{
-			gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
-		}
-#endif
 		return 1;
 	}
 
@@ -401,67 +389,6 @@ For GoldSrc CS1.6 with VGUI2 to export client funcs.
 No need for Xash3D.
 ========================
 */
-#ifndef XASH_STATIC_GAMELIB
-extern "C" void DLLEXPORT F(void *pv) {
-	cldll_func_t *pcldll_func = reinterpret_cast<cldll_func_t *>(pv);
-
-	static cldll_func_t cldll_func = {
-		Initialize,
-		HUD_Init,
-		HUD_VidInit,
-		HUD_Redraw,
-		HUD_UpdateClientData,
-		HUD_Reset,
-		HUD_PlayerMove,
-		HUD_PlayerMoveInit,
-		HUD_PlayerMoveTexture,
-		IN_ActivateMouse,
-		IN_DeactivateMouse,
-		IN_MouseEvent,
-		IN_ClearStates,
-		IN_Accumulate,
-		CL_CreateMove,
-		CL_IsThirdPerson,
-		CL_CameraOffset,
-		KB_Find,
-		CAM_Think,
-		V_CalcRefdef,
-		HUD_AddEntity,
-		HUD_CreateEntities,
-		HUD_DrawNormalTriangles,
-		HUD_DrawTransparentTriangles,
-		HUD_StudioEvent,
-		HUD_PostRunCmd,
-		HUD_Shutdown,
-		HUD_TxferLocalOverrides,
-		HUD_ProcessPlayerState,
-		HUD_TxferPredictionData,
-		Demo_ReadBuffer,
-		HUD_ConnectionlessPacket,
-		HUD_GetHullBounds,
-		HUD_Frame,
-		HUD_Key_Event,
-		HUD_TempEntUpdate,
-		HUD_GetUserEntity,
-		HUD_VoiceStatus,
-		HUD_DirectorMessage,
-		HUD_GetStudioModelInterface,
-		nullptr,	// HUD_ChatInputPosition,
-		nullptr,	// HUD_GetPlayerTeam
-		ClientFactory,	// pfnGetClientFactory
-		HUD_GetRenderInterface,	// Xash3D pfnGetRenderInterface
-		nullptr,	// Xash3D pfnClipMoveToEntity
-		IN_ClientTouchEvent,	// SDL Xash pfnTouchEvent
-		nullptr,	// SDL Xash pfnMoveEvent
-		nullptr,	// SDL Xash pfnLookEvent
-		nullptr,	// Reserved GUI callback ABI slot
-		nullptr, // Reserved precache callback ABI slot
-	};
-
-	*pcldll_func = cldll_func;
-}
-
-#else
 
 void DLLEXPORT IN_MouseEvent_CL( int mstate );
 void DLLEXPORT IN_ActivateMouse_CL( void );
@@ -587,4 +514,3 @@ extern "C" int switch_installdll_client( void )
 {
 	return dll_register( "client", switch_client_exports );
 }
-#endif

@@ -13,12 +13,8 @@ GNU General Public License for more details.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#include <Windows.h>
-#else
 #include <dlfcn.h>
 #include <unistd.h>
-#endif
 #include <stdarg.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -170,9 +166,7 @@ using namespace vgui2;
 #define LOGRETVAL( format, ret )
 #endif
 
-#ifdef XASH_STATIC_GAMELIB
 extern "C" int FS_GetAPI(fs_api_t * g_api);
-#endif
 
 
 static void FixSlashes( char *str )
@@ -451,11 +445,7 @@ void CXashFileSystem::GetLocalCopy(const char *pFileName)
 const char* CXashFileSystem::GetLocalPath(const char *pFileName, char *pLocalPath, int localPathBufferSize)
 {
     // Is it an absolute path?
-#ifdef _WIN32
-    if ( strchr( pFileName, ':' ) )
-#else
     if ( pFileName && pFileName[0] == '/' )
-#endif
     {
         strncpy( pLocalPath, pFileName, localPathBufferSize );
         pLocalPath[localPathBufferSize-1] = 0;
@@ -492,13 +482,9 @@ bool CXashFileSystem::FullPathToRelativePath(const char *pFullpath, char *pRelat
         return success;
     }
 
-#ifdef _WIN32
-    const char* fullpath = pFullpath;
-#else
     char* fullpath = realpath(pFullpath, NULL);
     if (!fullpath)
         return false;
-#endif
     searchpath_t *sp = gFileSystemAPI.FS_GetSearchPaths();
     char *real = NULL;
 
@@ -507,11 +493,7 @@ bool CXashFileSystem::FullPathToRelativePath(const char *pFullpath, char *pRelat
         if( sp->wad || sp->pack )
             continue;
 
-#ifdef _WIN32
-        real = sp->filename;
-#else
         real = realpath( sp->filename, 0 );
-#endif
 
         if( !real )
             continue; // is this possible?
@@ -544,25 +526,15 @@ bool CXashFileSystem::FullPathToRelativePath(const char *pFullpath, char *pRelat
         free( real );
     }
 
-#ifdef _WIN32
-#else
     free( fullpath );
-#endif
 
     return success;
 }
 
 bool CXashFileSystem::GetCurrentDirectory(char *pDirectory, int maxlen)
 {
-#ifdef _WIN32
-    wchar_t wbuf[MAX_PATH];
-    if ( !::GetCurrentDirectoryW(MAX_PATH, wbuf) )
-        return false;
-    WideCharToMultiByte(CP_UTF8, 0, wbuf, MAX_PATH, pDirectory, maxlen, nullptr, nullptr);
-#else
     if ( !getcwd( pDirectory, maxlen ) )
         return false;
-#endif
 
     FixSlashes(pDirectory);
 

@@ -39,9 +39,6 @@ void DumpPlaneToGlView( const float *pPlane, float fGrayScale, const char *pszFi
 void DumpLineToGLView( const Vector &vPoint1, const Vector &vColor1, const Vector &vPoint2, const Vector &vColor2, float fThickness, FILE *pFile );
 void DumpAABBToGLView( const Vector &vCenter, const Vector &vExtents, const Vector &vColor, FILE *pFile );
 
-#if defined( ENABLE_DEBUG_POLYHEDRON_DUMPS ) && defined( WIN32 )
-#include "winlite.h"
-#endif
 
 static VMatrix s_matIdentity( 1.0f, 0.0f, 0.0f, 0.0f, 
 							 0.0f, 1.0f, 0.0f, 0.0f, 
@@ -59,11 +56,7 @@ static int g_iPolyhedronDumpCounter = 0;
 #if defined( _DEBUG ) && defined( ENABLE_DEBUG_POLYHEDRON_DUMPS )
 void CreateDumpDirectory( const char *szDirectoryName )
 {
-#if defined( WIN32 )
-	CreateDirectory( szDirectoryName, NULL );
-#else
 	Assert( false ); //TODO: create directories in linux
-#endif
 }
 #endif
 
@@ -1331,25 +1324,6 @@ CPolyhedron *ClipLinkedGeometry( GeneratePolyhedronFromPlanes_UnorderedPolygonLL
 						float fInvTotalDist = 1.0f/(pDeadPoint->fPlaneDist - pLivingPoint->fPlaneDist); //subtraction because the living index is known to be negative
 						pNewPoint->ptPosition = (pLivingPoint->ptPosition * (pDeadPoint->fPlaneDist * fInvTotalDist)) - (pDeadPoint->ptPosition * (pLivingPoint->fPlaneDist * fInvTotalDist));
 
-#if ( 0 && defined( _DEBUG ) )
-						float fDebugDist = vNormal.Dot( pNewPoint->ptPosition ) - fPlaneDist; //just for looking at in watch windows
-						AssertMsg_DumpPolyhedron( fabs( fDebugDist ) < fOnPlaneEpsilon, "Generated split point is far from plane" );
-
-						//verify that the new point isn't sitting on top of another
-						{
-							GeneratePolyhedronFromPlanes_UnorderedPointLL *pActivePointWalk = pAllPoints;
-							do
-							{
-								if( pActivePointWalk->pPoint != pNewPoint )
-								{
-									Vector vDiff = pActivePointWalk->pPoint->ptPosition - pNewPoint->ptPosition;
-
-									AssertMsg_DumpPolyhedron( vDiff.Length() > fOnPlaneEpsilon, "Generated a point on top of another" );
-								}
-								pActivePointWalk = pActivePointWalk->pNext;
-							} while( pActivePointWalk );
-						}
-#endif
 
 						pNewPoint->planarity = POINT_ONPLANE;
 						pNewPoint->fPlaneDist = 0.0f;

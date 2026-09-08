@@ -28,9 +28,6 @@
 
 #ifndef VEHICLE_H
 #define VEHICLE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

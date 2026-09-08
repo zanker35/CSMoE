@@ -15,9 +15,6 @@
 /* crc.h */
 #ifndef CRC_H
 #define CRC_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <stdint.h>
 

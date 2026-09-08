@@ -1,9 +1,6 @@
 #ifndef BUYMOUSEOVERPANELBUTTON_H
 #define BUYMOUSEOVERPANELBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <KeyValues.h>
 #include <FileSystem.h>

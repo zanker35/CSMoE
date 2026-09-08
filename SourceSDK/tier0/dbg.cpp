@@ -9,12 +9,6 @@
 #include "pch_tier0.h"
 #include "tier0/minidump.h"
 
-#if defined( _WIN32 ) && !defined( _X360 )
-#include "tier0/valve_off.h"
-#define WIN_32_LEAN_AND_MEAN
-#include <windows.h>				// Currently needed for IsBadReadPtr and IsBadWritePtr
-#pragma comment(lib,"user32.lib")	// For MessageBox
-#endif
 
 #include <assert.h>
 #ifdef OSX
@@ -35,9 +29,6 @@
 #include "xbox/xbox_console.h"
 #endif
 
-#ifdef ANDROID
-#include <android/log.h>
-#endif
 
 #include "tier0/etwprof.h"
 
@@ -89,22 +80,11 @@ DBG_INTERFACE SpewRetval_t DefaultSpewFunc( SpewType_t type, const tchar *pMsg )
 #endif
 	{
 		_tprintf( _T("%s"), pMsg );
-#ifdef _WIN32
-		Plat_DebugString( pMsg );
-#endif
 	}
 	if ( type == SPEW_ASSERT )
 	{
-#ifndef WIN32
 		// Non-win32
 		bool bRaiseOnAssert = getenv( "RAISE_ON_ASSERT" ) || !!CommandLine()->FindParm( "-raiseonassert" );
-#elif defined( _DEBUG )
-		// Win32 debug
-		bool bRaiseOnAssert = true;
-#else
-		// Win32 release
-		bool bRaiseOnAssert = !!CommandLine()->FindParm( "-raiseonassert" );
-#endif
 
 		return bRaiseOnAssert ? SPEW_DEBUGGER : SPEW_CONTINUE;
 	}
@@ -317,9 +297,6 @@ static SpewRetval_t _SpewMessage( SpewType_t spewType, const char *pGroupName, i
 		nLevel
 	};
 
-#ifdef ANDROID
-    __android_log_print( ANDROID_LOG_INFO, "SRCENG", "%s", pTempBuffer );
-#endif
 
 	g_pSpewInfo = &spewInfo;
 	ret = s_SpewOutputFunc( spewType, pTempBuffer );

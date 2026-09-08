@@ -8,9 +8,6 @@
 #ifndef ANALOGCODE_H
 #define ANALOGCODE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include "inputsystem/InputEnums.h"

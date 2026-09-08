@@ -28,9 +28,6 @@ GNU General Public License for more details.
 #include "platform/macos/vid_macos.h"
 #endif
 
-#if defined(XASH_WINRT)
-#include "platform/winrt/winrt_interop.h"
-#endif
 
 typedef enum
 {
@@ -52,20 +49,11 @@ void *SDL_GetVideoDevice( void );
 
 static void SDLCALL GL_GetDrawableSize(SDL_Window* window, int* w, int* h)
 {
-#ifdef XASH_QINDIEGL
-	//return SDL_GetWindowSize(window, w, h);
-	GLint params[4]; pglGetIntegerv(GL_VIEWPORT, params);
-	*w = params[2];
-	*h = params[3];
-#else
 	return SDL_GL_GetDrawableSize(window, w, h);
-#endif
 }
 
 #if 0
-#ifdef _WIN32
-#define XASH_SDL_WINDOW_RECREATE
-#elif defined XASH_X11
+#if   defined XASH_X11
 #define XASH_SDL_USE_FAKEWND
 #endif
 #endif
@@ -202,20 +190,6 @@ void VID_RestoreScreenResolution( void )
 }
 #endif
 
-#if defined(_WIN32) && !defined(XASH_64BIT) && !defined( XASH_WINRT ) // ICO support only for Win32
-static void WIN_SetWindowIcon( HICON ico )
-{
-	SDL_SysWMinfo wminfo;
-
-	if( !ico )
-		return;
-
-	if( SDL_GetWindowWMInfo( host.hWnd, &wminfo ) )
-	{
-		SetClassLong( wminfo.info.win.window, GCL_HICON, (LONG)ico );
-	}
-}
-#endif
 
 qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 {
@@ -271,25 +245,6 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		VID_RestoreScreenResolution();
 	}
 #if 0
-#if defined(_WIN32) && !defined(XASH_64BIT) && !defined( XASH_WINRT ) // ICO support only for Win32
-	if( FS_FileExists( GI->iconpath, true ) )
-	{
-		HICON ico = NULL;
-		char	localPath[MAX_PATH];
-
-		Q_snprintf( localPath, sizeof( localPath ), "%s/%s", GI->gamefolder, GI->iconpath );
-		ico = (HICON)LoadImage( NULL, localPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE|LR_DEFAULTSIZE );
-
-		if( !ico )
-		{
-			MsgDev( D_INFO, "Extract %s from pak if you want to see it.\n", GI->iconpath );
-			ico = LoadIcon( host.hInst, MAKEINTRESOURCE( 101 ) );
-		}
-
-		WIN_SetWindowIcon( ico );
-	}
-	else
-#endif // _WIN32 && !XASH_64BIT
 	{
 #ifndef TARGET_OS_MAC
 		Q_strcpy( iconpath, GI->iconpath );
@@ -314,12 +269,6 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		}
 #endif
 
-#if defined(_WIN32) && !defined(XASH_64BIT) && !defined( XASH_WINRT ) // ICO support only for Win32
-		else
-		{
-			WIN_SetWindowIcon( LoadIcon( host.hInst, MAKEINTRESOURCE( 101 ) ) );
-		}
-#endif
 	}
 #endif
 
@@ -343,17 +292,6 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	R_ChangeDisplaySettingsFast( width, height );
 
 
-#if defined(XASH_WINRT)
-	{
-		SDL_SysWMinfo wminfo;
-		SDL_VERSION(&wminfo.version);
-		if (SDL_GetWindowWMInfo(host.hWnd, &wminfo))
-		{
-			WinRT_FullscreenMode_Install(fullscreen);
-		}
-		WinRT_BackButton_Install();
-	}
-#endif
 
 	IME_CreateContext();
 	
@@ -572,26 +510,7 @@ qboolean VID_GetDPI(float* out)
 {
 	float dpi;
 	qboolean success;
-#if defined(XASH_WINRT)
-	dpi = WinRT_GetDisplayDPI();
-	success = dpi > 0.0f;
-#elif defined(_WIN32)
-	{
-		SDL_SysWMinfo wmInfo;
-		SDL_VERSION(&wmInfo.version);
-		SDL_GetWindowWMInfo(host.hWnd, &wmInfo);
-		{
-			HWND hwnd = wmInfo.info.win.window;
-            float WIN_GetDpiForWindow(HWND hwnd);
-			int res = WIN_GetDpiForWindow(hwnd);
-			if (res)
-			{
-				success = true;
-				dpi = res / 96.0f;
-			}
-		}
-	}
-#elif defined(SDL_VIDEO_DRIVER_COCOA)
+#if   defined(SDL_VIDEO_DRIVER_COCOA)
 	success = true;
 	dpi = MacOS_GetDPI();
 #else

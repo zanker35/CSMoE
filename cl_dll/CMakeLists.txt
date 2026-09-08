@@ -26,13 +26,7 @@ project (client)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -stdlib=libc++")
-elseif(MSVC)
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
-else()
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -static-libstdc++")
-endif()
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ")
@@ -180,11 +174,7 @@ set(PM_SRCS
 
 
 
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
-	set(INPUT_SRCS ./input_winrt.cpp)
-else()
 	set(INPUT_SRCS ./input_xash3d.cpp)
-endif()
 
 set (CLDLL_SOURCES
 	./r_texture.cpp
@@ -215,7 +205,6 @@ set (CLDLL_SOURCES
 	${STUDIORENDER_SRCS}
 )
 
-if(XASH_VGUI2)
 	list(APPEND CLDLL_SOURCES
 		vgui2/CBackGroundPanel.cpp
 		vgui2/CBaseViewport.cpp
@@ -238,7 +227,6 @@ if(XASH_VGUI2)
 		vgui2/csmoe/BuyMenu/cstrikebuysubmenu.cpp
 		vgui2/csmoe/BuyMenu/WeaponImagePanel.cpp)
 	add_definitions(-DXASH_VGUI2=1)
-endif()
 
 include_directories (
 	hud/
@@ -253,38 +241,14 @@ include_directories (
 	../public/tier1/
 	)
 
-if(XASH_STATIC_GAMELIB)
 	add_library (${CLIENT_LIBRARY} STATIC ${CLDLL_SOURCES} "events/eventdef.h")
-else()
-	add_library (${CLIENT_LIBRARY} SHARED ${CLDLL_SOURCES})
-endif()
 
-if(APPLE OR ANDROID)
 	add_definitions(
 			-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp
 	)
-endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-	add_definitions(
-		-DLINUX -D_LINUX
-		-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp
-		)
-endif()
 
-if(MINGW)
-add_definitions(
-	-D_EMULATE_GLIBC
-	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp
-		)
-endif()
 
-if(MSVC)
-add_definitions(
-	-DWIN32 -DDEDICATED -D_USING_V110_SDK71_ -D_WINDLL -D_MBCS
-	-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE
-)
-endif()
 
 add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-DCLIENT_WEAPONS -DCLIENT_DLL
@@ -293,36 +257,24 @@ add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 
 target_link_libraries( ${CLIENT_LIBRARY} ${CMAKE_DL_LIBS} )
 
-if(XASH_VGUI2)
 	target_link_libraries(${CLIENT_LIBRARY} vgui_controls cso_controls)
 	target_include_directories(${CLIENT_LIBRARY} PRIVATE vgui2/
 		${CMAKE_SOURCE_DIR}
 		${CMAKE_SOURCE_DIR}/SourceSDK/public
 		${CMAKE_SOURCE_DIR}/SourceSDK/public/tier1)
-endif()
 
 
 
-if(ANDROID OR IOS)
-	set_target_properties(${CLIENT_LIBRARY} PROPERTIES
-			OUTPUT_NAME ${CLIENT_LIBRARY_NAME})
-else()
 	set_target_properties(${CLIENT_LIBRARY} PROPERTIES
 			PREFIX "" OUTPUT_NAME ${CLIENT_LIBRARY_NAME})
-endif()
 
-if(XASH_64BIT AND NOT ANDROID AND NOT IOS)
 	get_target_property(CLIENT_LIBRARY_NAME ${CLIENT_LIBRARY} OUTPUT_NAME)
-	if(NOT CLIENT_LIBRARY_NAME)
+if(NOT CLIENT_LIBRARY_NAME)
 		set(CLIENT_LIBRARY_NAME ${CLIENT_LIBRARY})
-	endif()
+endif()
 	set_target_properties(${CLIENT_LIBRARY} PROPERTIES
 			OUTPUT_NAME ${CLIENT_LIBRARY_NAME}64)
-endif()
 
-if(NOT XASH_STATIC_GAMELIB)
-	install( TARGETS ${CLIENT_LIBRARY} DESTINATION ${CMAKE_INSTALL_PREFIX}/${GAMEDIR}/${CLIENT_INSTALL_DIR} )
-endif()
 
 if(XASH_PCH)
 	target_precompile_headers(${CLIENT_LIBRARY} PRIVATE stdafx.h)

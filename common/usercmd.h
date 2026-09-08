@@ -28,9 +28,6 @@
 
 #ifndef USERCMD_H
 #define USERCMD_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 typedef struct usercmd_s
 {

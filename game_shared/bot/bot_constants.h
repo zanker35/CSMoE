@@ -28,9 +28,6 @@
 
 #ifndef BOT_CONSTANTS_H
 #define BOT_CONSTANTS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // We'll define our own version of this, because everyone else does.
 // This needs to stay in sync with MAX_CLIENTS, but there's no header with the #define.

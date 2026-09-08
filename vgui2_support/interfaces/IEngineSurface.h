@@ -1,9 +1,6 @@
 #ifndef IENGINESURFACE_H
 #define IENGINESURFACE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "interface.h"
 

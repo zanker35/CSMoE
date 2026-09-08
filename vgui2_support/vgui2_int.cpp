@@ -21,13 +21,7 @@
 
 #include "winsani_out.h"
 
-#ifdef _WIN32
-#include "winsani_in.h"
-#include <Windows.h>
-#include "winsani_out.h"
-#else
 #include <dlfcn.h>
-#endif
 
 namespace vgui2 {
 cl_enginefunc_t gEngfuncs;

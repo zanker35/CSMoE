@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -1131,4 +1130,3 @@ void R_DrawSpriteModel( cl_entity_t *e )
 	if( RI.fogCustom || ( RI.fogEnabled && !glState.drawTrans ))
 		pglEnable( GL_FOG );
 }
-#endif // XASH_DEDICATED

@@ -8,9 +8,6 @@
 #ifndef PROPERTYPAGE_H
 #define PROPERTYPAGE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "EditablePanel.h"
 #include "PHandle.h"

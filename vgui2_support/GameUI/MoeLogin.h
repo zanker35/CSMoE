@@ -1,9 +1,6 @@
 #ifndef MOELOGIN_H
 #define MOELOGIN_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <VGUI/IScheme.h>
 #include <vgui_controls/ImagePanel.h>

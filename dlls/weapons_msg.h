@@ -1,8 +1,5 @@
 #ifndef WEAPONS_MSG_H
 #define WEAPONS_MSG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum BTEWeaponMsgType : byte
 {

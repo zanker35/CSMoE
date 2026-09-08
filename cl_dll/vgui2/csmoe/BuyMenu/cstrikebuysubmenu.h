@@ -1,8 +1,5 @@
 #ifndef CSBUYSUBMENU_H
 #define CSBUYSUBMENU_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "weaponcatalog.h"
 #include "game_controls/buysubmenu.h"

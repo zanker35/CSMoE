@@ -6,9 +6,6 @@
 #ifndef IHTMLCHROME_H
 #define IHTMLCHROME_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "htmlmessages.h"
 #include "tier1/UtlBuffer.h"

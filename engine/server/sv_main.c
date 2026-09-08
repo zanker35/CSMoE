@@ -796,11 +796,7 @@ void SV_AddToMaster( netadr_t from, sizebuf_t *msg )
 	Info_SetValueForKey(s, "type",      Host_IsDedicated() ? "d" : "l", sizeof( s ) ); // dedicated
 	Info_SetValueForKey(s, "password",  havePassword       ? "1" : "0", sizeof( s ) ); // is password set
 
-#ifdef _WIN32
-	Info_SetValueForKey(s, "os",        "w", sizeof( s ) ); // Windows
-#else
 	Info_SetValueForKey(s, "os",        "l", sizeof( s ) ); // Linux
-#endif
 
 	Info_SetValueForKey(s, "secure",    "0", sizeof( s ) ); // server anti-cheat
 	Info_SetValueForKey(s, "lan",       "0", sizeof( s ) ); // LAN servers doesn't send info to master

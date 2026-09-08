@@ -8,9 +8,6 @@
 #ifndef PROPERTYSHEET_H
 #define PROPERTYSHEET_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifdef PropertySheet
 #undef PropertySheet

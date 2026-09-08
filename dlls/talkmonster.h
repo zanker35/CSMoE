@@ -28,9 +28,6 @@
 
 #ifndef TALKMONSTER_H
 #define TALKMONSTER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

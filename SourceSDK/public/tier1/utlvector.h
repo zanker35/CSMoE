@@ -11,9 +11,6 @@
 #ifndef UTLVECTOR_H
 #define UTLVECTOR_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <algorithm>
 
@@ -315,11 +312,6 @@ public:
 // carefully packing holders of vectors
 //-----------------------------------------------------------------------------
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable : 4200) // warning C4200: nonstandard extension used : zero-sized array in struct/union
-#pragma warning(disable : 4815 ) // warning C4815: 'staticData' : zero-sized array in stack object will have no elements
-#endif
 
 class CUtlVectorUltraConservativeAllocator
 {
@@ -578,9 +570,6 @@ private:
 	}
 };
 
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 // Make sure nobody adds multiple inheritance and makes this class bigger.
 COMPILE_TIME_ASSERT( sizeof(CUtlVectorUltraConservative<int>) == sizeof(void*) );

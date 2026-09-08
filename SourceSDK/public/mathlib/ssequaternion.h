@@ -6,9 +6,6 @@
 #ifndef SSEQUATMATH_H
 #define SSEQUATMATH_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include "mathlib/ssemath.h"

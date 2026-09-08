@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef WEAPONS_MOE_BUY_H
 #define WEAPONS_MOE_BUY_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 struct MoEWeaponBuyInfo_s
 {

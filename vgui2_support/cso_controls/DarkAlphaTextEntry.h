@@ -2,9 +2,6 @@
 #ifndef DARKALPHATEXTENTRY_H
 #define DARKALPHATEXTENTRY_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <VGUI/IBorder.h>
 #include <VGUI/IScheme.h>

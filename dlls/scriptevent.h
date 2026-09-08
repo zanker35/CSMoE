@@ -28,9 +28,6 @@
 
 #ifndef SCRIPTEVENT_H
 #define SCRIPTEVENT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define SCRIPT_EVENT_DEAD		1000	// character is now dead
 #define SCRIPT_EVENT_NOINTERRUPT	1001	// does not allow interrupt

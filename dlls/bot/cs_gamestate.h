@@ -28,9 +28,6 @@
 
 #ifndef CS_GAMESTATE_H
 #define CS_GAMESTATE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

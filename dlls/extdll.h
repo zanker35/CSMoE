@@ -38,14 +38,6 @@
 #include "common.h"
 
 // Prevent tons of unused windows definitions
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOWINRES
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#include "windows.h"
-#else // _WIN32
 typedef unsigned char BYTE;
 typedef int BOOL;
 
@@ -58,7 +50,6 @@ typedef int BOOL;
 #include <string.h> // memset 
 
 #define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
-#endif //_WIN32
 
 // Misc C-runtime library headers
 #include <stdio.h>

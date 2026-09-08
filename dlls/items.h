@@ -28,9 +28,6 @@
 
 #ifndef ITEMS_H
 #define ITEMS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

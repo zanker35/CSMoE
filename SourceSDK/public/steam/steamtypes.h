@@ -6,9 +6,6 @@
 
 #ifndef STEAMTYPES_H
 #define STEAMTYPES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define S_CALLTYPE __cdecl
 
@@ -36,27 +33,6 @@ typedef unsigned char uint8;
 typedef unsigned char uint8;
 typedef signed char int8;
 
-#if defined( _WIN32 )
-
-typedef __int16 int16;
-typedef unsigned __int16 uint16;
-typedef __int32 int32;
-typedef unsigned __int32 uint32;
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
-
-typedef int64 lint64;
-typedef uint64 ulint64;
-
-#ifdef X64BITS
-typedef __int64 intp;				// intp is an integer that can accomodate a pointer
-typedef unsigned __int64 uintp;		// (ie, sizeof(intp) >= sizeof(int) && sizeof(intp) >= sizeof(void *)
-#else
-typedef __int32 intp;
-typedef unsigned __int32 uintp;
-#endif
-
-#else // _WIN32
 
 typedef short int16;
 typedef unsigned short uint16;
@@ -82,7 +58,6 @@ typedef int intp;
 typedef unsigned int uintp;
 #endif
 
-#endif // else _WIN32
 
 #ifdef __clang__
 # define CLANG_ATTR(ATTR) __attribute__((annotate( ATTR )))

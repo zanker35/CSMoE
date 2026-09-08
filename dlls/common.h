@@ -28,9 +28,6 @@
 
 #ifndef COMMON_H
 #define COMMON_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 //#include "maintypes.h"
 #include "info.h"
@@ -73,9 +70,7 @@ typedef struct incomingtransfer_s
 	qboolean custom;
 } incomingtransfer_t;
 
-#ifndef _WIN32
 #define _strlwr(p) for (int i = 0; p[i] != 0; i++) p[i] = tolower(p[i]);
-#endif // _WIN32
 
 #define printf2 _printf2
 #define chatf _print_chat

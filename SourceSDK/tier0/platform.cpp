@@ -8,9 +8,6 @@
 #include "pch_tier0.h"
 #include <time.h>
 
-#if defined(_WIN32) && !defined(_X360)
-#include <errno.h>
-#endif
 #include <assert.h>
 #include "tier0/platform.h"
 #include "tier0/minidump.h"
@@ -164,16 +161,7 @@ void Plat_GetModuleFilename( char *pOut, int nMaxBytes )
 
 void Plat_ExitProcess( int nCode )
 {
-#if defined( _WIN32 ) && !defined( _X360 )
-	// We don't want global destructors in our process OR in any DLL to get executed.
-	// _exit() avoids calling global destructors in our module, but not in other DLLs.
-	const char *pchCmdLineA = Plat_GetCommandLineA();
-	if ( nCode || ( strstr( pchCmdLineA, "gc.exe" ) && strstr( pchCmdLineA, "gc.dll" ) && strstr( pchCmdLineA, "-gc" ) ) )
-	{
-		int *x = NULL; *x = 1; // cause a hard crash, GC is not allowed to exit voluntarily from gc.dll
-	}
-	TerminateProcess( GetCurrentProcess(), nCode );
-#elif defined(_PS3)
+#if   defined(_PS3)
 	// We do not use this path to exit on PS3 (naturally), rather we want a clear crash:
 	int *x = NULL; *x = 1;
 #else	
@@ -274,11 +262,7 @@ bool vtune( bool resume )
 
 bool Plat_IsInDebugSession()
 {
-#if defined( _WIN32 ) && !defined( _X360 )
-	return (IsDebuggerPresent() != 0);
-#elif defined( _WIN32 ) && defined( _X360 )
-	return (XBX_IsDebuggerPresent() != 0);
-#elif defined( LINUX )
+#if   defined( LINUX )
 	#error This code is implemented in platform_posix.cpp
 #else
 	return false;
@@ -287,11 +271,6 @@ bool Plat_IsInDebugSession()
 
 void Plat_DebugString( const char * psz )
 {
-#if defined( _WIN32 ) && !defined( _X360 )
-	::OutputDebugStringA( psz );
-#elif defined( _WIN32 ) && defined( _X360 )
-	XBX_OutputDebugString( psz );
-#endif
 }
 
 

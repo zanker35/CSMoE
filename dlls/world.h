@@ -28,9 +28,6 @@
 
 #ifndef WORLD_H
 #define WORLD_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

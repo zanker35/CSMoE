@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -1869,18 +1868,8 @@ GetWindowCenterX
 static int GAME_EXPORT pfnGetWindowCenterX( void )
 {
 	int x = 0;
-#if defined( _WIN32 ) && !defined( XASH_WINRT )
-	if( m_ignore->integer )
-	{
-		POINT pos;
-		GetCursorPos( &pos );
-		return pos.x;
-	}
-#endif
 
-#ifdef XASH_SDL
 	SDL_GetWindowPosition( host.hWnd, &x, NULL );
-#endif
 
 	return host.window_center_x + x;
 }
@@ -1894,18 +1883,8 @@ GetWindowCenterY
 static int GAME_EXPORT pfnGetWindowCenterY( void )
 {
 	int y = 0;
-#if defined( _WIN32 ) && !defined( XASH_WINRT )
-	if( m_ignore->integer )
-	{
-		POINT pos;
-		GetCursorPos( &pos );
-		return pos.y;
-	}
-#endif
 
-#ifdef XASH_SDL
 	SDL_GetWindowPosition( host.hWnd, NULL, &y );
-#endif
 
 	return host.window_center_y + y;
 }
@@ -1995,11 +1974,7 @@ pfnGetMousePosition
 */
 void GAME_EXPORT CL_GetMousePosition( int *mx, int *my )
 {
-#ifdef XASH_SDL
 	SDL_GetMouseState(mx, my);
-#else
-	*mx = *my = 0;
-#endif
 }
 
 /*
@@ -2736,11 +2711,7 @@ pfnGetMousePos
 */
 static void GAME_EXPORT pfnGetMousePos( POINT *ppt )
 {
-#ifdef XASH_SDL
 	SDL_GetMouseState(&ppt->x, &ppt->y);
-#else
-	ppt->x = ppt->y = 0;
-#endif
 }
 
 /*
@@ -2751,9 +2722,7 @@ pfnSetMousePos
 */
 static void GAME_EXPORT pfnSetMousePos( int mx, int my )
 {
-#ifdef XASH_SDL
 	SDL_WarpMouseInWindow( host.hWnd, mx, my );
-#endif
 }
 
 /*
@@ -4213,4 +4182,3 @@ qboolean CL_LoadProgs( const char *name )
 
 	return true;
 }
-#endif // XASH_DEDICATED

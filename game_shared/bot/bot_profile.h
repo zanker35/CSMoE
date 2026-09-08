@@ -28,19 +28,14 @@
 
 #ifndef BOT_PROFILE
 #define BOT_PROFILE
-#ifdef _WIN32
-#pragma once
-#endif
 
 // long STL names get truncated in browse info.
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)
 #endif
 
-#ifndef _WIN32
 #include <strings.h>
 #include <stdio.h>
-#endif // _WIN32
 
 #undef min
 #undef max

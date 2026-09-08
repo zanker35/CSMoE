@@ -8,9 +8,6 @@
 #ifndef KEYVALUES_H
 #define KEYVALUES_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 // #include <vgui/VGUI.h>
 

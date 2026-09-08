@@ -7,9 +7,6 @@
 #ifndef MEMSTACK_H
 #define MEMSTACK_H
 
-#if defined( _WIN32 )
-#pragma once
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -55,10 +52,6 @@ private:
 
 	unsigned m_maxSize;
 	unsigned m_alignment;
-#ifdef _WIN32
-	unsigned m_commitSize;
-	unsigned m_minCommit;
-#endif
 #ifdef _X360
 	bool m_bPhysical;
 #endif

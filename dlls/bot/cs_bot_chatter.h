@@ -28,9 +28,6 @@
 
 #ifndef CS_BOT_CHATTER_H
 #define CS_BOT_CHATTER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

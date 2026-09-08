@@ -9,9 +9,6 @@
 #ifndef VECTOR2D_H
 #define VECTOR2D_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <math.h>
 #include <float.h>

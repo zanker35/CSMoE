@@ -73,10 +73,6 @@ qboolean SNDDMA_Init( void *hInst )
 		return false;
 	}
 
-#ifdef __linux__
-	setenv( "PULSE_PROP_application.name", GI->title, 1 );
-	setenv( "PULSE_PROP_media.role", "game", 1 );
-#endif
 
 	Q_memset( &desired, 0, sizeof( desired ) );
 	desired.freq     = SOUND_DMA_SPEED;
@@ -219,16 +215,12 @@ void SNDDMA_Shutdown( void )
 	if( sdl_dev )
 	{
 		SDL_PauseAudioDevice( sdl_dev, 1 );
-#ifndef __EMSCRIPTEN__
 		SDL_CloseAudioDevice( sdl_dev );
 		SDL_CloseAudio( );
-#endif
 	}
 
-#ifndef __EMSCRIPTEN__
 	if( SDL_WasInit( SDL_INIT_AUDIO ) )
 		SDL_QuitSubSystem( SDL_INIT_AUDIO );
-#endif
 
 	if( dma.buffer )
 	{

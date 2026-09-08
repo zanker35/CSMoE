@@ -130,9 +130,6 @@ void IN_ClientMoveEvent( float forwardmove, float sidemove )
 
 void IN_ClientLookEvent( float relyaw, float relpitch )
 {
-#ifdef __ANDROID__
-	if( evdev_open || bMouseInUse ) return;
-#endif
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
 }
@@ -140,10 +137,6 @@ void IN_ClientLookEvent( float relyaw, float relpitch )
 // Rotate camera and add move values to usercmd
 void IN_Move( float frametime, usercmd_t *cmd )
 {
-#ifdef __ANDROID__
-	if( bMouseInUse )
-		return;
-#endif
 	Vector viewangles;
 	bool bLadder = false;
 
@@ -222,11 +215,7 @@ void IN_Move( float frametime, usercmd_t *cmd )
 	ac_movecount = 0;
 }
 
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT IN_MouseEvent_CL( int mstate )
-#else
-void DLLEXPORT IN_MouseEvent( int mstate )
-#endif
 {
 	static int mouse_oldbuttonstate;
 	// perform button actions
@@ -254,20 +243,12 @@ void DLLEXPORT IN_ClearStates ( void )
 	//gEngfuncs.Con_Printf("IN_ClearStates\n");
 }
 
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT  IN_ActivateMouse_CL ( void )
-#else
-void DLLEXPORT  IN_ActivateMouse ( void )
-#endif
 {
 	//gEngfuncs.Con_Printf("IN_ActivateMouse\n");
 }
 
-#ifdef XASH_STATIC_GAMELIB
 void DLLEXPORT  IN_DeactivateMouse_CL ( void )
-#else
-void DLLEXPORT  IN_DeactivateMouse ( void )
-#endif
 {
 	//gEngfuncs.Con_Printf("IN_DeactivateMouse\n");
 }
@@ -294,11 +275,6 @@ void IN_Init( void )
 	evdev_grab = gEngfuncs.pfnGetCvarPointer("evdev_grab");
 	
 	
-#ifdef __ANDROID__
-	gEngfuncs.Cvar_SetValue("m_yaw", -1);
-	gEngfuncs.Cvar_SetValue("m_pitch", -1);
-	gEngfuncs.pfnSetMouseEnable( false );
-#endif
 
 	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = 0;
 }

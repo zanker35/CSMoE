@@ -8,9 +8,6 @@
 #ifndef SPLITTER_H
 #define SPLITTER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "EditablePanel.h"
 

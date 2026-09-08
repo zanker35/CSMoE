@@ -7,9 +7,6 @@
 
 #ifndef CREATEMULTIPLAYERGAMEDIALOG_H
 #define CREATEMULTIPLAYERGAMEDIALOG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyDialog.h>
 

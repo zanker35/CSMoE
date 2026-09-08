@@ -1,9 +1,6 @@
 #ifndef MEMORYBITMAP_H
 #define MEMORYBITMAP_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 #include <vgui/IImage.h>

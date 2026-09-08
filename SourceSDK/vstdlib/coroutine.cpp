@@ -50,11 +50,7 @@
 #ifdef COROUTINE_TRACE
 #include "tier1/fmtstr.h"
 static CFmtStr g_fmtstr;
-#ifdef WIN32
-extern "C"	__declspec(dllimport) void __stdcall OutputDebugStringA( const char * );
-#else
 void OutputDebugStringA( const char *pchMsg ) { fprintf( stderr, pchMsg ); fflush( stderr ); } 
-#endif
 #define CoroutineDbgMsg( fmt, ... ) \
 { \
  g_fmtstr.sprintf( fmt, ##__VA_ARGS__ ); \
@@ -73,11 +69,7 @@ void OutputDebugStringA( const char *pchMsg ) { fprintf( stderr, pchMsg ); fflus
 extern "C" NORETURN void Coroutine_LongJmp_Unchecked( jmp_buf buffer, int nResult );
 #define Coroutine_longjmp Coroutine_LongJmp_Unchecked
 
-#ifdef  _WIN64
-#define Q_offsetof(s,m)   (size_t)( (ptrdiff_t)&reinterpret_cast<const volatile char&>((((s *)0)->m)) )
-#else
 #define Q_offsetof(s,m)   (size_t)&reinterpret_cast<const volatile char&>((((s *)0)->m))
-#endif
 #define SIZEOF_MEMBER( className, memberName ) sizeof( ((className*)nullptr)->memberName )
 
 
@@ -213,13 +205,7 @@ static const int k_cubMaxCoroutineStackSize = (48 * 1024);
 static const int k_cubMaxCoroutineStackSize = (32 * 1024);
 #endif // defined( _DEBUG )
 
-#ifdef _WIN64
-extern "C" byte *GetStackPtr64();
-#define GetStackPtr( pStackPtr)		byte *pStackPtr = GetStackPtr64();
-#else
-#ifdef WIN32
-#define GetStackPtr( pStackPtr )	byte *pStackPtr;	__asm mov pStackPtr, esp	
-#elif defined(GNUC)
+#if   defined(GNUC)
 // Apple's version of gcc/g++ doesn't return the expected value using the intrinsic, so 
 // do it the old fashioned way - this will also use asm on linux (since we don't compile
 // with llvm/clang there) but that seems fine.
@@ -232,7 +218,6 @@ extern "C" byte *GetStackPtr64();
 #define GetStackPtr( pStackPtr )	byte *pStackPtr = (byte*)__builtin_frame_address(0)
 #else
 #error
-#endif
 #endif
 
 #ifdef _M_X64
@@ -648,21 +633,6 @@ bool Internal_Coroutine_Continue( HCoroutine hCoroutine, const char *pchDebugMsg
 
 	bool bInCoroutineAlready = GCoroutineMgr().IsAnyCoroutineActive();
 
-#ifdef _WIN32
-#ifndef _WIN64
-	// make sure nobody has a try/catch block and then yielded
-	// because we hate that and we will crash
-	uint32 topofexceptionchain;
-	__asm mov eax, dword ptr fs:[0]
-	__asm mov topofexceptionchain, eax
-	if ( GCoroutineMgr().m_topofexceptionchain == 0 )
-		GCoroutineMgr().m_topofexceptionchain = topofexceptionchain;
-	else
-	{
-		Assert( topofexceptionchain == GCoroutineMgr().m_topofexceptionchain );
-	}
-#endif
-#endif
 
 	// start the new coroutine
 	GCoroutineMgr().SetActiveCoroutine( hCoroutine );
@@ -815,25 +785,10 @@ void NOINLINE Coroutine_Launch( CCoroutine &coroutine )
 	byte * pEsp = ((byte*)pStackFrameTwoUp)+32;
 
 #endif
-	#ifdef _WIN64
-		// Add a little extra padding, to capture the spill space for the registers
-		// that is required for us to reserve ABOVE the return address), and also
-		// align the stack
-		coroutine.m_pStackHigh = (byte *)( ((uintptr_t)pEsp + 32 + 15) & ~(uintptr_t)15 );
-
-		// On Win64, we need to be able to find an exception handler
-		// if we walk the stack to this point.  Currently,
-		// this is as close to the root as we can go.  If we
-		// try to go higher, we wil fail.  That's actually
-		// OK at run time, because Coroutine_Finish doesn't
-		// return!
-		CatchAndWriteMiniDumpForVoidPtrFn( coroutine.m_pFunc, coroutine.m_pvParam, /*bExitQuietly*/ true );
-	#else
 		coroutine.m_pStackHigh = (byte *)pEsp;
 
 		// run the function directly
 		coroutine.m_pFunc( coroutine.m_pvParam );
-	#endif
 
 	// longjmp back to the main 'thread'
 	Coroutine_Finish();
@@ -896,21 +851,6 @@ void Coroutine_YieldToMain()
 	CCoroutine &coroutine = GCoroutineMgr().GetActiveCoroutine();
 	CoroutineDbgMsg( g_fmtstr.sprintf( "Coroutine_YieldToMain() %s#%x -> %s#%x\n", coroutine.m_pchName, coroutine.m_hCoroutine, coroutinePrev.m_pchName, coroutinePrev.m_hCoroutine ) );
 
-#ifdef _WIN32
-#ifndef _WIN64
-	// make sure nobody has a try/catch block and then yielded
-	// because we hate that and we will crash
-	uint32 topofexceptionchain;
-	__asm mov eax, dword ptr fs:[0]
-	__asm mov topofexceptionchain, eax
-		if ( GCoroutineMgr().m_topofexceptionchain == 0 )
-			GCoroutineMgr().m_topofexceptionchain = topofexceptionchain;
-		else
-		{
-			Assert( topofexceptionchain == GCoroutineMgr().m_topofexceptionchain );
-		}
-#endif
-#endif
 
 	RW_MEMORY_BARRIER;
 	int iResult = setjmp( coroutine.GetRegisters() );

@@ -28,9 +28,6 @@
 
 #ifndef NAV_H
 #define NAV_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // STL uses exceptions, but we are not compiling with them - ignore warning
 #ifdef _MSC_VER

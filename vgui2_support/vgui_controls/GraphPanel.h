@@ -6,9 +6,6 @@
 
 #ifndef GRAPHPANEL_H
 #define GRAPHPANEL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Panel.h"
 

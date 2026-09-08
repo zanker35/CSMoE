@@ -439,9 +439,6 @@ void CCvar::UnregisterConCommand( ConCommandBase *pCommandToRemove )
 }
 
 // Crash here in TF2, so I'm adding some debugging stuff.
-#ifdef WIN32
-#pragma optimize( "", off )
-#endif
 void CCvar::UnregisterConCommands( CVarDLLIdentifier_t id )
 {
 	ConCommandBase	*pNewList;
@@ -472,9 +469,6 @@ void CCvar::UnregisterConCommands( CVarDLLIdentifier_t id )
 
 	m_pConCommandList = pNewList;
 }
-#ifdef WIN32
-#pragma optimize( "", on )
-#endif
 
 
 //-----------------------------------------------------------------------------

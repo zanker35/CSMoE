@@ -28,9 +28,6 @@
 
 #ifndef FUNC_BREAK_H
 #define FUNC_BREAK_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

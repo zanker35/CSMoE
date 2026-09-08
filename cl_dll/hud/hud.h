@@ -957,9 +957,6 @@ public:
 	cvar_t *sv_skipshield;
 
 	cvar_t *cl_headname;
-#ifdef __ANDROID__
-	cvar_t *cl_android_force_defaults;
-#endif
 
 	HSPRITE m_hGasPuff;
 

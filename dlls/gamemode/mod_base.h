@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef MOD_BASE_H
 #define MOD_BASE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "mods.h"
 #include "ruleof350.h"

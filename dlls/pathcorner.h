@@ -28,9 +28,6 @@
 
 #ifndef PATHCORNER_H
 #define PATHCORNER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

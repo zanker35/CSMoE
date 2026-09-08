@@ -28,9 +28,6 @@
 
 #ifndef BOT_UTIL_H
 #define BOT_UTIL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define COS_TABLE_SIZE		256
 

@@ -8,9 +8,6 @@
 #ifndef MENUBAR_H
 #define MENUBAR_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Panel.h"
 #include <tier1/utlvector.h>

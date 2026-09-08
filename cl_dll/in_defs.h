@@ -16,9 +16,6 @@
 #endif
 #endif
 
-#if defined(_WIN32) && !defined(XASH_WINRT)
-#include <WinUser.h>
-#else
 #ifndef PORT_H
 typedef struct point_s{
 	int x;
@@ -27,6 +24,5 @@ typedef struct point_s{
 #endif
 inline void GetCursorPos(...) {}
 inline void SetCursorPos(...) {}
-#endif
 
 #endif

@@ -28,9 +28,6 @@
 
 #ifndef WEAPONINFO_H
 #define WEAPONINFO_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 // Info about weapons player might have in his/her possession
 typedef struct weapon_data_s

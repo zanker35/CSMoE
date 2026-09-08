@@ -22,89 +22,7 @@ EOSType GetOSType()
 {
 	static EOSType eOSVersion = k_eOSUnknown;
 
-#if defined( _WIN32 ) && !defined( _X360 )
-	if ( eOSVersion == k_eOSUnknown || eOSVersion == k_eWinUnknown )
-	{
-		eOSVersion = k_eWinUnknown;
-		OSVERSIONINFOEX osvi;
-		Q_memset( &osvi, 0x00, sizeof(osvi) );
-		osvi.dwOSVersionInfoSize = sizeof(osvi);
-		
-		if ( GetVersionEx( (OSVERSIONINFO *) &osvi ) )
-		{
-			switch ( osvi.dwPlatformId )
-			{
-			case VER_PLATFORM_WIN32_NT:
-				if ( osvi.dwMajorVersion <= 4 )
-				{
-					eOSVersion = k_eWinNT;
-				}
-				else if ( osvi.dwMajorVersion == 5 )
-				{
-					switch(  osvi.dwMinorVersion ) 
-					{
-					case 0:
-						eOSVersion = k_eWin2000;
-						break;
-					case 1:
-						eOSVersion = k_eWinXP;
-						break;
-					case 2:
-						eOSVersion = k_eWin2003;
-						break;
-					}
-				}
-				else if ( osvi.dwMajorVersion >= 6 )
-				{
-					if ( osvi.wProductType == VER_NT_WORKSTATION )
-					{
-						switch ( osvi.dwMinorVersion )
-						{
-						case 0:
-							eOSVersion = k_eWinVista;
-							break;
-						case 1:
-							eOSVersion = k_eWindows7;
-							break;
-						}
-					}
-					else /* ( osvi.wProductType != VER_NT_WORKSTATION ) */
-					{
-						switch ( osvi.dwMinorVersion )
-						{
-						case 0:
-							eOSVersion = k_eWin2008;	// Windows 2008, not R2
-							break;
-						case 1:
-							eOSVersion = k_eWin2008;	// Windows 2008 R2
-							break;
-						}
-					}
-				}
-				break;
-			case VER_PLATFORM_WIN32_WINDOWS:
-				switch ( osvi.dwMinorVersion )
-				{
-				case 0:
-					eOSVersion = k_eWin95;
-					break;
-				case 10:
-					eOSVersion = k_eWin98;
-					break;
-				case 90:
-					eOSVersion = k_eWinME;
-					break;
-				}
-				break;
-			case VER_PLATFORM_WIN32s:
-				eOSVersion = k_eWin311;
-				break;
-			}
-		}
-	}
-#elif defined(IOS)
-    return k_eMacOSUnknown;
-#elif defined(OSX)
+#if   defined(OSX)
 	if ( eOSVersion == k_eOSUnknown )
 	{
 		SInt32 MajorVer = 0;
@@ -205,12 +123,6 @@ EOSType GetOSType()
 //-----------------------------------------------------------------------------
 const char *GetOSDetailString( char *pchOutBuf, int cchOutBuf )
 {
-#if defined WIN32 
-	(void)( pchOutBuf );
-	(void)( cchOutBuf );
-	// no interesting details
-	return NULL;
-#else
 #if defined LINUX
 	// we're about to go poking around to see if we can figure out distribution
 	// looking @ any /etc file is fragile (people can change 'em), 
@@ -262,7 +174,6 @@ const char *GetOSDetailString( char *pchOutBuf, int cchOutBuf )
 
 	pchOutBuf[ MIN( cchRead, (size_t)cchOutBuf-1 ) ] = '\0';
 	return pchOutBuf;
-#endif
 }
 
 
@@ -370,11 +281,7 @@ const OSTypeNameTuple k_rgOSTypeToName[] =
 EOSType GetOSTypeFromString_Deprecated( const char *pchName )
 {
 	EOSType eOSType;
-#ifdef WIN32
-	eOSType = k_eWinUnknown;
-#else
 	eOSType = k_eOSUnknown;
-#endif
 
 	// if this fires, make sure all OS types are in the map
 	Assert( Q_ARRAYSIZE( k_rgOSTypeToName ) == k_eOSTypeMax ); 

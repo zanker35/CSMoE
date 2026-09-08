@@ -34,11 +34,7 @@ static int fatbytes;
 
 // exports
 typedef void (__cdecl *LINK_ENTITY_FUNC)( entvars_t *pev );
-#ifdef _WIN32
-typedef void (__stdcall *GIVEFNPTRSTODLL)( enginefuncs_t* engfuncs, globalvars_t *pGlobals );
-#else
 typedef void (__cdecl *GIVEFNPTRSTODLL)( enginefuncs_t* engfuncs, globalvars_t *pGlobals );
-#endif
 /*
 =============
 EntvarsDescription
@@ -3058,10 +3054,6 @@ void SV_SetStringArrayMode( qboolean dynamic )
 }
 
 #ifdef XASH_64BIT
-#if !defined(_WIN32) && !defined(__APPLE__)
-#define USE_MMAP
-#include <sys/mman.h>
-#endif
 #endif
 
 /*
@@ -5185,18 +5177,12 @@ qboolean SV_LoadProgs( const char *name )
 	int			i, version;
 	static APIFUNCTION		GetEntityAPI;
 	static APIFUNCTION2		GetEntityAPI2;
-#ifdef DLL_LOADER
-	static GIVEFNPTRSTODLL 	__attribute__((__stdcall__)) GiveFnptrsToDll_w32;
-#endif
 	static GIVEFNPTRSTODLL GiveFnptrsToDll;
 	static NEW_DLL_FUNCTIONS_FN	GiveNewDllFuncs;
 	static enginefuncs_t	gpEngfuncs;
 	static globalvars_t		gpGlobals;
 	static playermove_t		gpMove;
 	edict_t			*e;
-#ifdef DLL_LOADER
-	qboolean dll;
-#endif
 
 	if( svgame.hInstance ) SV_UnloadProgs();
 
@@ -5205,9 +5191,6 @@ qboolean SV_LoadProgs( const char *name )
 	svgame.globals = &gpGlobals;
 	svgame.mempool = Mem_AllocPool( "Server Edicts Zone" );
 	svgame.hInstance = Com_LoadLibrary( name, true );
-#ifdef DLL_LOADER
-	dll = host.enabledll && Loader_GetDllHandle( svgame.hInstance );
-#endif
 	if( !svgame.hInstance ) return false;
 
 	// make sure what new dll functions is cleared
@@ -5229,21 +5212,6 @@ qboolean SV_LoadProgs( const char *name )
 		svgame.hInstance = NULL;
 		return false;
 	}
-#ifdef DLL_LOADER
-	if(dll)
-	{
-		GiveFnptrsToDll_w32 = (void *)Com_GetProcAddress( svgame.hInstance, "GiveFnptrsToDll" );
-		if( !GiveFnptrsToDll_w32 )
-		{
-			Com_FreeLibrary(svgame.hInstance);
-			MsgDev( D_NOTE, "SV_LoadProgs: failed to get address of GiveFnptrsToDll proc\n" );
-			svgame.hInstance = NULL;
-			return false;
-		}
-		GiveFnptrsToDll_w32( &gpEngfuncs, svgame.globals );
-	}
-	else
-#endif
 	{
 		GiveFnptrsToDll = (GIVEFNPTRSTODLL)Com_GetProcAddress( svgame.hInstance, "GiveFnptrsToDll" );
 		

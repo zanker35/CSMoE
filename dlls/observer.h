@@ -28,9 +28,6 @@
 
 #ifndef OBSERVER_H
 #define OBSERVER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define CAMERA_MODE_SPEC_ANYONE			0
 #define CAMERA_MODE_SPEC_ONLY_TEAM		1

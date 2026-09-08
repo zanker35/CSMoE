@@ -6,9 +6,6 @@
 
 #ifndef MEM_HELPERS_H
 #define MEM_HELPERS_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 // Normally, the runtime libraries like to mess with the memory returned by malloc(), 

@@ -17,37 +17,20 @@ GNU General Public License for more details.
 #include "common.h"
 #include "mathlib.h"
 
-#ifdef XASH_SDL
 #include <SDL_timer.h>
 #include <SDL_clipboard.h>
 #include <SDL_video.h>
-#else
-#include <time.h>
-#endif
-#ifndef _WIN32
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <dlfcn.h>
-#ifndef __ANDROID__
 extern char **environ;
 #include <pwd.h>
-#endif
 
-#else
-#include <stdlib.h>
-#include <time.h>
-#endif
 #include "menu_int.h" // _UPDATE_PAGE macro
-#ifdef XASH_WINRT
-#include "platform/winrt/winrt_interop.h"
-#endif
 
 
 qboolean	error_on_exit = false;	// arg for exit();
-#if defined _WIN32 && !defined XASH_SDL
-#include <winbase.h>
-#endif
 
 /*
 ================
@@ -155,18 +138,6 @@ qboolean Sys_DebuggerPresent( void )
 #endif // __i386__
 // __linux__/__FreeBSD__/__NetBSD__/__OpenBSD__
 
-#elif defined(_WIN32) && defined(_M_IX86) && !defined(XASH_64BIT)
-
-#ifdef _MSC_VER
-BOOL WINAPI IsDebuggerPresent(void);
-#define DEBUG_BREAK	if( IsDebuggerPresent() ) \
-		_asm{ int 3 }
-#else
-#define DEBUG_BREAK	if( IsDebuggerPresent() ) \
-		asm volatile("int $3;")
-#endif // _MSC_VER
-// _WIN32 && !XASH_64BIT
-
 #elif defined(__APPLE__) && defined(_DEBUG)
 
 // For more information, see https://developer.apple.com/library/content/qa/qa1361/_index.html
@@ -236,16 +207,12 @@ char *Sys_GetClipboardData( void )
 
 	data[0] = '\0';
 
-#ifdef XASH_WINRT
-	WinRT_GetClipboardData(data, 1024);
-#elif defined XASH_SDL
 	buffer = SDL_GetClipboardText();
 	if( buffer )
 	{
 		Q_strncpy( data, buffer, sizeof( data ) );
 		SDL_free( buffer );
 	}
-#endif
 	return data;
 }
 
@@ -258,11 +225,7 @@ write screenshot into clipboard
 */
 void Sys_SetClipboardData( const byte *buffer, size_t size )
 {
-#ifdef XASH_WINRT
-	WinRT_SetClipboardData((const char *)buffer, size);
-#elif defined XASH_SDL
 	SDL_SetClipboardText((char *)buffer);
-#endif
 }
 
 /*
@@ -296,17 +259,6 @@ returns username for current profile
 */
 char *Sys_GetCurrentUser( void )
 {
-#if defined( XASH_WINRT)
-	return WinRT_GetUserName();
-#elif defined(_WIN32)
-
-	static string	s_userName;
-	unsigned long size = sizeof( s_userName );
-
-	if( GetUserName( s_userName, &size ))
-		return s_userName;
-
-#elif !defined(__ANDROID__)
 
 	uid_t uid = geteuid();
 	struct passwd *pw = getpwuid( uid );
@@ -314,11 +266,9 @@ char *Sys_GetCurrentUser( void )
 	if( pw )
 		return pw->pw_name;
 
-#endif
 	return "Player";
 }
 
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined (__FreeBSD__) || defined (__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 qboolean Sys_FindExecutable( const char *baseName, char *buf, size_t size )
 {
 	char *envPath;
@@ -364,7 +314,6 @@ qboolean Sys_FindExecutable( const char *baseName, char *buf, size_t size )
 	}
 	return false;
 }
-#endif
 
 /*
 =================
@@ -373,22 +322,6 @@ Sys_ShellExecute
 */
 void Sys_ShellExecute( const char *path, const char *parms, qboolean shouldExit )
 {
-#if defined(_WIN32)
-	if( !Q_strcmp( path, GENERIC_UPDATE_PAGE ) || !Q_strcmp( path, PLATFORM_UPDATE_PAGE ))
-		path = XASH_UPDATE_PAGE;
-
-#ifdef XASH_WINRT
-	WinRT_ShellExecute(path);
-#else
-	ShellExecute(NULL, "open", path, parms, NULL, SW_SHOW);
-#endif
-#elif __EMSCRIPTEN__
-	EM_ASM_INT({
-				if( confirm( "Open game page?\n"+Pointer_stringify($0) ) )
-					document.location.href = Pointer_stringify($0);
-				return 0;
-			}, (int)path );
-#elif (defined(__linux__) && !defined (__ANDROID__)) || defined (__FreeBSD__) || defined (__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 
 	if( !Q_strcmp( path, GENERIC_UPDATE_PAGE ) || !Q_strcmp( path, PLATFORM_UPDATE_PAGE ))
 		path = XASH_UPDATE_PAGE;
@@ -406,22 +339,6 @@ void Sys_ShellExecute( const char *path, const char *parms, qboolean shouldExit 
 		}
 	}
 	else MsgDev( D_WARN, "Could not find "OPEN_COMMAND" utility\n" );
-#elif defined(__ANDROID__) && !defined(XASH_DEDICATED)
-	Android_ShellExecute( path, parms );
-#elif defined(__HAIKU__)
- 	// Prevent "open: www.url.com: No such file or directory" error
- 	char http[MAX_SYSPATH];
- 	if( Q_strncmp( path, "http", 4 ) )
- 	{
- 		Q_snprintf( http, MAX_SYSPATH, "%s%s", "http://", path );
- 		path = http;
- 	}
-
-  	// This will work in both package and standalone versions
- 	char command[MAX_SYSPATH];
- 	Q_snprintf( command, MAX_SYSPATH, "%s %s &", OPEN_COMMAND, path );
- 	system( command );
-#endif
 
 	if( shouldExit )
 		Sys_Quit();
@@ -565,14 +482,7 @@ qboolean Sys_LoadLibrary( dll_info_t *dll )
 
 	if (!dll->link)
 	{
-#ifdef XASH_WINRT
-		wchar_t buffer[MAX_PATH];
-		MultiByteToWideChar(CP_ACP, 0, dll->name, -1, buffer, MAX_PATH);
-
-		dll->link = LoadPackagedLibrary(buffer, 0); // environment pathes
-#else
 		dll->link = LoadLibrary(dll->name); // environment pathes
-#endif
 	}
 
 	// no DLL found
@@ -713,9 +623,7 @@ void Sys_Error( const char *format, ... )
 
 	if( !Host_IsDedicated() )
 	{
-#ifdef XASH_SDL
 		if( host.hWnd ) SDL_HideWindow( host.hWnd );
-#endif
 	}
 
 	if( host.developer > 0 )
@@ -762,9 +670,7 @@ void Sys_Break( const char *format, ... )
 
 	if( !Host_IsDedicated() )
 	{
-#ifdef XASH_SDL
 		if( host.hWnd ) SDL_HideWindow( host.hWnd );
-#endif
 	}
 
 	if( Host_IsDedicated() || host.developer > 0 )
@@ -788,19 +694,6 @@ void Sys_Break( const char *format, ... )
 	Sys_Quit();
 }
 
-#ifdef __EMSCRIPTEN__
-/* strange glitchy bug on emscripten
-_exit->_Exit->asm._exit->_exit
-As we do not need atexit(), just throw hidden exception
-*/
-#define exit my_exit
-void my_exit(int ret)
-{
-	emscripten_cancel_main_loop();
-	printf("exit(%d)\n", ret);
-	EM_ASM(if(showElement)showElement('reload', true);throw 'SimulateInfiniteLoop');
-}
-#endif
 
 /*
 ================

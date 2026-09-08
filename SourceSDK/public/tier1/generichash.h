@@ -8,9 +8,6 @@
 #ifndef GENERICHASH_H
 #define GENERICHASH_H
 
-#if defined(_WIN32)
-#pragma once
-#endif
 
 //-----------------------------------------------------------------------------
 

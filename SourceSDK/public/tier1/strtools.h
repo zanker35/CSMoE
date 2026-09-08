@@ -13,9 +13,7 @@
 
 #include <ctype.h>
 #include <stdarg.h>
-#ifdef _WIN32
-#pragma once
-#elif POSIX
+#if   POSIX
 #include <wchar.h>
 #include <math.h>
 #include <wctype.h>
@@ -27,11 +25,7 @@
 class CUtlBuffer;
 class CUtlString;
 
-#ifdef _WIN64
-#define str_size unsigned int
-#else
 #define str_size size_t
-#endif
 
 template< class T, class I > class CUtlMemory;
 template< class T, class A > class CUtlVector;
@@ -466,10 +460,6 @@ int Q_UTF16ToUChar32( const uchar16 *pUTF16, uchar32 &uValueOut, bool &bErrorOut
 #define V_UnicodeToUTF8 Q_WStringToUTF8
 
 
-#ifdef WIN32
-// This function is ill-defined as it relies on the current ANSI code page. Currently Win32 only for tools.
-int Q_LocaleSpecificANSIToUTF8( const char *pANSI, int cubSrcInBytes, OUT_Z_BYTECAP(cubDestSizeInBytes) char *pUTF8, int cubDestSizeInBytes );
-#endif
 
 // Windows-1252 is mostly the same as ISO Latin-1, and probably what you want if you are 
 // saddled with an 8-bit ANSI string that originated on a Windows system.
@@ -513,37 +503,11 @@ template <size_t maxLenInChars> int Q_NormalizeUTF8ToASCII( OUT_Z_ARRAY char (&p
 }
 
 // UNDONE: Find a non-compiler-specific way to do this
-#ifdef _WIN32
-#ifndef _VA_LIST_DEFINED
-
-#ifdef  _M_ALPHA
-
-struct va_list 
-{
-    char *a0;       /* pointer to first homed integer argument */
-    int offset;     /* byte offset of next parameter */
-};
-
-#else  // !_M_ALPHA
-
-typedef char *  va_list;
-
-#endif // !_M_ALPHA
-
-#define _VA_LIST_DEFINED
-
-#endif   // _VA_LIST_DEFINED
-
-#elif POSIX
+#if   POSIX
 #include <stdarg.h>
 #endif
 
-#ifdef _WIN32
-#define CORRECT_PATH_SEPARATOR '\\'
-#define CORRECT_PATH_SEPARATOR_S "\\"
-#define INCORRECT_PATH_SEPARATOR '/'
-#define INCORRECT_PATH_SEPARATOR_S "/"
-#elif POSIX
+#if   POSIX
 #define CORRECT_PATH_SEPARATOR '/'
 #define CORRECT_PATH_SEPARATOR_S "/"
 #define INCORRECT_PATH_SEPARATOR '\\'
@@ -935,10 +899,8 @@ public:
 	{
 		m_pch = pch;
 		m_pwch = NULL;
-#if !defined( WIN32 ) && !defined(_WIN32)
 		m_pucs2 = NULL;
 		m_bCreatedUCS2 = false;
-#endif
 		m_bCreatedUTF16 = false;
 	}
 
@@ -947,10 +909,8 @@ public:
 	{
 		m_pch = NULL;
 		m_pwch = pwch;
-#if !defined( WIN32 ) && !defined(_WIN32)
 		m_pucs2 = NULL;
 		m_bCreatedUCS2 = false;
-#endif
 		m_bCreatedUTF16 = true;
 	}
 
@@ -988,14 +948,12 @@ public:
 		return m_pwch;
 	}
 
-#if !defined( WIN32 ) && !defined(_WIN32)
 	// returns the UTF-16 string, converting on the fly.
 	const ucs2* ToUCS2String()
 	{
 		PopulateUCS2();
 		return m_pucs2;
 	}
-#endif
 
 	// returns the UTF-16 string - a writable pointer.
 	// only use this if you don't want to call const_cast
@@ -1019,10 +977,8 @@ public:
 		{
 			delete [] m_pwch;
 		}
-#if !defined( WIN32 ) && !defined(_WIN32)
 		if ( !m_bCreatedUCS2 && m_pucs2 )
 			delete [] m_pucs2;
-#endif
 	}
 
 private:
@@ -1092,7 +1048,6 @@ private:
 		}
 	}
 
-#if !defined( WIN32 ) && !defined(_WIN32)
 	// ensure we have done any conversion work required to farm out a
 	// UTF-16 encoded string.
 	//
@@ -1124,17 +1079,14 @@ private:
 			delete [] pwchTemp;
 		}
 	}
-#endif
 
 	// one of these pointers is an owned pointer; whichever
 	// one is the encoding OTHER than the one we were initialized
 	// with is the pointer we've allocated and must free.
 	const char *m_pch;
 	const wchar_t *m_pwch;
-#if !defined( WIN32 ) && !defined(_WIN32)
 	const ucs2 *m_pucs2;
 	bool m_bCreatedUCS2;
-#endif
 	// "created as UTF-16", means our owned string is the UTF-8 string not the UTF-16 one.
 	bool m_bCreatedUTF16;
 

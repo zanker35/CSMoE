@@ -14,11 +14,6 @@
 ****/
 #if !defined ( R_EFXH )
 #define R_EFXH
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 // particle_t
 #if !defined( PARTICLEDEF_H )  

@@ -1,8 +1,5 @@
 #ifndef MINMAX_H
 #define MINMAX_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifdef min
 #undef min

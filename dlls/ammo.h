@@ -28,9 +28,6 @@
 
 #ifndef AMMO_H
 #define AMMO_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

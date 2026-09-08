@@ -6,9 +6,6 @@
 
 #ifndef FILESYSTEM_PASSTHRU_H
 #define FILESYSTEM_PASSTHRU_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include "filesystem.h"

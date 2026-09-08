@@ -8,10 +8,7 @@
 
 #define PROTECTED_THINGS_DISABLE
 
-#if !defined( _X360 ) && defined( WIN32 )
-#include "winlite.h"
-#include <shellapi.h>
-#elif defined( POSIX )
+#if   defined( POSIX )
 #include <stdlib.h>
 #define _stat stat
 #define _wcsnicmp wcsncmp
@@ -726,40 +723,6 @@ void FileOpenDialog::PopulateDriveList()
 
 	m_pFullPathEdit->DeleteAllItems();
 
-#ifdef WIN32
-	// populate the drive list
-	char buf[512];
-	int len = system()->GetAvailableDrives(buf, 512);
-	char *pBuf = buf;
-	for (int i=0; i < len / 4; i++)
-	{
-		m_pFullPathEdit->AddItem(pBuf, NULL);
-
-		// is this our drive - add all subdirectories
-		if (!_strnicmp(pBuf, fullpath, 2))
-		{
-			int indent = 0;
-			char *pData = fullpath;
-			while (*pData)
-			{
-				if ( *pData == CORRECT_PATH_SEPARATOR )
-				{
-					if (indent > 0)
-					{
-						memset(subDirPath, ' ', indent);
-						memcpy(subDirPath+indent, fullpath, pData-fullpath);
-						subDirPath[indent+pData-fullpath] = 0;
-
-						m_pFullPathEdit->AddItem(subDirPath, NULL);
-					}
-					indent += 2;
-				}
-				pData++;
-			}
-		}
-		pBuf += 4;
-	}
-#else
 	m_pFullPathEdit->AddItem("/", NULL);
 	
 	char *pData = fullpath;
@@ -780,7 +743,6 @@ void FileOpenDialog::PopulateDriveList()
 		}
 		pData++;
 	}
-#endif
 }
 
 
@@ -859,12 +821,7 @@ void FileOpenDialog::OnOpenInExplorer()
 {
 	char pCurrentDirectory[MAX_PATH];
 	GetCurrentDirectory( pCurrentDirectory, sizeof(pCurrentDirectory) );
-#if !defined( _X360 ) && defined( WIN32 )
-	ShellExecute( NULL, NULL, pCurrentDirectory, NULL, NULL, SW_SHOWNORMAL );
-#elif defined( IOS )
-    extern void IOS_OpenURL(const char *url);
-    IOS_OpenURL(pCurrentDirectory);
-#elif defined( OSX )
+#if   defined( OSX )
 	char szCmd[ MAX_PATH * 2];
 	Q_snprintf( szCmd, sizeof(szCmd), "/usr/bin/open \"%s\"", pCurrentDirectory );
 	::system( szCmd );
@@ -1056,12 +1013,6 @@ void FileOpenDialog::ValidatePath()
 	// when statting a directory on Windows, you want to include
 	// the terminal slash exactly when you are statting a root
 	// directory. PKMN.
-#ifdef _WIN32
-	if ( Q_strlen( fullpath ) != 3 )
-	{
-		Q_StripTrailingSlash( fullpath );
-	}
-#endif
 	// cleanup the path, we format tabs into the list to make it pretty in the UI
 	Q_StripPrecedingAndTrailingWhitespace( fullpath );
 	
@@ -1081,74 +1032,6 @@ void FileOpenDialog::ValidatePath()
 	m_pFullPathEdit->GetTooltip()->SetText(m_szLastPath);
 }
 
-#ifdef WIN32	
-const char *GetAttributesAsString( DWORD dwAttributes )
-{
-	static char out[ 256 ];
-	out[ 0 ] = 0;
-	if ( dwAttributes & FILE_ATTRIBUTE_ARCHIVE )
-	{
-		Q_strncat( out, "A", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_COMPRESSED )
-	{
-		Q_strncat( out, "C", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_DIRECTORY )
-	{
-		Q_strncat( out, "D", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_HIDDEN )
-	{
-		Q_strncat( out, "H", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_READONLY )
-	{
-		Q_strncat( out, "R", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_SYSTEM )
-	{
-		Q_strncat( out, "S", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	if ( dwAttributes & FILE_ATTRIBUTE_TEMPORARY )
-	{
-		Q_strncat( out, "T", sizeof( out ), COPY_ALL_CHARACTERS );
-	}
-	return out;
-}
-
-const char *GetFileTimetamp( FILETIME ft )
-{
-	SYSTEMTIME local;
-	FILETIME localFileTime;
-	FileTimeToLocalFileTime( &ft, &localFileTime );
-	FileTimeToSystemTime( &localFileTime, &local );
-
-	static char out[ 256 ];
-
-	bool am = true;
-	WORD hour = local.wHour;
-	if ( hour >= 12 )
-	{
-		am = false;
-		// 12:42 pm displays as 12:42 pm
-		// 13:42 pm displays as 1:42 pm
-		if ( hour > 12 )
-		{
-			hour -= 12;
-		}
-	}
-	Q_snprintf( out, sizeof( out ), "%d/%02d/%04d %d:%02d %s",
-		local.wMonth, 
-		local.wDay,
-		local.wYear,
-		hour,
-		local.wMinute,
-		am ? "AM" : "PM" // TODO: Localize this?
-		);
-	return out;
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Fill the filelist with the names of all the files in the current directory
@@ -1544,12 +1427,6 @@ void FileOpenDialog::OnOpen()
 	// when statting a directory on Windows, you want to include
 	// the terminal slash exactly when you are statting a root
 	// directory. PKMN.
-#ifdef _WIN32
-	if ( Q_strlen( pFullPath ) == 2 )
-	{
-		Q_AppendSlash( pFullPath, Q_ARRAYSIZE( pFullPath ) );
-	}
-#endif
 
 	
 	// If the name specified is a directory, then change directory

@@ -13,9 +13,6 @@
 #ifndef UTLMEMORY_H
 #define UTLMEMORY_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <string.h>
 #ifdef NO_STL
@@ -23,8 +20,6 @@ template <class T>
 void *operator new(size_t count, T *ptr) {
 	return ptr;
 }
-#elif defined(_WIN32) && !defined(__MINGW32__)
-#include <new.h>
 #else
 #include "new"
 #endif

@@ -14,11 +14,6 @@
 ****/
 #if !defined ( DLIGHT_H )
 #define DLIGHT_H
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 typedef struct dlight_s
 {

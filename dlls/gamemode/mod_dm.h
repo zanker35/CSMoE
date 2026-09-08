@@ -1,9 +1,6 @@
 
 #ifndef MOD_DM_H
 #define MOD_DM_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "mod_base.h"
 

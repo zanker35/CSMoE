@@ -8,9 +8,6 @@
 #ifndef TIER0_STACKTOOLS_H
 #define TIER0_STACKTOOLS_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier0/platform.h"
 

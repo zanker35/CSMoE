@@ -38,17 +38,10 @@ extern "C++" {
 #endif
 
 
-#ifdef _WIN32
-
-typedef wchar_t uchar16;
-typedef unsigned int uchar32;
-
-#else
 
 typedef wchar_t uchar16;
 typedef char32_t uchar32;
 
-#endif // _WIN32
 
 enum EStringConvertErrorPolicy
 {

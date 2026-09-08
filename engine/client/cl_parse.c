@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -1844,4 +1843,3 @@ void CL_ParseServerMessage( sizebuf_t *msg )
 		}
 	}
 }
-#endif // XASH_DEDICATED

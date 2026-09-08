@@ -12,7 +12,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#ifndef XASH_DEDICATED
 #include "common.h"
 #ifdef XASH_VGUI2
 #include "vgui2_surface.h"
@@ -2092,4 +2091,3 @@ void Con_DefaultColor( int r, int g, int b )
 	b = bound( 0, b, 255 );
 	MakeRGBA( g_color_table[7], r, g, b, 255 );
 }
-#endif

@@ -326,7 +326,6 @@ debug/
 .idea
 /cmake-build-*
 /cmake-build-*
-Xcode-iOS/cmake-build
 CMakeSettings.json
 /3rdparty/SDL2
 /SDL2

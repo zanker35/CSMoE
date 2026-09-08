@@ -35,24 +35,13 @@
 #define THREAD_PRIORITY_HIGHEST 2
 #endif
 
-#if defined( _WIN32 )
-#pragma once
-#pragma warning(push)
-#pragma warning(disable:4251)
-#endif
 
 // #define THREAD_PROFILER 1
 
 #ifndef _RETAIL
 #define THREAD_MUTEX_TRACING_SUPPORTED
-#if defined(_WIN32) && defined(_DEBUG)
-#define THREAD_MUTEX_TRACING_ENABLED
-#endif
 #endif
 
-#ifdef _WIN32
-typedef void *HANDLE;
-#endif
 
 // Start thread running  - error if already running
 enum ThreadPriorityEnum_t
@@ -94,9 +83,7 @@ const unsigned TT_INFINITE = 0xffffffff;
 #ifndef NO_THREAD_LOCAL
 
 #ifndef THREAD_LOCAL
-#ifdef _WIN32
-#define THREAD_LOCAL __declspec(thread)
-#elif POSIX
+#if   POSIX
 #define THREAD_LOCAL __thread
 #endif
 #endif
@@ -139,10 +126,6 @@ typedef int (*ThreadedLoadLibraryFunc_t)();
 PLATFORM_INTERFACE void SetThreadedLoadLibraryFunc( ThreadedLoadLibraryFunc_t func );
 PLATFORM_INTERFACE ThreadedLoadLibraryFunc_t GetThreadedLoadLibraryFunc();
 
-#if defined( _WIN32 ) && !defined( _WIN64 ) && !defined( _X360 )
-extern "C" unsigned long __declspec(dllimport) __stdcall GetCurrentThreadId();
-#define ThreadGetCurrentId GetCurrentThreadId
-#endif
 
 inline void ThreadPause()
 {
@@ -180,10 +163,6 @@ enum ThreadWaitResult_t
 	TW_TIMEOUT = 0x00000102, // WAIT_TIMEOUT
 };
 
-#ifdef _WIN32
-PLATFORM_INTERFACE int ThreadWaitForObjects( int nEvents, const HANDLE *pHandles, bool bWaitAll = true, unsigned timeout = TT_INFINITE );
-inline int ThreadWaitForObject( HANDLE handle, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) { return ThreadWaitForObjects( 1, &handle, bWaitAll, timeout ); }
-#endif
 
 //-----------------------------------------------------------------------------
 //
@@ -192,9 +171,7 @@ inline int ThreadWaitForObject( HANDLE handle, bool bWaitAll = true, unsigned ti
 //
 //-----------------------------------------------------------------------------
 
-#ifdef _WIN32
-#define NOINLINE
-#elif POSIX
+#if   POSIX
 #define NOINLINE __attribute__ ((noinline))
 #endif
 
@@ -225,11 +202,6 @@ inline int ThreadWaitForObject( HANDLE handle, bool bWaitAll = true, unsigned ti
 	#error Every platform needs to define ThreadMemoryBarrier to at least prevent compiler reordering
 #endif
 
-#if defined(_WIN32) && !defined(_X360)
-	#if ( _MSC_VER >= 1310 )
-		#define USE_INTRINSIC_INTERLOCKED
-	#endif
-#endif
 
 #ifdef USE_INTRINSIC_INTERLOCKED
 extern "C"
@@ -280,18 +252,8 @@ inline void const *ThreadInterlockedCompareExchangePointerToConst( void const * 
 inline bool ThreadInterlockedAssignPointerToConstIf( void const * volatile *p, void const *value, void const *comperand )			{ return ThreadInterlockedAssignPointerIf( const_cast < void * volatile * > ( p ), const_cast < void * > ( value ), const_cast < void * > ( comperand ) ); }
 
 #if defined( PLATFORM_64BITS )
-#if defined (_WIN32) 
-#if defined( _M_ARM ) || defined( _M_ARM64 )
-typedef int32x4_t int128;
-inline int128 int128_zero() { return vdupq_n_s32(0); }
-#else
-typedef __m128i int128;
-inline int128 int128_zero()	{ return _mm_setzero_si128(); }
-#endif
-#else
 typedef __int128_t int128;
 #define int128_zero() int128()
-#endif
 
 PLATFORM_INTERFACE bool ThreadInterlockedAssignIf128( volatile int128 *pDest, const int128 &value, const int128 &comperand ) NOINLINE;
 
@@ -330,17 +292,10 @@ inline bool ThreadInterlockedAssignIf64( uint64 volatile *p, uint64 value, uint6
 //-----------------------------------------------------------------------------
 // Access to VTune thread profiling
 //-----------------------------------------------------------------------------
-#if defined(_WIN32) && defined(THREAD_PROFILER)
-PLATFORM_INTERFACE void ThreadNotifySyncPrepare(void *p);
-PLATFORM_INTERFACE void ThreadNotifySyncCancel(void *p);
-PLATFORM_INTERFACE void ThreadNotifySyncAcquired(void *p);
-PLATFORM_INTERFACE void ThreadNotifySyncReleasing(void *p);
-#else
 #define ThreadNotifySyncPrepare(p)		((void)0)
 #define ThreadNotifySyncCancel(p)		((void)0)
 #define ThreadNotifySyncAcquired(p)		((void)0)
 #define ThreadNotifySyncReleasing(p)	((void)0)
-#endif
 
 //-----------------------------------------------------------------------------
 // Encapsulation of a thread local datum (needed because THREAD_LOCAL doesn't
@@ -384,9 +339,7 @@ public:
 		void   Set(void *);
 
 private:
-#ifdef _WIN32
-	uint32 m_index;
-#elif POSIX
+#if   POSIX
 		pthread_key_t m_index;
 #endif
 	};
@@ -742,19 +695,7 @@ private:
 	CThreadMutex( const CThreadMutex & );
 	CThreadMutex &operator=( const CThreadMutex & );
 
-#if defined( _WIN32 )
-	// Efficient solution to breaking the windows.h dependency, invariant is tested.
-#ifdef _WIN64
-	#define TT_SIZEOF_CRITICALSECTION 40	
-#else
-#ifndef _X360
-	#define TT_SIZEOF_CRITICALSECTION 24
-#else
-	#define TT_SIZEOF_CRITICALSECTION 28
-#endif // !_XBOX
-#endif // _WIN64
-	byte m_CriticalSection[TT_SIZEOF_CRITICALSECTION];
-#elif defined(POSIX)
+#if   defined(POSIX)
 	pthread_mutex_t m_Mutex;
 	pthread_mutexattr_t m_Attr;
 #else
@@ -874,11 +815,6 @@ public:
     	}
     }
 
-#ifdef WIN32
-	bool TryLock() const volatile							{ return (const_cast<CThreadFastMutex *>(this))->TryLock(); }
-	void Lock(unsigned nSpinSleepTime = 1 ) const volatile	{ (const_cast<CThreadFastMutex *>(this))->Lock( nSpinSleepTime ); }
-	void Unlock() const	volatile							{ (const_cast<CThreadFastMutex *>(this))->Unlock(); }
-#endif
 	// To match regular CThreadMutex:
 	bool AssertOwnedByCurrentThread()	{ return true; }
 	void SetTrace( bool )				{}
@@ -1078,10 +1014,6 @@ public:
 	//-----------------------------------------------------
 	// Access handle
 	//-----------------------------------------------------
-#ifdef _WIN32
-	operator HANDLE() { return GetHandle(); }
-	const HANDLE GetHandle() const { return m_hSyncObject; }
-#endif
 	//-----------------------------------------------------
 	// Wait for a signal from the object
 	//-----------------------------------------------------
@@ -1091,10 +1023,7 @@ protected:
 	CThreadSyncObject();
 	void AssertUseable();
 
-#ifdef _WIN32
-	HANDLE m_hSyncObject;
-	bool m_bCreatedHandle;
-#elif defined(POSIX)
+#if   defined(POSIX)
 	pthread_mutex_t	m_Mutex;
 	pthread_cond_t	m_Condition;
 	bool m_bInitalized;
@@ -1117,68 +1046,12 @@ private:
 //
 //-----------------------------------------------------------------------------
 
-#if defined( _WIN32 )
-
-//-----------------------------------------------------------------------------
-//
-// CThreadSemaphore
-//
-//-----------------------------------------------------------------------------
-
-class PLATFORM_CLASS CThreadSemaphore : public CThreadSyncObject
-{
-public:
-	CThreadSemaphore(long initialValue, long maxValue);
-
-	//-----------------------------------------------------
-	// Increases the count of the semaphore object by a specified
-	// amount.  Wait() decreases the count by one on return.
-	//-----------------------------------------------------
-	bool Release(long releaseCount = 1, long * pPreviousCount = NULL );
-
-private:
-	CThreadSemaphore(const CThreadSemaphore &);
-	CThreadSemaphore &operator=(const CThreadSemaphore &);
-};
-
-
-//-----------------------------------------------------------------------------
-//
-// A mutex suitable for out-of-process, multi-processor usage
-//
-//-----------------------------------------------------------------------------
-
-class PLATFORM_CLASS CThreadFullMutex : public CThreadSyncObject
-{
-public:
-	CThreadFullMutex( bool bEstablishInitialOwnership = false, const char * pszName = NULL );
-
-	//-----------------------------------------------------
-	// Release ownership of the mutex
-	//-----------------------------------------------------
-	bool Release();
-
-	// To match regular CThreadMutex:
-	void Lock()							{ Wait(); }
-	void Lock( unsigned timeout )		{ Wait( timeout ); }
-	void Unlock()						{ Release(); }
-	bool AssertOwnedByCurrentThread()	{ return true; }
-	void SetTrace( bool )				{}
-
-private:
-	CThreadFullMutex( const CThreadFullMutex & );
-	CThreadFullMutex &operator=( const CThreadFullMutex & );
-};
-#endif
 
 
 class PLATFORM_CLASS CThreadEvent : public CThreadSyncObject
 {
 public:
 	CThreadEvent( bool fManualReset = false );
-#ifdef WIN32
-	CThreadEvent( HANDLE hHandle );
-#endif
 	//-----------------------------------------------------
 	// Set the state to signaled
 	//-----------------------------------------------------
@@ -1251,11 +1124,7 @@ public:
 private:
 	void WaitForRead();
 
-#ifdef WIN32
-	CThreadFastMutex m_mutex;
-#else
 	CThreadMutex m_mutex;	
-#endif
 	CThreadEvent m_CanWrite;
 	CThreadEvent m_CanRead;
 
@@ -1358,11 +1227,7 @@ public:
 	// is no longer alive.
 	bool Join( unsigned timeout = TT_INFINITE );
 
-#ifdef _WIN32
-	// Access the thread handle directly
-	HANDLE GetThreadHandle();
-	uint GetThreadId();
-#elif defined( LINUX )
+#if   defined( LINUX )
 	uint GetThreadId();
 #endif
 
@@ -1451,11 +1316,7 @@ protected:
 
 	CThreadMutex m_Lock;
 
-#ifdef WIN32
-	ThreadHandle_t GetThreadID() const { return (ThreadHandle_t)m_hThread; }
-#else
 	ThreadId_t GetThreadID() const { return (ThreadId_t)m_threadId; }
-#endif
 
 private:
 	enum Flags
@@ -1478,10 +1339,7 @@ private:
 	CThread( const CThread & );
 	CThread &operator=( const CThread & );
 
-#ifdef _WIN32
-	HANDLE 	m_hThread;
-	ThreadId_t m_threadId;
-#elif defined(POSIX)
+#if   defined(POSIX)
 	pthread_t m_threadId;
 #endif
 	CInterlockedInt m_nSuspendCount;
@@ -1576,9 +1434,7 @@ public:
 	int BoostPriority();
 
 protected:
-#ifndef _WIN32
 #define __stdcall
-#endif
 	typedef uint32 (__stdcall *WaitFunc_t)( int nEvents, CThreadEvent * const *pEvents, int bWaitAll, uint32 timeout );
 	
 	int Call( unsigned, unsigned timeout, bool fBoost, WaitFunc_t = NULL, CFunctor *pParamFunctor = NULL );
@@ -1680,87 +1536,7 @@ public:
 //
 //-----------------------------------------------------------------------------
 
-#ifdef _WIN32
-typedef struct _RTL_CRITICAL_SECTION RTL_CRITICAL_SECTION;
-typedef RTL_CRITICAL_SECTION CRITICAL_SECTION;
-
-#ifndef _X360
-extern "C"
-{
-	void __declspec(dllimport) __stdcall InitializeCriticalSection(CRITICAL_SECTION *);
-	void __declspec(dllimport) __stdcall EnterCriticalSection(CRITICAL_SECTION *);
-	void __declspec(dllimport) __stdcall LeaveCriticalSection(CRITICAL_SECTION *);
-	void __declspec(dllimport) __stdcall DeleteCriticalSection(CRITICAL_SECTION *);
-};
-#endif
-
-//---------------------------------------------------------
-
-inline void CThreadMutex::Lock()
-{
-#ifdef THREAD_MUTEX_TRACING_ENABLED
-		uint thisThreadID = ThreadGetCurrentId();
-		if ( m_bTrace && m_currentOwnerID && ( m_currentOwnerID != thisThreadID ) )
-		Msg( "Thread %u about to wait for lock %p owned by %u\n", ThreadGetCurrentId(), (CRITICAL_SECTION *)&m_CriticalSection, m_currentOwnerID );
-	#endif
-
-	VCRHook_EnterCriticalSection((CRITICAL_SECTION *)&m_CriticalSection);
-
-	#ifdef THREAD_MUTEX_TRACING_ENABLED
-		if (m_lockCount == 0)
-		{
-			// we now own it for the first time.  Set owner information
-			m_currentOwnerID = thisThreadID;
-			if ( m_bTrace )
-			Msg( "Thread %u now owns lock %p\n", m_currentOwnerID, (CRITICAL_SECTION *)&m_CriticalSection );
-		}
-		m_lockCount++;
-	#endif
-}
-
-//---------------------------------------------------------
-
-inline void CThreadMutex::Unlock()
-{
-	#ifdef THREAD_MUTEX_TRACING_ENABLED
-		AssertMsg( m_lockCount >= 1, "Invalid unlock of thread lock" );
-		m_lockCount--;
-		if (m_lockCount == 0)
-		{
-			if ( m_bTrace )
-			Msg( "Thread %u releasing lock %p\n", m_currentOwnerID, (CRITICAL_SECTION *)&m_CriticalSection );
-			m_currentOwnerID = 0;
-		}
-	#endif
-	LeaveCriticalSection((CRITICAL_SECTION *)&m_CriticalSection);
-}
-
-//---------------------------------------------------------
-
-inline bool CThreadMutex::AssertOwnedByCurrentThread()
-{
-#ifdef THREAD_MUTEX_TRACING_ENABLED
-	if (ThreadGetCurrentId() == m_currentOwnerID)
-		return true;
-	AssertMsg3( 0, "Expected thread %u as owner of lock %p, but %u owns", ThreadGetCurrentId(), (CRITICAL_SECTION *)&m_CriticalSection, m_currentOwnerID );
-	return false;
-#else
-	return true;
-#endif
-}
-
-//---------------------------------------------------------
-
-inline void CThreadMutex::SetTrace( bool bTrace )
-{
-#ifdef THREAD_MUTEX_TRACING_ENABLED
-	m_bTrace = bTrace;
-#endif
-}
-
-//---------------------------------------------------------
-
-#elif defined(POSIX)
+#if   defined(POSIX)
 
 inline CThreadMutex::CThreadMutex()
 {
@@ -1938,8 +1714,5 @@ template<class T> FORCEINLINE T ReadVolatileMemory( T const *pPtr )
 
 //-----------------------------------------------------------------------------
 
-#if defined( _WIN32 )
-#pragma warning(pop)
-#endif
 
 #endif // THREADTOOLS_H

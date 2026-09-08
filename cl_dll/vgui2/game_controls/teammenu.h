@@ -1,9 +1,6 @@
 #ifndef TEAMMENU_H
 #define TEAMMENU_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/Frame.h>
 #include <vgui_controls/Button.h>

@@ -28,9 +28,6 @@
 
 #ifndef GAME_EVENT_H
 #define GAME_EVENT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum GameEventType : int
 {

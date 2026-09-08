@@ -8,9 +8,6 @@
 #ifndef BUILDMODEDIALOG_H
 #define BUILDMODEDIALOG_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "Frame.h"
 

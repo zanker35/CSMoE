@@ -7,9 +7,6 @@
 
 #ifndef GAMECONSOLEDIALOG_H
 #define GAMECONSOLEDIALOG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 //#include "TaskFrame.h"
 #include "EngineInterface.h"

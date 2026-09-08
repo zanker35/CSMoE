@@ -9,9 +9,6 @@
 
 #ifndef WCHARTYPES_H
 #define WCHARTYPES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifdef _INC_TCHAR
 #error ("Must include tier0 type headers before tchar.h")
@@ -57,9 +54,6 @@ typedef wchar_t wchar;
 #define _UNICODE
 #endif
 
-#ifdef _WIN32
-#include <tchar.h>
-#else
 #define _tcsstr strstr
 #define _tcsicmp stricmp
 #define _tcscmp strcmp
@@ -74,7 +68,6 @@ typedef wchar_t wchar;
 #define _tprintf printf
 #define _sntprintf _snprintf
 #define _T(s) s
-#endif
 
 #if defined(_UNICODE)
 typedef wchar tchar;

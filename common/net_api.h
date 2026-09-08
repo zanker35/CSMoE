@@ -7,11 +7,6 @@
 
 #if !defined( NET_API_H )
 #define NET_API_H
-#ifdef _WIN32
-#ifndef __MINGW32__
-#pragma once
-#endif /* not __MINGW32__ */
-#endif
 
 #if !defined ( NETADRH )
 #include "netadr.h"

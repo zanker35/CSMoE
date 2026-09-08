@@ -1,9 +1,6 @@
 #ifndef ISYSTEM_H
 #define ISYSTEM_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <interface.h>
 #include <vgui/VGUI.h>

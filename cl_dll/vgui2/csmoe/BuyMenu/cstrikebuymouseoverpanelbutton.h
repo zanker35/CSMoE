@@ -1,9 +1,6 @@
 #ifndef CSTRIKEBUYMOUSEOVERPANELBUTTON_H
 #define CSTRIKEBUYMOUSEOVERPANELBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/IScheme.h>
 #include <vgui_controls/Button.h>

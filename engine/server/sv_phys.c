@@ -1842,7 +1842,6 @@ Called from renderer for debug purposes
 */
 void SV_DrawDebugTriangles( void )
 {
-#ifndef XASH_DEDICATED
 	if( Host_IsDedicated() )
 		return;
 
@@ -1866,7 +1865,6 @@ void SV_DrawDebugTriangles( void )
 		pglDepthMask( GL_TRUE );
 		pglEnable( GL_BLEND );
 	}
-#endif
 }
 
 /*
@@ -1938,11 +1936,7 @@ static server_physics_api_t gPhysicsAPI =
 	SV_GetHeadNode,
 	SV_ServerState,
 	Host_Error,
-#ifndef XASH_DEDICATED
 	&gTriApi,	// ouch!
-#else
-	NULL,
-#endif
 	pfnDrawConsoleString,
 	pfnDrawSetTextColor,
 	pfnDrawConsoleStringLen,

@@ -8,12 +8,7 @@
 #include "pch_tier0.h"
 #include "tier0/dynfunction.h"
 
-#if defined(WIN32)
-typedef HMODULE LibraryHandle;
-#define LoadLibraryHandle(libname) LoadLibrary(libname)
-#define CloseLibraryHandle(handle) FreeLibrary(handle)
-#define LookupInLibraryHandle(handle, fn) GetProcAddress(handle, fn)
-#elif defined(POSIX)
+#if   defined(POSIX)
 #include <dlfcn.h>
 typedef void *LibraryHandle;
 #define LoadLibraryHandle(libname) dlopen(libname, RTLD_NOW)

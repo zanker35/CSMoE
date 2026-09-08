@@ -1252,13 +1252,7 @@ FORCEINLINE unsigned long RoundFloatToUnsignedLong(float f)
 #else // PLATFORM_WINDOWS_PC64
     unsigned char nResult[8];
 
-#if defined( _WIN32 )
-    __asm
-    {
-        fld f
-        fistp       qword ptr nResult
-    }
-#elif POSIX
+#if   POSIX
     __asm __volatile__(
     "fistpl %0;": "=m" (nResult) : "t" (f) : "st"
         );

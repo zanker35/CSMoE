@@ -50,7 +50,6 @@ USING_BUILD_FACTORY( URLLabel );
 
 int g_nYou_Must_Add_Public_Vgui_Controls_Vgui_ControlsCpp_To_Your_Project = 0;
 
-#ifdef XASH_STATIC_GAMELIB
 
 #define REGISTER_BUILD_FACTORY( className ) \
     extern vgui2::Panel *Create_##className( void ); \
@@ -112,5 +111,3 @@ REGISTER_BUILD_FACTORY( CTreeViewListControl );
 REGISTER_BUILD_FACTORY_CUSTOM( URLLabel, URLLabel_Factory );
     
 }
-
-#endif

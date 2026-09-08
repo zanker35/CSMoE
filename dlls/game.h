@@ -28,9 +28,6 @@
 
 #ifndef GAME_H
 #define GAME_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define LOG_ENEMYATTACK		1
 #define LOG_TEAMMATEATTACK	2

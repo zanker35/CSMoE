@@ -1,9 +1,6 @@
 
 #ifndef MOD_NONE_H
 #define MOD_NONE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "mod_base.h"
 

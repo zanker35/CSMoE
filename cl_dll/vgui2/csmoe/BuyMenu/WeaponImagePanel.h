@@ -1,9 +1,6 @@
 #ifndef WEAPONIMAGEPANEL_H
 #define WEAPONIMAGEPANEL_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/IScheme.h>
 #include <vgui_controls/Button.h>

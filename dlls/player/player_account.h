@@ -1,8 +1,5 @@
 #ifndef PLAYER_ACCOUNT_H
 #define PLAYER_ACCOUNT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifndef CLIENT_DLL
 namespace sv {

@@ -7,9 +7,6 @@
 
 #ifndef WIN32FONT_H
 #define WIN32FONT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #if !defined( _X360 )
 #define WIN32_LEAN_AND_MEAN

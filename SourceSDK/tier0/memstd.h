@@ -5,18 +5,6 @@
 //-----------------------------------------------------------------------------
 #include "pch_tier0.h"
 
-#if defined(_WIN32)
-#if !defined(_X360)
-#define WIN_32_LEAN_AND_MEAN
-#include <windows.h>
-#else
-#undef Verify
-#define _XBOX
-#include <xtl.h>
-#undef _XBOX
-#include "xbox/xbox_win32stubs.h"
-#endif
-#endif
 
 #ifdef OSX
 #include <malloc/malloc.h>

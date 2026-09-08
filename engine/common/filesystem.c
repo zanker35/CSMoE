@@ -24,22 +24,12 @@ GNU General Public License for more details.
 #include <sys/stat.h>
 #include <time.h>
 #include <stdarg.h> // va
-#ifdef XASH_SDL
 #include <SDL_system.h> // Android External storage
 #include <SDL_filesystem.h> // Android External storage
-#endif
-#ifdef _WIN32
-#include <io.h>
-#include <direct.h>
-#else
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
-#endif
 
-#ifdef XASH_WINRT
-#include "platform/winrt/winrt_interop.h"
-#endif
 
 #define FILE_BUFF_SIZE		2048
 #define PAK_LOAD_OK			0
@@ -87,9 +77,7 @@ char		fs_gamedir[MAX_SYSPATH];	// game current directory
 char		gs_basedir[MAX_SYSPATH];	// initial dir before loading gameinfo.txt (used for compilers too)
 
 qboolean		fs_ext_path = false;	// attempt to read\write from ./ or ../ paths
-#ifndef _WIN32
 qboolean		fs_caseinsensitive = true; // try to search missing files
-#endif
 static void FS_InitMemory( void );
 static dlumpinfo_t *W_FindLump( wfile_t *wad, const char *name, const signed char matchtype );
 static packfile_t* FS_AddFileToPack( const char* name, pack_t *pack, fs_offset_t offset, fs_offset_t size );
@@ -236,7 +224,6 @@ static void stringlistsort( stringlist_t *list )
 	}
 }
 
-#ifndef _WIN32
 int sel(const struct dirent *d)
 {
 	int plen, extlen;
@@ -246,50 +233,15 @@ int sel(const struct dirent *d)
 	extlen = strlen("*");
 	return strncmp("*", p, (extlen < plen) ? extlen : plen) == 0;
 }
-#endif
 
 
 static void listdirectory( stringlist_t *list, const char *path, qboolean lowercase )
 {
 	int		i;
 	signed char *c;
-#ifdef _WIN32
-	char pattern[4096];
-#ifdef _WIN64
-	struct _finddatai64_t	n_file;
-	intptr_t		hFile;
-#else
-	struct _finddata_t	n_file;
-	int		hFile;
-#endif
-#else
 	DIR *dir;
 	struct dirent *entry;
-#endif
 
-#ifdef _WIN32
-	Q_snprintf( pattern, sizeof( pattern ), "%s*", path );
-
-	// ask for the directory listing handle
-#ifdef _WIN64
-	hFile = _findfirsti64( pattern, &n_file );
-	if (hFile < 0) return;
-#else
-	hFile = _findfirst(pattern, &n_file);
-	if (hFile == -1) return;
-#endif
-
-	// start a new chain with the the first name
-	stringlistappend( list, n_file.name );
-	// iterate through the directory
-#ifdef _WIN64
-	while (_findnexti64( hFile, &n_file ) == 0 )
-#else
-	while (_findnext(hFile, &n_file) == 0)
-#endif
-		stringlistappend( list, n_file.name );
-	_findclose( hFile );
-#else
 	if( !( dir = opendir( path ) ) )
 		return;
 
@@ -297,7 +249,6 @@ static void listdirectory( stringlist_t *list, const char *path, qboolean lowerc
 	while( ( entry = readdir( dir ) ))
 		stringlistappend( list, entry->d_name );
 	closedir( dir );
-#endif
 
 	// convert names to lowercase because windows doesn't care, but pattern matching code often does
 	if( lowercase )
@@ -639,14 +590,12 @@ pack_t *FS_LoadPackPAK( const char *packfile, int *error )
 
 	packhandle = open( packfile, O_RDONLY|O_BINARY );
 
-#ifndef _WIN32
 	if( packhandle < 0 )
 	{
 		const char *fpackfile = FS_FixFileCase( packfile );
 		if( fpackfile!= packfile )
 			packhandle = open( fpackfile, O_RDONLY|O_BINARY );
 	}
-#endif
 
 	if( packhandle < 0 )
 	{
@@ -1154,22 +1103,10 @@ void FS_Rescan( void )
 	MsgDev( D_NOTE, "FS_Rescan( %s )\n", GI->title );
 	FS_ClearSearchPath();
 
-#ifdef __ANDROID__
-	char *str;
-	if( str = getenv("XASH3D_EXTRAS_PAK1") )
-		FS_AddPack_Fullpath( str, NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
-	if( str = getenv("XASH3D_EXTRAS_PAK2") )
-		FS_AddPack_Fullpath( str, NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
-	//FS_AddPack_Fullpath( "/data/data/in.celest.xash3d.hl.test/files/pak.pak", NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
-#elif TARGET_OS_IPHONE
+#if   TARGET_OS_IPHONE
 	{
 		FS_AddPack_Fullpath( va( "%sextras.pak", SDL_GetBasePath() ), NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
 		FS_AddPack_Fullpath( va( "%sextras_%s.pak", SDL_GetBasePath(), GI->gamefolder ), NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
-	}
-#elif defined(__SAILFISH__)
-	{
-		FS_AddPack_Fullpath( va( SHAREPATH"/extras.pak" ), NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
-		FS_AddPack_Fullpath( va( SHAREPATH"/%s/extras.pak", GI->gamefolder ), NULL, false, FS_NOWRITE_PATH | FS_CUSTOM_PATH );
 	}
 #elif defined(__HAIKU__)
 	char *dir;
@@ -1799,9 +1736,6 @@ void FS_LoadGameInfo( const char *rootfolder )
 
 	if( i == SI.numgames )
 	{
-#ifdef XASH_WINRT
-		WinRT_OpenGameFolderWithExplorer();
-#endif
 		Sys_Error("Couldn't find game directory '%s' at \n %s", gs_basedir, host.rootdir);
 	}
 
@@ -1810,14 +1744,8 @@ void FS_LoadGameInfo( const char *rootfolder )
 	{
 #ifdef XASH_INTERNAL_GAMELIBS
 		Q_strncpy( SI.gamedll, "server", sizeof( SI.gamedll ) );
-#elif defined(_WIN32)
-		Q_strncpy( SI.gamedll, GI->game_dll, sizeof( SI.gamedll ) );
-#elif defined(__APPLE__)
-		Q_strncpy( SI.gamedll, GI->game_dll_osx, sizeof( SI.gamedll ) );
-#elif defined(__HAIKU__)
-		Q_strncpy( SI.gamedll, "dlls/"SERVERDLL, sizeof( SI.gamedll ) );
 #else
-		Q_strncpy( SI.gamedll, GI->game_dll_linux, sizeof( SI.gamedll ) );
+		Q_strncpy( SI.gamedll, GI->game_dll_osx, sizeof( SI.gamedll ) );
 #endif
 	}
 	if( !Sys_GetParmFromCmdLine( "-clientlib", SI.clientlib ) )
@@ -1853,12 +1781,9 @@ void FS_Init( void )
 	Cmd_AddCommand( "crc32", FS_Crc32_f, "print crc32 of for file" );
 	Cmd_AddCommand( "md5", FS_MD5_f, "print md5 of for file" );
 
-#ifndef _WIN32
 	if( Sys_CheckParm( "-casesensitive" ) )
 		fs_caseinsensitive = false;
-#endif
 
-#ifndef _WIN32
 	if( !fs_caseinsensitive )
 	{
 		if( host.rodir[0] && !Q_strcmp( host.rodir, host.rootdir ) )
@@ -1867,7 +1792,6 @@ void FS_Init( void )
 		}
 	}
 	else
-#endif
 	{
 		if( host.rodir[0] && !Q_stricmp( host.rodir, host.rootdir ) )
 		{
@@ -1921,7 +1845,6 @@ void FS_Init( void )
 
 		MsgDev( D_NOTE, "%d gamedirs found\n", dirs.numstrings );
 
-#ifndef _WIN32
 		if( dirs.maxstrings == 0 )
 		{
 			char cwd[1024];
@@ -1929,7 +1852,6 @@ void FS_Init( void )
 			cwd[1023] = 0;
 			MsgDev( D_ERROR, "No gamedirs found, cwd is is \"%s\"\n", cwd);
 		}
-#endif
 
 		// validate directories
 		for( i = 0; i < dirs.numstrings; i++ )
@@ -2093,14 +2015,12 @@ static file_t* FS_SysOpen( const char* filepath, const char* mode )
 
 	file->handle = open( filepath, mod|opt, 0666 );
 
-#ifndef _WIN32
 	if( file->handle < 0 )
 	{
 		const char *ffilepath = FS_FixFileCase( filepath );
 		if( ffilepath != filepath )
 			file->handle = open( ffilepath, mod|opt, 0666 );
 	}
-#endif
 
 	if( file->handle < 0 )
 	{
@@ -2167,14 +2087,6 @@ Look for a file in the filesystem only
 */
 qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 {
-#ifdef _WIN32
-	int desc;
-
-	desc = open( path, O_RDONLY|O_BINARY );
-	if( desc < 0 ) return false;
-	close( desc );
-	return true;
-#else
 	int ret;
 	struct stat buf;
 
@@ -2192,7 +2104,6 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 		return false;
 
 	return S_ISREG( buf.st_mode );
-#endif
 }
 
 /*
@@ -2204,19 +2115,6 @@ Look for a existing folder
 */
 qboolean FS_SysFolderExists( const char *path )
 {
-#ifdef XASH_WINRT
-	struct _finddata_t n_file;
-	// ask for the directory listing handle
-	const intptr_t hFile = _findfirst(path, &n_file);
-	if (hFile == -1)
-		return 0;
-	_findclose(hFile);
-	return 1;
-#elif defined( _WIN32 )
-	DWORD	dwFlags = GetFileAttributes( path );
-
-	return ( dwFlags != -1 ) && ( dwFlags & FILE_ATTRIBUTE_DIRECTORY );
-#else
 	DIR *dir = opendir( path );
 
 	if( dir )
@@ -2233,7 +2131,6 @@ qboolean FS_SysFolderExists( const char *path )
 		MsgDev( D_ERROR, "FS_SysFolderExists: problem while opening dir: %s\n", strerror(errno) );
 		return 0;
 	}
-#endif
 }
 
 /*
@@ -2801,13 +2698,11 @@ byte *FS_LoadFile( const char *path, fs_offset_t *filesizeptr, qboolean gamediro
 
 	file = FS_Open( path, "rb", gamedironly );
 
-#ifndef _WIN32
 	if( !file )
 	{
 		// Try to open this file with lowered path
 		file = FS_Open( FS_ToLowerCase( path ), "rb", gamedironly );
 	}
-#endif // _WIN32
 
 	if( !file )
 	{
@@ -2849,13 +2744,11 @@ byte *FS_LoadDirectFile( const char *path, fs_offset_t *filesizeptr )
 
 	file = FS_SysOpen( path, "rb" );
 
-#ifndef _WIN32
 	if( !file )
 	{
 		// Try to open this file with lowered path
 		file = FS_SysOpen( FS_ToLowerCase( path ), "rb" );
 	}
-#endif // _WIN32
 
 	if( !file )
 		return NULL;
@@ -2885,10 +2778,8 @@ file_t *FS_OpenFile( const char *path, fs_offset_t *filesizeptr, qboolean gamedi
 {
 	file_t	*file = FS_Open( path, "rb", gamedironly );
 
-#ifndef _WIN32
 	if( !file )
 		file = FS_Open( FS_ToLowerCase( path ), "rb", gamedironly );
-#endif // _WIN32
 
 	if( filesizeptr )
 	{
@@ -3798,7 +3689,6 @@ wfile_t *W_Open( const char *filename, const char *mode )
 	else if( mode[0] == 'w' ) wad->handle = open( filename, O_CREAT|O_TRUNC|O_WRONLY|O_BINARY, 0x666 );
 	else if( mode[0] == 'r' ) wad->handle = open( filename, O_RDONLY|O_BINARY, 0x666 );
 
-#ifndef _WIN32
 	if( wad->handle < 0 )
 	{
 		const char *ffilename = FS_FixFileCase( filename );
@@ -3809,7 +3699,6 @@ wfile_t *W_Open( const char *filename, const char *mode )
 			else if( mode[0] == 'r' ) wad->handle = open( ffilename, O_RDONLY|O_BINARY, 0x666 );
 		}
 	}
-#endif
 
 	if( wad->handle < 0 )
 	{

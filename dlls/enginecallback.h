@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef ENGINECALLBACK_H
 #define ENGINECALLBACK_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "event_flags.h"
 

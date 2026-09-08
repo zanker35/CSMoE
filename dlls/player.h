@@ -28,9 +28,6 @@
 
 #ifndef PLAYER_H
 #define PLAYER_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "pm_materials.h"
 #include "player/hintmessage.h"

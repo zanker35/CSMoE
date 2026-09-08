@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "sound.h"
@@ -324,4 +323,3 @@ void S_SetSampleEnd( channel_t *pChan, wavdata_t *pSource, int newEndPosition )
 
 	pChan->pMixer.forcedEndSample = newEndPosition;
 }
-#endif // XASH_DEDICATED

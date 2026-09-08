@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "sound.h"
@@ -152,4 +151,3 @@ void SND_MoveMouth16( channel_t *ch, wavdata_t *pSource, int count )
 		pMouth->sndcount = 0;
 	}
 }
-#endif // XASH_DEDICATED

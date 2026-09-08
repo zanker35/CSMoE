@@ -9,14 +9,11 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#if defined (_WIN32)
-#else
 #include <sys/types.h>
 #include <sys/stat.h>
 #if !defined( _PS3 )
 #include <signal.h>
 #endif // _PS3
-#endif
 
 #include "tier0/platform.h"
 #include "tier1/utlstring.h"
@@ -89,11 +86,6 @@ private:
 
 #ifdef LINUX
 	void AddFileToChangeList( const char *pchFile );
-#endif
-#ifdef WIN32
-	// used by callback functions to push a file onto the list
-	void AddFileToChangeList( const char *pchFile );
-	void PostDirWatch();
 #endif
 };
 #endif // _PS3

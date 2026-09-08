@@ -7,14 +7,6 @@
 //=============================================================================//
 
 
-#if defined(_WIN32) && !defined(_X360)
-#define WIN32_LEAN_AND_MEAN
-// 0x0601 gives us access to Windows 7 features. We have to be careful not to
-// depend on these features because we still support Windows XP.
-#define _WIN32_WINNT 0x0601
-#include <windows.h>
-#include <assert.h>
-#endif
 
 // tier0
 #include "tier0/basetypes.h"

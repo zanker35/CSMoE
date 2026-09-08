@@ -255,7 +255,6 @@ extern "C" EXPORT void AddTouchButtonToList( const char *name, const char *textu
 
 }
 
-#ifdef XASH_STATIC_GAMELIB
 typedef struct dllexport_s
 {
 const char *name;
@@ -277,4 +276,3 @@ extern "C" int switch_installdll_menu( void )
 {
 	return dll_register( "menu", switch_menu_exports );
 }
-#endif

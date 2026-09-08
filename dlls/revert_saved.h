@@ -28,9 +28,6 @@
 
 #ifndef REVERT_SAVED_H
 #define REVERT_SAVED_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

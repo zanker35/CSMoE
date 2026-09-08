@@ -28,9 +28,6 @@
 
 #ifndef TUTOR_CS_TUTOR_H
 #define TUTOR_CS_TUTOR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <map>
 #include <string>

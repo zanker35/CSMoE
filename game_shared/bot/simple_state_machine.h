@@ -28,9 +28,6 @@
 
 #ifndef SIMPLE_STATE_MACHINE_H
 #define SIMPLE_STATE_MACHINE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

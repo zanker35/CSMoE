@@ -2,9 +2,6 @@
 #ifndef COLOREDBUTTON_H
 #define COLOREDBUTTON_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/IBorder.h>
 #include <vgui/IScheme.h>

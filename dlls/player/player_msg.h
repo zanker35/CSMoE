@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef PLAYER_MSG_H
 #define PLAYER_MSG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 struct ItemInfo;
 

@@ -1,8 +1,5 @@
 #ifndef PLAYER_SIGNAL_H
 #define PLAYER_SIGNAL_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define SIGNAL_BUY			(1<<0)
 #define SIGNAL_BOMB			(1<<1)

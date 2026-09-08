@@ -1,9 +1,6 @@
 #ifndef MOUSEOVERPANELBUTTON_NEW_H
 #define MOUSEOVERPANELBUTTON_NEW_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/TextImage.h>
 #include <vgui_controls/ImagePanel.h>

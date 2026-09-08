@@ -28,9 +28,6 @@
 
 #ifndef GAMERULES_H
 #define GAMERULES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifndef CLIENT_DLL
 #include "voice_gamemgr.h"

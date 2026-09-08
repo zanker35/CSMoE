@@ -15,9 +15,6 @@ GNU General Public License for more details.
 
 #ifndef VECTOR_H
 #define VECTOR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #ifdef DotProduct
 #undef DotProduct

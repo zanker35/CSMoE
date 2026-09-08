@@ -28,9 +28,6 @@
 
 #ifndef WEAPONS_BUY_H
 #define WEAPONS_BUY_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum AutoBuyClassType
 {

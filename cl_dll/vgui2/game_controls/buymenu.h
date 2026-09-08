@@ -1,9 +1,6 @@
 #ifndef BUYMENU_H
 #define BUYMENU_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define PANEL_BUY "BuyMenu"
 

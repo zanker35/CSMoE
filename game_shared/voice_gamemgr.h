@@ -28,9 +28,6 @@
 
 #ifndef VOICE_GAMEMGR_H
 #define VOICE_GAMEMGR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define UPDATE_INTERVAL		0.3s
 

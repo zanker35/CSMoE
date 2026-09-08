@@ -25,13 +25,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project (server)
 set(CMAKE_CXX_STANDARD 17)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -stdlib=libc++")
-elseif(MSVC)
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
-else()
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -static-libstdc++")
-endif()
 
 set (SERVER_LIBRARY server)
 
@@ -40,13 +34,7 @@ set (SERVER_LIBRARY server)
 ################\
 set(GAMEDIR "csmoe" CACHE STRING "Gamedir path")
 set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Where put server dll")
-if(ANDROID OR IOS)
-	set(SERVER_LIBRARY_NAME "server" CACHE STRING "Library name for Android/iOS")
-elseif(NOT WIN32)
 	set(SERVER_LIBRARY_NAME "cs" CACHE STRING "Library name for Linux/MacOS")
-else()
-	set(SERVER_LIBRARY_NAME "mp" CACHE STRING "Library name for Windows")
-endif()
 
 #-----------------
 # MAIN BUILD CODE \
@@ -273,45 +261,16 @@ include_directories (
 	../dlls/
 	../game_shared/)
 
-if(XASH_STATIC_GAMELIB)
 	add_library (${SERVER_LIBRARY} STATIC ${SERVER_SOURCES})
-else()
-	add_library (${SERVER_LIBRARY} SHARED ${SERVER_SOURCES})
-endif()
 
-if(APPLE OR ANDROID)
 	add_definitions(
 		-Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf
 		-D_alloca=alloca -D_strdup=strdup -D_write=write -DNO_MALLOC_OVERRIDE
 		-D_close=close -D_write=write
 	)
-endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-	add_definitions(
-		-fpermissive -fno-strict-aliasing -fno-exceptions -fexpensive-optimizations
-		-DLINUX -D_LINUX -DGNUC
-		-Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf
-		-D_alloca=alloca -D_strdup=strdup -D_write=write -DNO_MALLOC_OVERRIDE
-		-D_close=close -D_write=write
-	)
-endif()
 
-if(MINGW)
-add_definitions(
-	-fpermissive -fno-strict-aliasing -fno-exceptions -fexpensive-optimizations
-	-D_EMULATE_GLIBC -DGNUC
-	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp
-	-D_alloca=alloca -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE
-		)
-endif()
 
-if(MSVC)
-add_definitions(
-	-DWIN32 -DDEDICATED -D_USING_V110_SDK71_ -D_WINDLL -D_MBCS
-	-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE
-)
-endif()
 
 add_definitions(
 	-DCLIENT_WEAPONS
@@ -320,17 +279,9 @@ add_definitions(
 
 target_link_libraries( ${SERVER_LIBRARY} ${CMAKE_DL_LIBS} )
 
-if(ANDROID OR IOS)
-	set_target_properties(${SERVER_LIBRARY} PROPERTIES
-			OUTPUT_NAME ${SERVER_LIBRARY_NAME})
-else()
 	set_target_properties(${SERVER_LIBRARY} PROPERTIES
 			PREFIX "" OUTPUT_NAME ${SERVER_LIBRARY_NAME})
-endif()
 
-if(NOT XASH_STATIC_GAMELIB)
-	install( TARGETS ${SERVER_LIBRARY} DESTINATION ${CMAKE_INSTALL_PREFIX}/${GAMEDIR}/${SERVER_INSTALL_DIR})
-endif()
 
 if(XASH_PCH)
 	target_precompile_headers(${SERVER_LIBRARY} PRIVATE stdafx.h)

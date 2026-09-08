@@ -1,9 +1,6 @@
 #ifndef TRIANGLEEFFECT_H__
 #define TRIANGLEEFFECT_H__
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define TRI_COLLIDEWORLD	0x00000020
 #define TRI_COLLIDEALL		0x00001000 // will collide with world and slideboxes
@@ -45,11 +42,7 @@ public:
 	{
 		// Requested size should match size of class.
         if ( size != sizeof( CCoreTriangleEffect ) )
-#ifdef _WIN32
-             throw "Error in requested size of new particle class instance.";
-#else
 			return NULL;
-#endif
 		
       return((CCoreTriangleEffect *) CMiniMem::Instance()->newBlock());
 
@@ -195,9 +188,6 @@ protected:
         //  from being successfully allocated.
         if (size > (unsigned long) CMiniMem::Instance()->MaxBlockSize())
 		{
-#ifdef _WIN32
-            throw "New particle class is larger than memory pool max size, update lMaxParticleClassSize() function.";
-#endif
 			return(false);
 		}
 

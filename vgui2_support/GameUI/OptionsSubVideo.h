@@ -7,9 +7,6 @@
 
 #ifndef OPTIONS_SUB_VIDEO_H
 #define OPTIONS_SUB_VIDEO_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/ComboBox.h>

@@ -1102,14 +1102,12 @@ void Cmd_ExecuteString( const char *text, cmd_source_t src )
 	if( Cvar_Command( NULL )) return;
 #endif
 
-#ifndef XASH_DEDICATED
 	// forward the command line to the server, so the entity DLL can parse it
 	if( cmd_source != src_client && !Host_IsDedicated() )
 	{
 		if( cls.state >= ca_connected )
 			Cmd_ForwardToServer();
 	}
-#endif
 }
 
 /*
@@ -1125,7 +1123,6 @@ void Cmd_ForwardToServer( void )
 {
 	char	str[MAX_CMD_BUFFER];
 
-#ifndef XASH_DEDICATED
 	if( cls.demoplayback )
 	{
 		if( !Q_stricmp( Cmd_Argv( 0 ), "pause" ))
@@ -1153,7 +1150,6 @@ void Cmd_ForwardToServer( void )
 	else Q_strcat( str, "\n" );
 
 	BF_WriteString( &cls.netchan.message, str );
-#endif
 }
 
 /*

@@ -14,7 +14,6 @@ GNU General Public License for more details.
 */
 
 
-#ifndef XASH_DEDICATED
 #include "common.h"
 #if XASH_SOUND == SOUND_NULL
 
@@ -154,5 +153,4 @@ void S_PrintDeviceName( void )
 {
 	Msg( "Audio: No sound backend!\n" );
 }
-#endif
 #endif

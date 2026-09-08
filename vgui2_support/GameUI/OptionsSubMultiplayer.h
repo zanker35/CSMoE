@@ -1,9 +1,6 @@
 #ifndef OPTIONSSUBMULTIPLAYER_H
 #define OPTIONSSUBMULTIPLAYER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyPage.h>
 

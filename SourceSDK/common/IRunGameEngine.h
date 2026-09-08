@@ -6,9 +6,6 @@
 //=============================================================================//
 #ifndef IRUNGAMEENGINE_H
 #define IRUNGAMEENGINE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "interface.h"
 

@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -1338,14 +1337,7 @@ void R_EndFrame( void )
 	else
 		R_Set2DMode( false );
 
-#ifdef XASH_QINDIEGL
-	BOOL wrap_wglSwapBuffers(HDC);
-	wrap_wglSwapBuffers(NULL);
-#elif defined(XASH_SDL)
 	SDL_GL_SwapWindow( host.hWnd );
-#elif defined __ANDROID__ // For direct android backend
-	Android_SwapBuffers();
-#endif
 }
 
 /*
@@ -1733,4 +1725,3 @@ qboolean R_InitRenderAPI( void )
 	// render interface is missed
 	return true;
 }
-#endif // XASH_DEDICATED

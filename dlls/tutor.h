@@ -28,9 +28,6 @@
 
 #ifndef TUTOR_H
 #define TUTOR_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

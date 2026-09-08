@@ -1,8 +1,5 @@
 #ifndef PLAYER_CONST_H
 #define PLAYER_CONST_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #define PLAYER_CLASS_SYSTEM 1
 

@@ -4,10 +4,6 @@
 //
 //=============================================================================
 
-#if defined( _WIN32 ) && !defined( _X360 )
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 #include "tier0/dbg.h"
 #include "tier0/tslist.h"
 #include "tier0/icommandline.h"
@@ -353,31 +349,6 @@ private:
 	{
 		unsigned waitResult;
 		tmZone( TELEMETRY_LEVEL0, TMZF_IDLE, "%s", __FUNCTION__ );
-#ifdef WIN32
-		enum Event_t
-		{
-			CALL_FROM_MASTER,
-			SHARED_QUEUE,
-			DIRECT_QUEUE,
-
-			NUM_EVENTS
-		};
-
-		HANDLE	 waitHandles[NUM_EVENTS];
-		
-		waitHandles[CALL_FROM_MASTER]	= GetCallHandle().GetHandle();
-		waitHandles[SHARED_QUEUE]		= m_SharedQueue.GetEventHandle().GetHandle();
-		waitHandles[DIRECT_QUEUE] 		= m_DirectQueue.GetEventHandle().GetHandle();
-		
-#ifdef _DEBUG
-		while ( ( waitResult = WaitForMultipleObjects( ARRAYSIZE(waitHandles), waitHandles, FALSE, 10 ) ) == WAIT_TIMEOUT )
-		{
-			waitResult = waitResult; // break here
-		}
-#else
-		waitResult = WaitForMultipleObjects( ARRAYSIZE(waitHandles), waitHandles, FALSE, INFINITE );
-#endif
-#else // !win32
 		bool bSet = false;
 		int nWaitTime = 100;
 
@@ -395,7 +366,6 @@ private:
 			waitResult = WAIT_TIMEOUT;
 		else
 			waitResult = WAIT_OBJECT_0;
-#endif
 		return waitResult;
 	}
 
@@ -1009,9 +979,6 @@ bool CThreadPool::Start( const ThreadPoolStartParams_t &startParams, const char 
 		m_Threads[iThread]->SetName( CFmtStr( "%s%d", pszName, iThread ) );
 		m_Threads[iThread]->Start( nStackSize );
 		m_Threads[iThread]->GetIdleEvent().Wait();
-#ifdef WIN32
-		ThreadSetPriority( (ThreadHandle_t)m_Threads[iThread]->GetThreadHandle(), priority );
-#endif
 	}
 
 	Distribute( bDistribute, startParams.bUseAffinityTable ? (int *)startParams.iAffinityTable : NULL );
@@ -1073,9 +1040,6 @@ void CThreadPool::Distribute( bool bDistribute, int *pAffinityTable )
 							iProc = ( iProc + 1 ) % nHwThreadsPer;
 						}
 					}
-#ifdef WIN32
-					ThreadSetAffinity( (ThreadHandle_t)m_Threads[i]->GetThreadHandle(), 1 << iProc );
-#endif
 				}
 #endif
 			}
@@ -1084,25 +1048,12 @@ void CThreadPool::Distribute( bool bDistribute, int *pAffinityTable )
 				// distribution is from affinity table
 				for ( int i = 0; i < m_Threads.Count(); i++ )
 				{
-#ifdef WIN32
-					ThreadSetAffinity( (ThreadHandle_t)m_Threads[i]->GetThreadHandle(), pAffinityTable[i] );
-#endif
 				}
 			}
 		}
 	}
 	else
 	{
-#ifdef WIN32
-		DWORD_PTR dwProcessAffinity, dwSystemAffinity;
-		if ( GetProcessAffinityMask( GetCurrentProcess(), &dwProcessAffinity, &dwSystemAffinity ) )
-		{
-			for ( int i = 0; i < m_Threads.Count(); i++ )
-			{
-				ThreadSetAffinity( (ThreadHandle_t)m_Threads[i]->GetThreadHandle(), dwProcessAffinity );
-			}
-		}
-#endif
 	}
 }
 
@@ -1381,15 +1332,7 @@ void RunThreadPoolTests()
 	RunTSQueueTests(10000);
 	RunTSListTests(10000);
 
-#ifdef _WIN32
-	DWORD_PTR mask1 = 0;
-	--mask1;
-	DWORD_PTR mask2 = 0;
-	--mask2;
-	GetProcessAffinityMask( GetCurrentProcess(), &mask1, &mask2 );
-#else
 	int32 mask1=-1;
-#endif
 	Msg( "ThreadPoolTest: Job distribution speed\n" );
 	for ( int i = 0; i < 2; i++ )
 	{
@@ -1449,9 +1392,6 @@ void RunThreadPoolTests()
 		ThreadPoolTest::Test( false, false, bToCompletion, true  );
 		ThreadSetAffinity( 0, mask1 );
 	}
-#ifdef _WIN32
-	GetProcessAffinityMask( GetCurrentProcess(), &mask1, &mask2 );
-#endif
 
 	ThreadPoolTest::TestForcedExecute();
 }

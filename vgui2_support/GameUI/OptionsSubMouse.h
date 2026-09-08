@@ -1,9 +1,6 @@
 #ifndef OPTIONS_SUB_MOUSE_H
 #define OPTIONS_SUB_MOUSE_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui_controls/PropertyPage.h>
 

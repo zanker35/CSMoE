@@ -14,9 +14,6 @@
 #include "tier0/valve_off.h"
 #include <string.h>
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 // This is a trick to get the DLL extension off the -D option on the command line.
@@ -144,11 +141,7 @@ typedef unsigned long ULONG;
 typedef unsigned char BYTE;
 typedef unsigned char byte;
 typedef unsigned short word;
-#ifdef _WIN32
-typedef wchar_t ucs2; // under windows wchar_t is ucs2
-#else
 typedef unsigned short ucs2;
-#endif
 
 enum ThreeState_t
 {

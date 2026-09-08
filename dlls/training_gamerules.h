@@ -28,9 +28,6 @@
 
 #ifndef TRAINING_GAMERULES_H
 #define TRAINING_GAMERULES_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

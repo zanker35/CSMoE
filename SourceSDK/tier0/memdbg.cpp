@@ -19,9 +19,6 @@
 #include "tier0/dbg.h"
 #include "tier0/memalloc.h"
 #include "mem_helpers.h"
-#ifdef _WIN32
-#include <crtdbg.h>
-#endif
 #ifdef OSX
 #include <malloc/malloc.h>
 #include <mach/mach.h>
@@ -40,11 +37,6 @@
 #endif
 #if (defined(_DEBUG) || defined(USE_MEM_DEBUG))
 
-#if defined(_WIN32) && ( !defined(_X360) && !defined(_WIN64) )
-// #define USE_STACK_WALK
-// or:
-// #define USE_STACK_WALK_DETAILED
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -56,9 +48,6 @@
 #define DebugFree	DmFreePool
 #endif
 
-#ifdef WIN32
-int g_DefaultHeapFlags = _CrtSetDbgFlag( _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF );
-#endif
 
 #if defined( _MEMTEST )
 static char s_szStatsMapName[32];
@@ -798,22 +787,6 @@ void CDbgMemAlloc::Shutdown()
 }
 
 
-#ifdef WIN32
-extern "C" BOOL APIENTRY MemDbgDllMain( HMODULE hDll, DWORD dwReason, PVOID pvReserved )
-{
-	UNREFERENCED_PARAMETER( pvReserved );
-
-	// Check if we are shutting down
-	if ( dwReason == DLL_PROCESS_DETACH )
-	{
-		// CDbgMemAlloc is a global object and destructs after the _Lockit object in the CRT runtime,
-		//  so we can't actually operate on the STL object in a normal destructor here as its support libraries have been turned off already
-		s_DbgMemAlloc.Shutdown();
-	}
-
-	return TRUE;
-}
-#endif
 
 
 //-----------------------------------------------------------------------------
@@ -1505,18 +1478,6 @@ void CDbgMemAlloc::DumpStatsFileBase( char const *pchFileBase )
 
 	DumpMemInfo( "Totals", 0, m_GlobalInfo );
 
-#ifdef WIN32
-	if ( IsX360() )
-	{
-		// add a line that has free memory
-		size_t usedMemory, freeMemory;
-		GlobalMemoryStatus( &usedMemory, &freeMemory );
-		MemInfo_t info;
-		// OS takes 32 MB, report our internal allocations only
-		info.m_nCurrentSize = usedMemory;
-		DumpMemInfo( "Used Memory", 0, info );
-	}
-#endif
 
 	DumpFileStats();
 

@@ -28,9 +28,6 @@
 
 #ifndef HOSTAGE_H
 #define HOSTAGE_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum GameEventType : int; // #include "game_shared/GameEvent.h"
 
@@ -201,9 +198,6 @@ public:
 
 	void AddSound(HostageChatterType type, const char *filename);
 
-#ifdef _WIN32
-	#undef PlaySound
-#endif // _WIN32
 
 	duration_t PlaySound(CBaseEntity *entity, HostageChatterType type);
 	char *GetSound(HostageChatterType type, duration_t *duration);

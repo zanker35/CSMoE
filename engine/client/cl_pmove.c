@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifndef XASH_DEDICATED
 
 #include "common.h"
 #include "client.h"
@@ -822,13 +821,6 @@ void CL_InitClientMove( void )
 	clgame.pmove->PM_TestPlayerPositionEx = pfnTestPlayerPositionEx;
 	clgame.pmove->PM_TraceLineEx = pfnTraceLineEx;
 	clgame.pmove->PM_TraceSurface = pfnTraceSurface;
-#ifdef DLL_LOADER // w32-compatible ABI
-	if( host.enabledll && Loader_GetDllHandle( clgame.hInstance ) )
-	{
-		clgame.pmove->PM_PlayerTrace = (void*)pfnPlayerTrace_w32;
-		clgame.pmove->PM_PlayerTraceEx = (void*)pfnPlayerTraceEx_w32;
-	}
-#endif
 #if defined(__MINGW32__)
 	clgame.pmove->PM_PlayerTrace = (void*)pfnPlayerTrace_w32;
 	clgame.pmove->PM_PlayerTraceEx = (void*)pfnPlayerTraceEx_w32;
@@ -1379,4 +1371,3 @@ void CL_PredictMovement( void )
 	}
 	CL_CheckPredictionError();
 }
-#endif // XASH_DEDICATED

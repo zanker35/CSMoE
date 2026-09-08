@@ -37,17 +37,10 @@ add_library(tier0 STATIC
         ${HL2SDK_PATH}/tier0/tslist.cpp
         ${HL2SDK_PATH}/tier0/vprof.cpp
 )
-if( WIN32 )
-    target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/platform.cpp)
-    target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/vcrmode.cpp)
-    target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/pme_posix.cpp)
-    #target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/etwprof.cpp)
-elseif( POSIX )
     target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/cpu_posix.cpp)
     target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/platform_posix.cpp)
     target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/pme_posix.cpp)
     target_sources(tier0 PUBLIC ${HL2SDK_PATH}/tier0/vcrmode_posix.cpp)
-endif()
 
 target_include_directories(tier0 PUBLIC
         ${HL2SDK_PATH}/public
@@ -55,9 +48,6 @@ target_include_directories(tier0 PUBLIC
         ${HL2SDK_PATH}
         )
 target_link_libraries(tier0 PUBLIC platform_config video_config)
-if( WIN32 )
-    target_link_libraries(tier0 PUBLIC ws2_32)
-endif()
 target_link_libraries(tier0 PUBLIC 3rdparty-sdl2)
 
 add_library(tier1 STATIC
@@ -85,11 +75,6 @@ add_library(tier1 STATIC
         ${HL2SDK_PATH}/tier1/utlsymbol.cpp
         ${HL2SDK_PATH}/tier1/ilocalize.cpp
         )
-if(LINUX)
-    target_sources(tier1 PRIVATE
-            ${HL2SDK_PATH}/tier1/qsort_s.cpp
-            )
-endif()
 target_include_directories(tier1 PUBLIC
         ${HL2SDK_PATH}/public
         ${HL2SDK_PATH}/public/tier1
@@ -97,9 +82,6 @@ target_include_directories(tier1 PUBLIC
 target_link_libraries(tier1 PUBLIC platform_config)
 find_package(Iconv REQUIRED)
 target_link_libraries(tier1 PRIVATE Iconv::Iconv)
-if(ANDROID)
-    target_link_libraries(tier1 PRIVATE android) # iconv
-endif()
 
 add_library(mathlib STATIC
         ${HL2SDK_PATH}/mathlib/color_conversion.cpp
@@ -124,9 +106,7 @@ add_library(mathlib STATIC
         ${HL2SDK_PATH}/mathlib/vmatrix.cpp
         ${HL2SDK_PATH}/mathlib/almostequal.cpp
         )
-if(NOT MSVC)
     target_compile_options(mathlib PRIVATE -Wno-c++11-narrowing)
-endif()
 target_include_directories(mathlib PUBLIC
     ${HL2SDK_PATH}/public
     ${HL2SDK_PATH}/common
@@ -148,17 +128,10 @@ add_library(vstdlib STATIC
         ${HL2SDK_PATH}/vstdlib/vcover.cpp
 #        ${HL2SDK_PATH}/public/tier0/memoverride.cpp
         )
-if(WIN32)
-    target_sources(vstdlib PRIVATE
-            ${HL2SDK_PATH}/vstdlib/processutils.cpp
-            )
-endif()
 target_link_libraries(vstdlib PRIVATE tier0 tier1)
 target_compile_definitions(vstdlib PRIVATE -DVSTDLIB_DLL_EXPORT=1)
-if(OSX)
     # fix for Gestalt
     target_link_libraries(vstdlib PUBLIC "-framework CoreServices")
-endif()
 
 add_library(SourceSDK INTERFACE)
 target_include_directories(SourceSDK INTERFACE ./ ./public)

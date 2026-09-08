@@ -11,9 +11,6 @@
 #ifndef UTLSOACONTAINER_H
 #define UTLSOACONTAINER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 #include "tier0/platform.h"

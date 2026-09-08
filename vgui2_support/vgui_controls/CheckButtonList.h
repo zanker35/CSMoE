@@ -6,9 +6,6 @@
 
 #ifndef CHECKBUTTONLIST_H
 #define CHECKBUTTONLIST_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "EditablePanel.h"
 #include <tier1/utlvector.h>

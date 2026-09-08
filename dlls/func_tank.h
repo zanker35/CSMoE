@@ -28,9 +28,6 @@
 
 #ifndef FUNC_TANK_H
 #define FUNC_TANK_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 namespace sv {
 

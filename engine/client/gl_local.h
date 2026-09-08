@@ -16,9 +16,7 @@ GNU General Public License for more details.
 #ifndef GL_LOCAL_H
 #define GL_LOCAL_H
 
-#ifdef XASH_SDL
 #include <SDL_video.h>
-#endif
 #include "gl_export.h"
 #include "com_model.h"
 #include "cl_entity.h"
@@ -510,10 +508,6 @@ void R_NewMap( void );
 
 =======================================================================
 */
-#ifdef XASH_NANOGL
-#undef GL_TEXTURE_3D_EXT
-#undef GL_VERTEX_SHADER_EXT
-#endif
 enum
 {
 	GL_OPENGL_110 = 0,		// base
@@ -630,11 +624,7 @@ typedef struct
 
 typedef struct
 {
-#ifdef XASH_SDL
 	SDL_GLContext		context;		// SDL GL Context
-#else
-	void *context;
-#endif
 	int		desktopBitsPixel;
 	int		desktopWidth;
 	int		desktopHeight;

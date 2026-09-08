@@ -28,9 +28,6 @@
 
 #ifndef CS_BOT_H
 #define CS_BOT_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "minmax.h"
 

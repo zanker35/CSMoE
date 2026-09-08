@@ -8,9 +8,6 @@
 
 #ifndef DBGFLAG_H
 #define DBGFLAG_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 
 // Here are all the flags we support:

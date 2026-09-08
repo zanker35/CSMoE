@@ -12,13 +12,7 @@
 #ifndef VCRMODE_H
 #define VCRMODE_H
 
-#ifdef _WIN32
-#include <process.h>
-#endif
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "tier0/platform.h"
 #include "tier0/vcr_shared.h"

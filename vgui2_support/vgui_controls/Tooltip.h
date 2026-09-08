@@ -8,9 +8,6 @@
 #ifndef TOOLTIP_H
 #define TOOLTIP_H
 
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <vgui/VGUI.h>
 

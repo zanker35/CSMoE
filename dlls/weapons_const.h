@@ -1,9 +1,6 @@
 
 #ifndef WEAPONS_CONST_H
 #define WEAPONS_CONST_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 enum WeaponIdType
 {

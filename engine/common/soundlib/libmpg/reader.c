@@ -14,11 +14,7 @@ GNU General Public License for more details.
 */
 
 #include "mpg123.h"
-#ifdef _WIN32
-#include <io.h>
-#else
 #include <unistd.h>
-#endif
 
 #define READER_STREAM	0
 #define READER_FEED		1
