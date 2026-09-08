@@ -60,7 +60,6 @@ else()
 	set(XASH_VGUI2 OFF)
 endif()
 
-option(XASH_LUASH "LUA support for CSMoE. Expected lua 5.3" ON)
 
 if(APPLE)
 	add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-error=incompatible-function-pointer-types>
@@ -165,9 +164,6 @@ if(XASH_VGUI2)
 endif()
 
 
-if(XASH_LUASH)
-	add_subdirectory(luash)
-endif()
 
 if(NOT XASH_DEDICATED)
 	ADD_SUBDIRECTORY(cl_dll)

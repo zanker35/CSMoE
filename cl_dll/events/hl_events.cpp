@@ -14,9 +14,6 @@
 ****/
 #include "events.h"
 
-#ifdef XASH_LUASH
-#include "luash_cl/ev_lua.h"
-#endif
 
 namespace cl {
 
@@ -49,9 +46,6 @@ void Game_HookEvents( void )
 #include "eventdef.h"
 #undef HOOK_EVENT
 
-#ifdef XASH_LUASH
-	LuaCL_HookEvents();
-#endif
 
 	cl_gunbubbles = gEngfuncs.pfnRegisterVariable("cl_gunbubbles", "2", FCVAR_ARCHIVE);
 	cl_tracereffect = gEngfuncs.pfnRegisterVariable("cl_tracereffect", "0", FCVAR_ARCHIVE);

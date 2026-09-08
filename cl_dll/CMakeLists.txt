@@ -179,14 +179,6 @@ set(PM_SRCS
 )
 
 
-if(XASH_LUASH)
-	set(LUASH_SRCS
-		luash_cl/lua_cl.cpp
-		luash_cl/ev_lua.cpp
-	)
-else()
-	set(LUASH_SRCS )
-endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 	set(INPUT_SRCS ./input_winrt.cpp)
@@ -214,7 +206,6 @@ set (CLDLL_SOURCES
 	./calcscreen.cpp
 	./input_touch.cpp
 	
-	${LUASH_SRCS}
 	${INPUT_SRCS}
 	${PM_SRCS}
 	${HUD_SRCS}
@@ -311,9 +302,6 @@ if(XASH_VGUI2)
 endif()
 
 
-if(XASH_LUASH)
-	target_link_libraries( ${CLIENT_LIBRARY} luash)
-endif()
 
 if(ANDROID OR IOS)
 	set_target_properties(${CLIENT_LIBRARY} PROPERTIES

@@ -38,9 +38,6 @@
 #include "cdll_exp.h"
 #include "events.h"
 
-#ifdef XASH_LUASH
-#include "luash_cl/lua_cl.h"
-#endif
 
 extern "C"
 {
@@ -94,9 +91,6 @@ void DLLEXPORT HUD_Shutdown( void )
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
-#ifdef XASH_LUASH
-	LuaCL_Shutdown();
-#endif
 }
 
 
@@ -209,9 +203,6 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
-#ifdef XASH_LUASH
-	LuaCL_Init();
-#endif
 	InitInput();
 	gHUD.Init();
 #ifdef XASH_VGUI2
@@ -387,17 +378,6 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 	return 0;
 }
 
-/*
-========================
-HUD_MobilityInterface
-========================
-*/
-void DLLEXPORT CL_OnPrecache(int type, const char* name, int index)
-{
-#ifdef XASH_LUASH
-	LuaCL_OnPrecache((resourcetype_t)type, name, index);
-#endif
-}
 
 /*
 ========================
@@ -475,7 +455,7 @@ extern "C" void DLLEXPORT F(void *pv) {
 		nullptr,	// SDL Xash pfnMoveEvent
 		nullptr,	// SDL Xash pfnLookEvent
 		nullptr,	// Reserved GUI callback ABI slot
-		CL_OnPrecache, // CSMoE ext
+		nullptr, // Reserved precache callback ABI slot
 	};
 
 	*pcldll_func = cldll_func;
@@ -542,7 +522,7 @@ extern "C" void DLLEXPORT F(void *pv) {
 			nullptr,	// SDL Xash pfnMoveEvent
 			nullptr,	// SDL Xash pfnLookEvent
 			nullptr,	// Reserved GUI callback ABI slot
-			CL_OnPrecache, // CSMoE ext
+			nullptr, // Reserved precache callback ABI slot
 	};
 
 	*pcldll_func = cldll_func;
@@ -598,7 +578,6 @@ static dllexport_t switch_client_exports[] = {
 	{ "HUD_VoiceStatus", (void*)HUD_VoiceStatus },
 	{ "IN_ClientMoveEvent", (void*)IN_ClientMoveEvent}, // Xash3D ext
 	{ "IN_ClientLookEvent", (void*)IN_ClientLookEvent}, // Xash3D ext
-	{ "CL_OnPrecache", (void*)CL_OnPrecache },
 	{ NULL, NULL },
 };
 

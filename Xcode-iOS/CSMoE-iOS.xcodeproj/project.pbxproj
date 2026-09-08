@@ -69,7 +69,6 @@
 		B62AAE402629E55D00F77FE7 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B62AAE162629E35A00F77FE7 /* libSDL2.a */; };
 		B6467524253FE21E00F557B8 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B646751B253FE21E00F557B8 /* CoreBluetooth.framework */; };
 		B663773925DD89D000564BD5 /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B663773825DD89D000564BD5 /* CoreHaptics.framework */; };
-		B6D007C4262A1B71007A949F /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B6D007C3262A1B71007A949F /* libluajit.a */; };
 		FA8B4BA31967070A00F8EB7C /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8B4BA21967070A00F8EB7C /* CoreMotion.framework */; };
 		FABA34D41D8B5E5600915323 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FABA34D31D8B5E5600915323 /* AVFoundation.framework */; };
 		FDB96EE00DEFC9DC00FAF19F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96EDF0DEFC9DC00FAF19F /* QuartzCore.framework */; };
@@ -225,7 +224,6 @@
 		B62AADFD2629E35900F77FE7 /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = ../3rdparty/SDL2/Xcode/SDL/SDL.xcodeproj; sourceTree = "<group>"; };
 		B646751B253FE21E00F557B8 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		B663773825DD89D000564BD5 /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
-		B6D007C3262A1B71007A949F /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libluajit.a; sourceTree = "<group>"; };
 		FA8B4BA21967070A00F8EB7C /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		FABA34D31D8B5E5600915323 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		FAE0E9691BAF96A00098DFA4 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
@@ -250,7 +248,6 @@
 				FABA34D41D8B5E5600915323 /* AVFoundation.framework in Frameworks */,
 				FA8B4BA31967070A00F8EB7C /* CoreMotion.framework in Frameworks */,
 				FDF0D7AB0E12D53800247964 /* CoreAudio.framework in Frameworks */,
-				B6D007C4262A1B71007A949F /* libluajit.a in Frameworks */,
 				FDF0D7AC0E12D53800247964 /* AudioToolbox.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -432,7 +429,6 @@
 		B6D007BC262A1AD4007A949F /* 3rdparty */ = {
 			isa = PBXGroup;
 			children = (
-				B6D007C3262A1B71007A949F /* libluajit.a */,
 			);
 			path = 3rdparty;
 			sourceTree = "<group>";
@@ -677,7 +673,6 @@
 				"$(SRCROOT)/cmake-build/dlls/libserver.a",
 				"$(SRCROOT)/cmake-build/vgui2_support/libvgui2_support.a",
 				"$(SRCROOT)/cmake-build/engine/libxash.a",
-				"$(SRCROOT)/cmake-build/3rdparty/libluajit.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

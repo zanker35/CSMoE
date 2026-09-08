@@ -74,7 +74,7 @@ typedef struct cldll_func_s
 	void (*pfnLookEvent)( float relyaw, float relpitch );
 	// CSMoE extension
 	void (*reserved_gui_callback)(void *context); // Reserved ABI slot; never called.
-	void (*CL_OnPrecache)(int type, const char* name, int index); // 1=model 2=sound 3=generic 4=event
+	void (*reserved_precache_callback)(int type, const char* name, int index); // Reserved ABI slot.
 } cldll_func_t;
 
 #endif//CDLL_EXP_H
