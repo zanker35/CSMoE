@@ -174,7 +174,6 @@ set(XASH_ENGINE_APPLE_SOURCES
 )
 else()
 set(XASH_ENGINE_APPLE_SOURCES
-	platform/macos/TouchBar.mm
 	platform/macos/vid_macos.mm
 	platform/ime_stub.cpp
 )

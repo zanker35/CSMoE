@@ -25,7 +25,6 @@ GNU General Public License for more details.
 #include <SDL_syswm.h>
 
 #if defined(SDL_VIDEO_DRIVER_COCOA)
-#include "platform/macos/TouchBar.h"
 #include "platform/macos/vid_macos.h"
 #endif
 
@@ -343,9 +342,6 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	GL_GetDrawableSize( host.hWnd, &width, &height );
 	R_ChangeDisplaySettingsFast( width, height );
 
-#if defined(SDL_VIDEO_DRIVER_COCOA)
-	TouchBar_Install();
-#endif
 
 #if defined(XASH_WINRT)
 	{
