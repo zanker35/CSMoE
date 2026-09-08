@@ -112,24 +112,6 @@ int CHudDeathNotice :: VidInit( void )
 	m_KM_Icon_Head = gHUD.GetSpriteIndex("KM_Icon_Head");
 	m_KM_Icon_Knife = gHUD.GetSpriteIndex("KM_Icon_knife");
 	m_KM_Icon_Frag = gHUD.GetSpriteIndex("KM_Icon_Frag");
-	if ((gHUD.m_hudstyle->value == 1))
-	{
-		R_InitTexture(m_killBg[0], "resource/hud/csgo/DeathNotice/KillBg_left");
-		R_InitTexture(m_killBg[1], "resource/hud/csgo/DeathNotice/KillBg_center");
-		R_InitTexture(m_killBg[2], "resource/hud/csgo/DeathNotice/KillBg_right");
-	}
-	else
-	{
-		R_InitTexture(m_killBg[0], "resource/Hud/DeathNotice/KillBg_left");
-		R_InitTexture(m_killBg[1], "resource/Hud/DeathNotice/KillBg_center");
-		R_InitTexture(m_killBg[2], "resource/Hud/DeathNotice/KillBg_right");
-	}
-	R_InitTexture(m_deathBg[0], "resource/Hud/DeathNotice/DeathBg_left");
-	R_InitTexture(m_deathBg[1], "resource/Hud/DeathNotice/DeathBg_center");
-	R_InitTexture(m_deathBg[2], "resource/Hud/DeathNotice/DeathBg_right");
-	R_InitTexture(m_defaultBg[0], "resource/hud/csgo/DeathNotice/DefaultBg_left");
-	R_InitTexture(m_defaultBg[1], "resource/hud/csgo/DeathNotice/DefaultBg_center");
-	R_InitTexture(m_defaultBg[2], "resource/hud/csgo/DeathNotice/DefaultBg_right");
 	R_InitTexture(m_NewHud_killBg[0], "resource/hud/deathnotice/killbg_left_new.tga");
 	R_InitTexture(m_NewHud_killBg[1], "resource/hud/deathnotice/killbg_center_new.tga");
 	R_InitTexture(m_NewHud_killBg[2], "resource/hud/deathnotice/killbg_right_new.tga");
@@ -141,9 +123,6 @@ int CHudDeathNotice :: VidInit( void )
 
 void CHudDeathNotice::Shutdown(void)
 {
-	std::fill(std::begin(m_killBg), std::end(m_killBg), nullptr);
-	std::fill(std::begin(m_deathBg), std::end(m_deathBg), nullptr);
-	std::fill(std::begin(m_defaultBg), std::end(m_defaultBg), nullptr);
 	std::fill(std::begin(m_NewHud_killBg), std::end(m_NewHud_killBg), nullptr);
 	std::fill(std::begin(m_NewHud_deathBg), std::end(m_NewHud_deathBg), nullptr);
 }
@@ -198,20 +177,11 @@ int CHudDeathNotice :: Draw( float flTime )
 			switch (rgDeathNoticeList[i].DrawBg)
 			{
 			case DB_KILL:
-				DrawBg = gHUD.m_hudstyle->value == 2 ? &m_NewHud_killBg : &m_killBg; break;
+				DrawBg = &m_NewHud_killBg; break;
 			case DB_DEATH:
-				DrawBg = gHUD.m_hudstyle->value == 2 ? &m_NewHud_deathBg : &m_deathBg; break;
+				DrawBg = &m_NewHud_deathBg; break;
 			default:
-			{
-				if ((gHUD.m_hudstyle->value == 1))
-				{
-					DrawBg = &m_defaultBg; break;
-				}
-				else
-				{
-					DrawBg = nullptr; break;
-				}
-			}
+				break;
 			}
 
 			if (DrawBg)
@@ -249,8 +219,8 @@ int CHudDeathNotice :: Draw( float flTime )
 			
 
 			r = 255;
-			g = gHUD.m_hudstyle->value == 2 ? 255 : 80;
-			b = gHUD.m_hudstyle->value == 2 ? 255 : 0;
+			g = 255;
+			b = 255;
 			if ( rgDeathNoticeList[i].bTeamKill )
 			{
 				r = 10;	g = 240; b = 10;  // display it in sickly green

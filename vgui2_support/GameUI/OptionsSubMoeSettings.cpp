@@ -25,8 +25,6 @@ COptionsSubMoeSettings::COptionsSubMoeSettings(vgui2::Panel *parent) : PropertyP
 	m_pSiFiAmmoType = new CLabeledCommandComboBox(this, "SiFiAmmoTypeComboBox");
 	InitSiFiAmmoStyleList(m_pSiFiAmmoType);
 
-	m_pHudStyle = new CLabeledCommandComboBox(this, "HudStyleComboBox");
-	InitHudStyleList(m_pHudStyle);
 
 	m_pAlarmStyle = new CLabeledCommandComboBox(this, "AlarmStyleComboBox");
 	InitAlarmStyleList(m_pAlarmStyle);
@@ -148,26 +146,7 @@ void COptionsSubMoeSettings::InitSiFiAmmoStyleList(CLabeledCommandComboBox* cb)
 	cb->SetInitialItem(initialType);
 }
 
-void COptionsSubMoeSettings::InitHudStyleList(CLabeledCommandComboBox* cb)
-{
-	if (cb == NULL)
-		return;
 
-	cb->Reset();
-
-	cb->AddItem("#CSO_HudClassicStyle", "hud_style 0");
-	cb->AddItem("#CSO_HudCSGOStyle", "hud_style 1");
-	cb->AddItem("#CSO_HudNewStyle", "hud_style 2");
-
-	auto value = engine->pfnGetCvarString("hud_style");
-
-	if (!value)
-		return;
-
-	int initialType = atoi(value);
-
-	cb->SetInitialItem(initialType);
-}
 void COptionsSubMoeSettings::InitAlarmStyleList(CLabeledCommandComboBox* cb)
 {
 	if (cb == NULL)
@@ -257,7 +236,6 @@ void COptionsSubMoeSettings::OnResetData()
 {
 	m_pFloatingDamageType->Reset();
 	m_pSiFiAmmoType->Reset();
-	m_pHudStyle->Reset();
 	m_pAlarmStyle->Reset();
 	m_pTexlru->Reset();
 	m_pHudScale->Reset();
@@ -274,8 +252,6 @@ void COptionsSubMoeSettings::OnApplyChanges()
 	if (m_pSiFiAmmoType)
 		m_pSiFiAmmoType->ApplyChanges();
 
-	if (m_pHudStyle)
-		m_pHudStyle->ApplyChanges();
 
 	if (m_pAlarmStyle)
 		m_pAlarmStyle->ApplyChanges();

@@ -31,8 +31,7 @@ void CHudNewHud::InitHUDData()
 
 int CHudNewHud::Draw(float flTime)
 {
-	if (gHUD.m_hudstyle->value != 2 ||
-		(gHUD.m_iHideHUDDisplay & (HIDEHUD_ALL | HIDEHUD_HEALTH)) ||
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_ALL | HIDEHUD_HEALTH)) ||
 		gHUD.m_iIntermission || gEngfuncs.IsSpectateOnly() || g_iUser1 ||
 		!(gHUD.m_iWeaponBits & (1 << WEAPON_SUIT)))
 		return 0;

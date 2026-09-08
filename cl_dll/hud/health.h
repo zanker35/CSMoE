@@ -47,7 +47,6 @@ public:
 	virtual int VidInit( void );
 	virtual int Draw(float fTime);
 	virtual void Reset( void );
-	int DrawBar(int x, int y, int width, int height, float f, int& r, int& g, int& b, int& a);
 	int MsgFunc_Health(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
@@ -56,16 +55,12 @@ public:
 	int m_iHealth;
 	int m_iMaxHealth;
 	int m_HUD_dmg_bio;
-	int m_HUD_cross;
 	int m_NEWHUD_cross;
 	//float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	float m_fAttack[4];
-	void GetPainColor(int &r, int &g, int &b , int &a);
-	float m_fFade;
 private:
 	void DrawPain( float fTime );
 	void DrawDamage( float fTime );
-	void DrawHealthBar( float flTime );
 	void DrawNewHudHealth(float flTime);
 	void CalcDamageDirection( Vector vecFrom );
 	void UpdateTiles( float fTime, long bits );
@@ -78,5 +73,4 @@ private:
 	float m_flTimeFlash;
 	int	m_bitsDamage;
 	cvar_t *cl_radartype;
-	UniqueTexture m_pTexture_Black;
 };

@@ -101,8 +101,6 @@ struct HUDLIST {
 	HUDLIST		*pNext;
 };
 
-
-
 //
 //-----------------------------------------------------
 //
@@ -141,7 +139,6 @@ public:
 	void CalcCrosshairColor();
 
 	int DrawWList(float flTime);
-	int DrawWpnList(float flTime);
 	int DrawNEWHudAmmo(float flTime);
 	void DrawNEWHudCurrentWpn();
 	CHudMsgFunc(CurWeapon);
@@ -181,7 +178,6 @@ public:
 	WEAPON *m_pWeapon;
 	int	m_HUD_bucket0;
 	int m_HUD_selection;
-	UniqueTexture m_pTexture_Black;
 	UniqueTexture m_iWeapon_OffBG;
 	int m_iAlpha;
 	int m_R, m_G, m_B;
@@ -425,11 +421,8 @@ private:
 	float m_killEffectTime, m_killIconTime;
 
 private:
-	SharedTexture m_killBg[3];
-	SharedTexture m_deathBg[3];
 	SharedTexture m_NewHud_killBg[3];
 	SharedTexture m_NewHud_deathBg[3];
-	SharedTexture m_defaultBg[3];
 	int m_KM_Number0;
 	int m_KM_Number1;
 	int m_KM_Number2;
@@ -508,7 +501,6 @@ public:
 	int VidInit( void );
 	int Draw(float flTime);
 	int DrawNewHudArmor(float flTime);
-	int DrawBar(int x, int y, int width, int height, float f, int& r, int& g, int& b, int& a);
 	void InitHUDData( void );
 	CHudMsgFunc(Battery);
 	CHudMsgFunc(ArmorType);
@@ -519,14 +511,10 @@ private:
 		VestHelm
 	} m_enArmorType;
 
-	CClientSprite m_hEmpty[VestHelm + 1];
-	CClientSprite m_hFull[VestHelm + 1];
 	CClientSprite m_NEWHUD_hEmpty[VestHelm + 1];
 	CClientSprite m_NEWHUD_hFull[VestHelm + 1];
 	int	  m_iBat;
 	float m_fFade;
-	UniqueTexture m_pTexture_Black;
-	int	  m_iHeight;		// width of the battery innards
 };
 
 
@@ -638,7 +626,6 @@ public:
 	int Init( void );
 	int VidInit( void );
 	void Reset( void );
-	void Shutdown(void);
 	int Draw(float flTime);
 	CHudMsgFunc(StatusIcon);
 
@@ -668,7 +655,6 @@ private:
 	} icon_sprite_t;
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
-	UniqueTexture m_tgaC4[2];
 	int m_NEWHUD_hC4_Off;
 	int m_NEWHUD_hC4_On;
 	int m_NEWHUD_hDefuser;
@@ -694,11 +680,7 @@ private:
 	int m_iDelta;
 	int m_iBlinkAmt;
 	float m_fBlinkTime;
-	UniqueTexture m_pTexture_Black;
 	float m_fFade;
-	CClientSprite m_hDollar;
-	CClientSprite m_hPlus;
-	CClientSprite m_hMinus;
 	UniqueTexture m_iDollarBG;
 	int m_NEWHUD_hDollar;
 	int m_NEWHUD_hMinus;
@@ -741,13 +723,11 @@ public:
 	// [empty]
 	CHudMsgFunc(ShowTimer);
 private:
-	int m_HUD_timer;
 	int m_iTime;
 	float m_fStartTime;
 	bool m_bPanicColorChange;
 	float m_flPanicTime;
 	int m_closestRight;
-	UniqueTexture m_pTexture_Black;
 	SharedTexture m_iNum_Bottom;
 	UniqueTexture m_iColon_Bottom;
 	wrect_t m_iNum_BottomC[10];
@@ -959,7 +939,6 @@ public:
 	int		m_iRes;
 	cvar_t *m_pCvarDraw;
 	cvar_t *cl_shadows;
-	cvar_t *m_hudstyle;
 	cvar_t *fastsprites;
 	cvar_t *cl_predict;
 	cvar_t *cl_weapon_wallpuff;

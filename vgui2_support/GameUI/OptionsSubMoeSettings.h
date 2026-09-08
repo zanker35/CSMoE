@@ -28,7 +28,6 @@ public:
 	void InitFloatingDamageTypeList(CLabeledCommandComboBox* cb, bool read);
 	void RemapDamage(void);
 	void InitSiFiAmmoStyleList(CLabeledCommandComboBox* cb);
-	void InitHudStyleList(CLabeledCommandComboBox* cb);
 	void InitAlarmStyleList(CLabeledCommandComboBox* cb);
 	void InitTexlruList(CLabeledCommandComboBox* cb);
 	void InitHudScaleList(CLabeledCommandComboBox* cb);
@@ -43,7 +42,6 @@ private:
 	vgui2::ImagePanel* m_pDamageImage;
 	CLabeledCommandComboBox* m_pFloatingDamageType;
 	CLabeledCommandComboBox* m_pSiFiAmmoType;
-	CLabeledCommandComboBox* m_pHudStyle;
 	CLabeledCommandComboBox* m_pAlarmStyle;
 	CLabeledCommandComboBox* m_pTexlru;
 	CLabeledCommandComboBox* m_pHudScale;
@@ -55,7 +53,5 @@ private:
 
 
 };
-
-
 
 #endif // OPTIONS_SUB_AUDIO_H

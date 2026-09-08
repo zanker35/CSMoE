@@ -130,7 +130,7 @@ int CHudRadarLegacy::GetRadarSize() const
 
 int CHudRadarLegacy::GetRadarTop() const
 {
-	return gHUD.m_hudstyle && gHUD.m_hudstyle->value == 2 && m_iMapTitleBG ?
+	return m_iMapTitleBG ?
 		m_iMapTitleBG->h() + 1 : 0;
 }
 

@@ -21,7 +21,6 @@ int CHudScenarioStatus::VidInit(void)
 {
 	m_alpha = 100;
 	m_hSprite = 0;
-	R_InitTexture(m_pTexture_Black, "resource/hud/csgo/black");
 	m_iRepeatTimes = 0;
 	return 1;
 }
@@ -48,52 +47,17 @@ int CHudScenarioStatus::Draw(float fTime)
 	if (m_iFlags & HUD_ACTIVE)
 	{
 		int r = 255, g = 255, b = 255;
-		if ((gHUD.m_hudstyle->value == 1) && m_hSprite == gHUD.GetSprite(gHUD.GetSpriteIndex("bombticking")))
+		const int width = m_rect.right - m_rect.left;
+		int x = (ScreenWidth - m_iRepeatTimes * width) / 2;
+		const int y = 85;
+		DrawUtils::ScaleColors(r, g, b, m_alpha);
+		if (m_alpha > 100)
+			m_alpha *= 0.9;
+		for (int i = 0; i < m_iRepeatTimes; ++i)
 		{
-			int x = ScreenWidth / 2;	
-			int w = m_rect.right - m_rect.left;
-
-			DrawUtils::ScaleColors(r, g, b, m_alpha);
-				m_alpha *= 0.9;
-
-			for (int i = 0; i < m_iRepeatTimes; ++i)
-			{
-				SPR_Set(m_hSprite, r * 255, g * 255, b * 255);
-				SPR_DrawAdditive(0, x - (m_rect.right - m_rect.left) / 2, 17, &m_rect);
-				x += w;
-			}
-
-			x = ScreenWidth / 2;
-			gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-			gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 100);
-			m_pTexture_Black->Bind();
-			DrawUtils::Draw2DQuadScaled(x - 120 / 2, 5, x + 120 / 2, 75);
-		}
-		else 
-		{
-			DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
-
-			int x = gHUD.m_Timer.m_closestRight;
-			int y = ScreenHeight + (3 * gHUD.m_iFontHeight) / -2 - (m_rect.bottom - m_rect.top - gHUD.m_iFontHeight) / 2;
-			int w = m_rect.right - m_rect.left;
-			if (gHUD.m_hudstyle->value == 2)
-			{
-				x = (ScreenWidth - m_iRepeatTimes * w) / 2;
-				y = 85;
-				DrawUtils::UnpackRGB(r, g, b, RGB_WHITE);
-			}
-
-			DrawUtils::ScaleColors(r, g, b, m_alpha);
-
-			if (m_alpha > 100)
-				m_alpha *= 0.9;
-
-			for (int i = 0; i < m_iRepeatTimes; ++i)
-			{
-				SPR_Set(m_hSprite, r, g, b);
-				SPR_DrawAdditive(0, x, y, &m_rect);
-				x += w;
-			}
+			SPR_Set(m_hSprite, r, g, b);
+			SPR_DrawAdditive(0, x, y, &m_rect);
+			x += width;
 		}
 	}
 

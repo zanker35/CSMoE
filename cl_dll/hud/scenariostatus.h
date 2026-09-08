@@ -15,7 +15,6 @@ public:
 public:
 	HSPRITE m_hSprite;
 	wrect_t m_rect;
-	UniqueTexture m_pTexture_Black;
 	int m_alpha;
 	float m_nextFlash;
 	float m_flashInterval;

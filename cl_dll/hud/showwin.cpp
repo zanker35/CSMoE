@@ -65,7 +65,7 @@ void CHudShowWin::InitHUDData()
 
 bool CHudShowWin::Show(Winner winner)
 {
-	if (!gHUD.m_hudstyle || gHUD.m_hudstyle->value != 2 || !m_textures[winner])
+	if (!m_textures[winner])
 		return false;
 
 	// A normal round ends with both SendAudio and TextMsg. Do not restart
@@ -107,8 +107,7 @@ void CHudShowWin::OnRadioMessage(const char *sentence)
 
 int CHudShowWin::Draw(float time)
 {
-	if (!gHUD.m_hudstyle || gHUD.m_hudstyle->value != 2 ||
-		time >= m_displayUntil || !m_textures[m_winner])
+	if (time >= m_displayUntil || !m_textures[m_winner])
 		return 1;
 
 	const bool zombieResult = m_winner == HUMAN_WIN || m_winner == ZOMBIE_WIN;

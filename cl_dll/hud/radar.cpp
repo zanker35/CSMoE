@@ -242,8 +242,7 @@ int CHudRadar::MsgFunc_Location(const char * pszName, int iSize, void * pbuf)
 
 bool CHudRadar::UseModernRadar() const
 {
-	return pimpl && pimpl->get<CHudRadarModern>().Available() &&
-		(gHUD.m_iModRunning != MOD_NONE || (gHUD.m_hudstyle && gHUD.m_hudstyle->value == 2));
+	return pimpl && pimpl->get<CHudRadarModern>().Available();
 }
 
 int CHudRadar::GetRadarSize() const

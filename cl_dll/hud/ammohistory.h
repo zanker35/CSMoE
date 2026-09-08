@@ -136,10 +136,7 @@ public:
 
 	void CheckClearHistory( void );
 	void VidInit();
-	int DrawAmmoHistory( float flTime );
 	int DrawNEWHudAmmoHistory(float flTime);
 };
 
 extern HistoryResource gHR;
-
-
