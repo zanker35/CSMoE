@@ -91,10 +91,7 @@ struct skilldata_t
 	float monDmgMP5;
 	float monDmg12MM;
 	float monDmgHornet;
-	float suitchargerCapacity;
 	float batteryCapacity;
-	float healthchargerCapacity;
-	float healthkitCapacity;
 	float scientistHeal;
 	float monHead;
 	float monChest;

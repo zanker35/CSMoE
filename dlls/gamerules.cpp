@@ -125,10 +125,7 @@ void CGameRules::RefreshSkillData()
 	gSkillData.monDmg12MM = 8;
 	gSkillData.monDmgMP5 = 3;
 	gSkillData.monDmg9MM = 5;
-	gSkillData.suitchargerCapacity = 75;
 	gSkillData.batteryCapacity = 15;
-	gSkillData.healthchargerCapacity = 50;
-	gSkillData.healthkitCapacity = 15;
 }
 
 CGameRules *InstallGameRules()

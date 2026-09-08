@@ -27,7 +27,7 @@ const char *CBreakable::pSpawnObjects[] =
 {
 	NULL,
 	"item_battery",
-	"item_healthkit",
+	NULL, // Unused map spawnobject slot; retain subsequent indices.
 	"weapon_9mmhandgun",
 	"ammo_9mmclip",
 	"weapon_9mmAR",
@@ -164,7 +164,7 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "spawnobject"))
 	{
 		auto object = static_cast<size_t>(Q_atoi(pkvd->szValue));
-		if (object > 0 && object < ARRAYSIZE(pSpawnObjects))
+		if (object > 0 && object < ARRAYSIZE(pSpawnObjects) && pSpawnObjects[object])
 		{
 			m_iszSpawnObject = MAKE_STRING(pSpawnObjects[object]);
 		}

@@ -41,7 +41,6 @@ set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Where put server dll")
 ###################\
 
 set(HLDLL_SRCS
-	./airtank.cpp
 	./ammo.cpp
 	./animating.cpp
 	./animation.cpp
@@ -55,15 +54,12 @@ set(HLDLL_SRCS
 	./effects.cpp
 	./explode.cpp
 	./func_break.cpp
-	./func_tank.cpp
 	./game.cpp
 	./gamerules.cpp
 	./ggrenade.cpp
 	./globals.cpp
 	./h_ai.cpp
-	./h_battery.cpp
 	./h_cycler.cpp
-	./healthkit.cpp
 	./h_export.cpp
 	./player/csdm_randomspawn.cpp
 	./player/hintmessage.cpp
@@ -76,12 +72,10 @@ set(HLDLL_SRCS
 	./items.cpp
 	./lights.cpp
 	./maprules.cpp
-	./mortar.cpp
 	./mpstubb.cpp
 	./multiplay_gamerules.cpp
 	./observer.cpp
 	./pathcorner.cpp
-	./plane.cpp
 	./plats.cpp
 	./player.cpp
 	./skill.cpp

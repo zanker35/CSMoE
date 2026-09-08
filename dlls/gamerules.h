@@ -233,7 +233,6 @@ public:
 	virtual int AmmoShouldRespawn(CBasePlayerAmmo *pAmmo) = 0;
 	virtual time_point_t FlAmmoRespawnTime(CBasePlayerAmmo *pAmmo) = 0;
 	virtual Vector VecAmmoRespawnSpot(CBasePlayerAmmo *pAmmo) = 0;
-	virtual float FlHealthChargerRechargeTime() = 0;
 	virtual float FlHEVChargerRechargeTime() { return 0.0f; }
 	virtual int DeadPlayerWeapons(CBasePlayer *pPlayer) = 0;
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer) = 0;
@@ -310,7 +309,6 @@ public:
 	virtual int AmmoShouldRespawn(CBasePlayerAmmo *pAmmo);
 	virtual time_point_t FlAmmoRespawnTime(CBasePlayerAmmo *pAmmo);
 	virtual Vector VecAmmoRespawnSpot(CBasePlayerAmmo *pAmmo);
-	virtual float FlHealthChargerRechargeTime();
 	virtual float FlHEVChargerRechargeTime();
 	virtual int DeadPlayerWeapons(CBasePlayer *pPlayer);
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);

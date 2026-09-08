@@ -368,7 +368,6 @@ void CHalfLifeMultiplay::RefreshSkillData()
 
 	gSkillData.plrDmg9MM = 12;
 	gSkillData.plrDmgMP5 = 12;
-	gSkillData.suitchargerCapacity = 30;
 	gSkillData.plrDmg357 = 40;
 	gSkillData.plrDmgM203Grenade = 100;
 	gSkillData.plrDmgBuckshot = 20;
@@ -3335,10 +3334,7 @@ Vector CHalfLifeMultiplay::VecAmmoRespawnSpot(CBasePlayerAmmo *pAmmo)
 	return pAmmo->pev->origin;
 }
 
-float CHalfLifeMultiplay::FlHealthChargerRechargeTime()
-{
-	return 60;
-}
+
 
 float CHalfLifeMultiplay::FlHEVChargerRechargeTime()
 {

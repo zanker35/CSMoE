@@ -351,7 +351,6 @@ template<> struct PrivateData<class CBasePlayer, CBaseMonster>
 	BOOL m_fGameHUDInitialized;
 	int m_iTrain;
 	BOOL m_fWeapon;
-	EHANDLE m_pTank;
 	time_point_t m_fDeadTime;
 	BOOL m_fNoPlayerSound;
 	BOOL m_fLongJump;
