@@ -55,7 +55,7 @@ void V_SetupRefDef( void )
 	cl.refdef.time = cl.time;
 	cl.refdef.frametime = host.frametime;
 	//cl.refdef.frametime = cl.time - cl.oldtime;
-	cl.refdef.demoplayback = cls.demoplayback;
+	cl.refdef.demoplayback = 0;
 	cl.refdef.smoothing = 0;
 	cl.refdef.viewsize = scr_viewsize->integer;
 	cl.refdef.onlyClientDraw = 0;	// reset clientdraw
@@ -95,7 +95,7 @@ void V_SetupRefDef( void )
 	if( glState.wideScreen && r_adjust_fov->integer )
 		V_AdjustFov( &cl.refdef.fov_x, &cl.refdef.fov_y, cl.refdef.viewport[2], cl.refdef.viewport[3], false );
 
-	if( CL_IsPredicted( ) && !cl.refdef.demoplayback )
+	if( CL_IsPredicted( ) )
 	{
 		//VectorMA( cl.predicted.origin, cl.lerpBack, cl.predicted.error, cl.predicted.origin );
 		VectorCopy( cl.predicted.origin, cl.refdef.simorg );
@@ -422,7 +422,6 @@ void V_PostRender( void )
 
 		SCR_DrawPos();
 		SV_DrawOrthoTriangles();
-		CL_DrawDemoRecording();
 		R_ShowTextures();
 		CL_DrawHUD( CL_CHANGELEVEL );
 

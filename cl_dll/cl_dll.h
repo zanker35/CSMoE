@@ -83,7 +83,6 @@ void       DLLEXPORT IN_MouseLook(float yaw, float pitch);
 void       DLLEXPORT IN_Accumulate( void );
 void       DLLEXPORT IN_ClearStates( void );
 void       DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
-void       DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
 struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
 struct kbutton_s   DLLEXPORT *KB_Find( const char *name );
 }

@@ -410,7 +410,7 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 {
 	float		delta, move;
 
-	if ( gEngfuncs.IsNoClipping() || !pparams->onground || pparams->demoplayback || pparams->spectator )
+	if ((gEngfuncs.IsNoClipping()) || (!(pparams->onground)) || (pparams->spectator))
 	{
 		pd.driftmove = 0;
 		pd.pitchvel = 0;

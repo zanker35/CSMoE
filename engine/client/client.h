@@ -503,25 +503,10 @@ typedef struct
 	int		envshot_viewsize;		// override cvar
 	qboolean		envshot_disable_vis;	// disable VIS on server while makes an envshots
 	string		shotname;
-	// demo loop control
-	int		demonum;			// -1 = don't play demos
-	int		olddemonum;		// restore playing
-	string		demos[MAX_DEMOS];		// when not playing
-
 	// movie playlist
 	int		movienum;
 	string		movies[MAX_MOVIES];
 
-	// demo recording info must be here, so it isn't clearing on level change
-	qboolean		demorecording;
-	qboolean		demoplayback;
-	qboolean		demowaiting;		// don't record until a non-delta message is received
-	qboolean		timedemo;
-	string		demoname;			// for demo looping
-	double		demotime;			// recording time
-
-	file_t		*demofile;
-	file_t		*demoheader;		// contain demo startup info in case we record a demo on this level
 	qboolean keybind_changed;
 	qboolean splitcompress;			// enabled only on server->client netchan
 	qboolean need_save_config;
@@ -617,7 +602,6 @@ void CL_MP3Command_f( void );
 void CL_EnvShot_f( void );
 void CL_SkyShot_f( void );
 void CL_SaveShot_f( void );
-void CL_DemoShot_f( void );
 void CL_LevelShot_f( void );
 void CL_SetSky_f( void );
 void SCR_Viewpos_f( void );
@@ -638,23 +622,6 @@ void CL_ClearState( void );
 //
 // cl_demo.c
 //
-void CL_StartupDemoHeader( void );
-void CL_DrawDemoRecording( void );
-void CL_WriteDemoUserCmd( int cmdnumber );
-void CL_WriteDemoMessage( qboolean startup, int start, sizebuf_t *msg );
-void CL_WriteDemoUserMessage( const byte *buffer, size_t size );
-qboolean CL_DemoReadMessage( byte *buffer, size_t *length );
-void CL_WriteDemoJumpTime( void );
-void CL_CloseDemoHeader( void );
-void CL_StopPlayback( void );
-void CL_StopRecord( void );
-void CL_PlayDemo_f( void );
-void CL_StartDemos_f( void );
-void CL_Demos_f( void );
-void CL_DeleteDemo_f( void );
-void CL_Record_f( void );
-void CL_Stop_f( void );
-void CL_FreeDemo( void );
 
 //
 // cl_events.c

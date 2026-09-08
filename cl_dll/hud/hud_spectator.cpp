@@ -23,7 +23,6 @@ extern "C++"
 
 // these are included for the math functions
 #include "com_model.h"
-#include "demo_api.h"
 #include "event_api.h"
 
 #include "pm_math.h"
@@ -769,8 +768,7 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 		return; // don't do anything if not in spectator mode
 
 	// don't handle buttons during normal demo playback
-	if ( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
-		return;
+
 	// Slow down mouse clicks.
 	if ( m_flNextObserverInput > time )
 		return;
@@ -1707,7 +1705,7 @@ void CHudSpectator::InitHUDData()
 	memset( &m_OverviewData, 0, sizeof(m_OverviewData));
 	memset( &m_OverviewEntities, 0, sizeof(m_OverviewEntities));
 
-	if ( gEngfuncs.IsSpectateOnly() || gEngfuncs.pDemoAPI->IsPlayingback() )
+	if (gEngfuncs.IsSpectateOnly())
 		m_autoDirector->value = 1.0f;
 	else
 		m_autoDirector->value = 0.0f;

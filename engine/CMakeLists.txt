@@ -126,7 +126,6 @@ set(XASH_ENGINE_APPLE_SOURCES
 
 set(XASH_ENGINE_CLIENT_SOURCES
    client/cl_cmds.c
-   client/cl_demo.c
    client/cl_events.c
    client/cl_frame.c
    client/cl_game.c

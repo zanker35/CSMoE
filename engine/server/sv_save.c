@@ -599,8 +599,7 @@ int SV_IsValidSave( void )
 		return 0;
 
 	// don't parse autosave/transition save/restores during playback!
-	if( CL_IsPlaybackDemo( ))
-		return 0;
+
 
 	if( !svs.initialized || sv.state != ss_active )
 	{

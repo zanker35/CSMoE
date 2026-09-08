@@ -19,7 +19,6 @@ GNU General Public License for more details.
 #include "const.h"
 #include "triangleapi.h"
 #include "r_efx.h"
-#include "demo_api.h"
 #include "ivoicetweak.h"
 #include "pm_local.h"
 #include "cl_tent.h"
@@ -80,7 +79,6 @@ static dllfunc_t cdll_exports[] =
 { "HUD_DrawNormalTriangles", (void **)&clgame.dllFuncs.pfnDrawNormalTriangles },
 { "HUD_DrawTransparentTriangles", (void **)&clgame.dllFuncs.pfnDrawTransparentTriangles },
 { "HUD_GetUserEntity", (void **)&clgame.dllFuncs.pfnGetUserEntity },
-{ "Demo_ReadBuffer", (void **)&clgame.dllFuncs.pfnDemo_ReadBuffer },
 { "CAM_Think", (void **)&clgame.dllFuncs.CAM_Think },
 { "CL_IsThirdPerson", (void **)&clgame.dllFuncs.CL_IsThirdPerson },
 { "CL_CameraOffset", (void **)&clgame.dllFuncs.CL_CameraOffset },
@@ -3391,10 +3389,7 @@ Demo_IsRecording
 
 =================
 */
-static int GAME_EXPORT Demo_IsRecording( void )
-{
-	return cls.demorecording;
-}
+
 
 /*
 =================
@@ -3402,10 +3397,7 @@ Demo_IsPlayingback
 
 =================
 */
-static int GAME_EXPORT Demo_IsPlayingback( void )
-{
-	return cls.demoplayback;
-}
+
 
 /*
 =================
@@ -3413,10 +3405,7 @@ Demo_IsTimeDemo
 
 =================
 */
-static int GAME_EXPORT Demo_IsTimeDemo( void )
-{
-	return cls.timedemo;
-}
+
 
 /*
 =================
@@ -3424,10 +3413,7 @@ Demo_WriteBuffer
 
 =================
 */
-static void GAME_EXPORT Demo_WriteBuffer( int size, byte *buffer )
-{
-	CL_WriteDemoUserMessage( buffer, size );
-}
+
 
 /*
 =================
@@ -3819,13 +3805,7 @@ static event_api_t gEventApi =
 	pfnGetCurrentEventIndex,
 };
 
-static demo_api_t gDemoApi =
-{
-	Demo_IsRecording,
-	Demo_IsPlayingback,
-	Demo_IsTimeDemo,
-	Demo_WriteBuffer,
-};
+
 
 static net_api_t gNetApi =
 {
@@ -3932,7 +3912,7 @@ static cl_enginefunc_t gEngfuncs =
 	&gTriApi,
 	&gEfxApi,
 	&gEventApi,
-	&gDemoApi,
+	NULL, // Reserved demo API slot
 	&gNetApi,
 	NULL, // Reserved voice API slot
 	pfnIsSpectateOnly,

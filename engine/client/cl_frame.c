@@ -259,7 +259,7 @@ qboolean CL_InterpolateModel( cl_entity_t *e )
 	VectorCopy( e->curstate.angles, e->angles );
 
 	// disable interpolating in singleplayer
-	if( cls.timedemo || NET_IsLocalAddress( cls.netchan.remote_address ) )
+	if(NET_IsLocalAddress( cls.netchan.remote_address ))
 		return true;
 
 	// disable interpolating non-moving entities
@@ -983,8 +983,7 @@ int CL_ParsePacketEntities( sizebuf_t *msg, qboolean delta )
 	int playerbytes = 0, bufstart;
 
 	// save first uncompressed packet as timestamp
-	if( cls.changelevel && !delta && cls.demorecording )
-		CL_WriteDemoJumpTime();
+
 
 	// first, allocate packet for new frame
 	count = BF_ReadWord( msg );
@@ -1038,7 +1037,6 @@ int CL_ParsePacketEntities( sizebuf_t *msg, qboolean delta )
 		oldframe = NULL;
 		oldpacket = -1;		// delta too old or is initial message
 		cl.force_send_usercmd = true;	// send reply
-		cls.demowaiting = false;	// we can start recording now
 	}
 
 	// mark current delta state
@@ -1185,7 +1183,7 @@ int CL_ParsePacketEntities( sizebuf_t *msg, qboolean delta )
 		Cvar_SetFloat( "scr_loading", 0.0f );	// reset progress bar	
 		Netchan_ReportFlow( &cls.netchan );
 
-		if(( cls.demoplayback || cls.disable_servercount != cl.servercount ) && cl.video_prepped )
+		if((cls.disable_servercount != cl.servercount) && (cl.video_prepped))
 			SCR_EndLoadingPlaque(); // get rid of loading plaque
 
 #ifdef XASH_VGUI2

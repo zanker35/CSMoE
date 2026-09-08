@@ -353,16 +353,7 @@ void CL_LevelShot_f( void )
 	cls.scrshot_request = scrshot_inactive;
 
 	// check for existence
-	if( cls.demoplayback && ( cls.demonum != -1 ))
-	{
-		Q_sprintf( cls.shotname, "levelshots/%s_%s.bmp", cls.demoname, glState.wideScreen ? "16x9" : "4x3" );
-		Q_snprintf( filename, sizeof( filename ), "demos/%s.dem", cls.demoname );
-
-		// make sure that levelshot is newer than demo
-		ft1 = FS_FileTime( filename, false );
-		ft2 = FS_FileTime( cls.shotname, true );
-	}
-	else if( cl.worldmodel->name )
+	if( cl.worldmodel->name )
 	{
 		Q_sprintf( cls.shotname, "levelshots/%s_%s.bmp", clgame.mapname, glState.wideScreen ? "16x9" : "4x3" );
 
@@ -404,17 +395,7 @@ CL_DemoShot_f
 mini-pic in playdemo menu
 ================== 
 */ 
-void CL_DemoShot_f( void )
-{
-	if( Cmd_Argc() < 2 )
-	{
-		Msg( "Usage: demoshot <demoname>\n" );
-		return;
-	}
 
-	Q_sprintf( cls.shotname, "demos/%s.bmp", Cmd_Argv( 1 ));
-	cls.scrshot_action = scrshot_demoshot; // build new frame for demoshot
-}
 
 /*
 ==============
@@ -422,24 +403,7 @@ CL_DeleteDemo_f
 
 ==============
 */
-void CL_DeleteDemo_f( void )
-{
-	if( Cmd_Argc() != 2 )
-	{
-		Msg( "Usage: killdemo <name>\n" );
-		return;
-	}
 
-	if( cls.demorecording && !Q_stricmp( cls.demoname, Cmd_Argv( 1 )))
-	{
-		Msg( "Can't delete %s - recording\n", Cmd_Argv( 1 ));
-		return;
-	}
-
-	// delete save and saveshot
-	FS_Delete( va( "demos/%s.dem", Cmd_Argv( 1 )));
-	FS_Delete( va( "demos/%s.bmp", Cmd_Argv( 1 )));
-}
 
 /*
 =================

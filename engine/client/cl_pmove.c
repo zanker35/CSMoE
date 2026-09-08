@@ -1131,11 +1131,7 @@ void CL_PredictMovement( void )
 
 	if( cls.state != ca_active ) return;
 
-	if( cls.demoplayback && cl.refdef.cmd != NULL )
-	{
-		// restore viewangles from cmd.angles
-		VectorCopy( cl.refdef.cmd->viewangles, cl.refdef.cl_viewangles );
-	}
+
 	
 	CL_SetUpPlayerPrediction( false, false );
 

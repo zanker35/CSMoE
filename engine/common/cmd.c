@@ -1123,12 +1123,7 @@ void Cmd_ForwardToServer( void )
 {
 	char	str[MAX_CMD_BUFFER];
 
-	if( cls.demoplayback )
-	{
-		if( !Q_stricmp( Cmd_Argv( 0 ), "pause" ))
-			cl.refdef.paused ^= 1;
-		return;
-	}
+
 
 	if( cls.state != ca_connected && cls.state != ca_active )
 	{

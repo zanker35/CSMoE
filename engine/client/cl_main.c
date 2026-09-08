@@ -117,24 +117,18 @@ qboolean CL_IsIntermission( void )
 	return cl.refdef.intermission;
 }
 
-qboolean CL_IsPlaybackDemo( void )
-{
-	return cls.demoplayback;
-}
+
 
 qboolean CL_DisableVisibility( void )
 {
 	return cls.envshot_disable_vis;
 }
 
-qboolean CL_IsBackgroundDemo( void )
-{
-	return ( cls.demoplayback && cls.demonum != -1 );
-}
+
 
 qboolean CL_IsBackgroundMap( void )
 {
-	return ( cl.background && !cls.demoplayback );
+	return ( cl.background );
 }
 
 /*
@@ -443,7 +437,6 @@ void CL_CreateCmd( void )
 	// from the last level
 	if( ++cl.movemessages <= 10 )
 	{
-		if( !cls.demoplayback )
 		{
 			cl.refdef.cmd = &cl.commands[cls.netchan.outgoing_sequence & CL_UPDATE_MASK].cmd;
 			*cl.refdef.cmd = cmd;
@@ -457,14 +450,14 @@ void CL_CreateCmd( void )
 
 	pcmd = &cl.commands[i];
 
-	pcmd->senttime = cls.demoplayback ? 0.0 : host.realtime;
+	pcmd->senttime = host.realtime;
 	memset( &pcmd->cmd, 0, sizeof( pcmd->cmd ));
 	pcmd->receivedtime = -1.0;
 	pcmd->processedfuncs = false;
 	pcmd->heldback = false;
 	pcmd->sendsize = 0;
 
-	active = ( cls.state == ca_active && !cl.refdef.paused && !cls.demoplayback );
+	active = ( cls.state == ca_active && !cl.refdef.paused );
 
 	if( m_ignore->integer )
 	{
@@ -491,7 +484,7 @@ void CL_CreateCmd( void )
 	V_ProcessOverviewCmds( &pcmd->cmd );
 	V_ProcessShowTexturesCmds( &pcmd->cmd );
 
-	if(( cl.background && !cls.demoplayback ) || gl_overview->integer || cls.changelevel )
+	if((cl.background) || (gl_overview->integer) || (cls.changelevel))
 	{
 		VectorCopy( angles, cl.refdef.cl_viewangles );
 		VectorCopy( angles, pcmd->cmd.viewangles );
@@ -500,7 +493,7 @@ void CL_CreateCmd( void )
 
 	// demo always have commands
 	// so don't overwrite them
-	if( !cls.demoplayback ) cl.refdef.cmd = &pcmd->cmd;
+	cl.refdef.cmd = &pcmd->cmd;
 }
 
 void CL_WriteUsercmd( sizebuf_t *msg, int from, int to )
@@ -547,7 +540,7 @@ void CL_WritePacket( void )
 	int		cmdnumber;
 
 	// don't send anything if playing back a demo
-	if( cls.demoplayback || cls.state == ca_cinematic )
+	if(cls.state == ca_cinematic)
 		return;
 
 	if( cls.state == ca_disconnected || cls.state == ca_connecting )
@@ -665,7 +658,7 @@ void CL_WritePacket( void )
 		i = cls.netchan.outgoing_sequence & CL_UPDATE_MASK;
 
 		// determine if we need to ask for a new set of delta's.
-		if( cl.validsequence && (cls.state == ca_active) && !( cls.demorecording && cls.demowaiting ))
+		if((cl.validsequence) && (cls.state == ca_active))
 		{
 			cl.delta_sequence = cl.validsequence;
 
@@ -706,12 +699,7 @@ void CL_WritePacket( void )
 		cls.netchan.outgoing_sequence++;
 	}
 
-	if( cls.demorecording )
-	{
-		// Back up one because we've incremented outgoing_sequence each frame by 1 unit
-		cmdnumber = ( cls.netchan.outgoing_sequence - 1 ) & CL_UPDATE_MASK;
-		CL_WriteDemoUserCmd( cmdnumber );
-	}
+
 
 	// update download/upload slider.
 	Netchan_UpdateProgress( &cls.netchan );
@@ -876,7 +864,7 @@ void CL_CheckForResend( void )
 	}
 
 	// resend if we haven't gotten a reply yet
-	if( cls.demoplayback || cls.state != ca_connecting )
+	if(cls.state != ca_connecting)
 		return;
 
 	if(( host.realtime - cls.connect_time ) < 10.0f )
@@ -1042,7 +1030,7 @@ void CL_ClearState( void )
 	// restore real developer level
 	host.developer = host.old_developer;
 
-	if( !SV_Active() && !CL_IsPlaybackDemo() && !cls.demorecording )
+	if(!(SV_Active()))
 	{
 		Delta_Shutdown();
 		Delta_InitClient();
@@ -1093,7 +1081,6 @@ void CL_Disconnect( void )
 
 	cls.connect_time = 0;
 	cls.changedemo = false;
-	CL_Stop_f();
 
 	// send a disconnect message to the server
 	CL_SendDisconnectMessage();
@@ -1134,7 +1121,6 @@ void CL_Crashed( void )
 
 	host.state = HOST_CRASHED;
 
-	CL_Stop_f(); // stop any demos
 
 	// send a disconnect message to the server
 	CL_SendDisconnectMessage();
@@ -1226,7 +1212,7 @@ void CL_Reconnect_f( void )
 
 	if( cls.state == ca_connected )
 	{
-		cls.demonum = cls.movienum = -1;	// not in the demo loop now
+		cls.movienum = -1;	// not in the demo loop now
 		cls.state = ca_connected;
 
 		// clear channel and stuff
@@ -1242,7 +1228,6 @@ void CL_Reconnect_f( void )
 		cls.nextcmdtime = host.realtime;	// we can send a cmd right away
 		cl.last_command_ack = -1;
 
-		CL_StartupDemoHeader ();
 		return;
 	}
 
@@ -1255,7 +1240,7 @@ void CL_Reconnect_f( void )
 		}
 		else cls.connect_time = MAX_HEARTBEAT; // fire immediately
 
-		cls.demonum = cls.movienum = -1;	// not in the demo loop now
+		cls.movienum = -1;	// not in the demo loop now
 		cls.state = ca_connecting;
 		Msg( "reconnecting...\n" );
 	}
@@ -1402,7 +1387,7 @@ void CL_PrepVideo( void )
 	SCR_UpdateScreen();
 
 	// make sure what map is valid
-	if( !cls.demoplayback && map_checksum != cl.checksum )
+	if(map_checksum != cl.checksum)
 		Host_Error( "Local map version differs from server: %i != '%i'\n", map_checksum, cl.checksum );
 
 	for( i = 0, mdlcount = 0; i < MAX_MODELS && cl.model_precache[i+1][0]; i++ )
@@ -1585,7 +1570,6 @@ void CL_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 		cls.nextcmdtime = host.realtime;	// we can send a cmd right away
 		cl.last_command_ack = -1;
 
-		CL_StartupDemoHeader ();
 	}
 	else if( !Q_strcmp( c, "info" ))
 	{
@@ -1680,10 +1664,7 @@ Handles recording and playback of demos, on top of NET_ code
 */
 static qboolean CL_GetMessage( byte *data, size_t *length )
 {
-	if( cls.demoplayback )
-	{
-		return CL_DemoReadMessage( data, length );
-	}
+
 
 	return NET_GetPacket( NS_CLIENT, &net_from, data, length );
 }
@@ -1723,13 +1704,13 @@ void CL_ReadNetMessage( void )
 		}
 
 		// packet from server
-		if( !cls.demoplayback && !NET_CompareAdr( net_from, cls.netchan.remote_address ))
+		if(!(NET_CompareAdr( net_from, cls.netchan.remote_address )))
 		{
 			MsgDev( D_ERROR, "CL_ReadPackets: %s:sequenced packet without connection\n", NET_AdrToString( net_from ));
 			continue;
 		}
 
-		if( !cls.demoplayback && !Netchan_Process( &cls.netchan, &net_message ))
+		if(!(Netchan_Process( &cls.netchan, &net_message )))
 			continue;	// wasn't accepted for some reason
 
 		CL_ParseServerMessage( &net_message );
@@ -1779,7 +1760,7 @@ void CL_ReadPackets( void )
 		return;
 
 	// check timeout
-	if( cls.state >= ca_connected && !cls.demoplayback && cls.state != ca_cinematic )
+	if((cls.state >= ca_connected) && (cls.state != ca_cinematic))
 	{
 		if( host.realtime - cls.netchan.last_received > cl_timeout->value )
 		{
@@ -2014,13 +1995,7 @@ void CL_InitLocal( void )
 	Cmd_AddCommand ("userinfo", CL_Userinfo_f, "print current client userinfo" );
 	Cmd_AddCommand ("physinfo", CL_Physinfo_f, "print current client physinfo" );
 	Cmd_AddCommand ("disconnect", CL_Disconnect_f, "disconnect from server" );
-	Cmd_AddCommand ("record", CL_Record_f, "record a demo" );
-	Cmd_AddCommand ("playdemo", CL_PlayDemo_f, "play a demo" );
-	Cmd_AddCommand ("killdemo", CL_DeleteDemo_f, "delete a specified demo file and demoshot" );
-	Cmd_AddCommand ("startdemos", CL_StartDemos_f, "start playing back the selected demos sequentially" );
-	Cmd_AddCommand ("demos", CL_Demos_f, "restart looping demos defined by the last startdemos command" );
 	Cmd_AddCommand ("movie", CL_PlayVideo_f, "play a movie" );
-	Cmd_AddCommand ("stop", CL_Stop_f, "stop playing or recording a demo" );
 	Cmd_AddCommand ("info", NULL, "collect info about local servers with specified protocol" );
 	Cmd_AddCommand ("escape", CL_Escape_f, "escape from game to menu" );
 	Cmd_AddCommand ("pointfile", CL_ReadPointFile_f, "show leaks on a map (if present of course)" );
@@ -2035,7 +2010,6 @@ void CL_InitLocal( void )
 	Cmd_AddCommand ("skyshot", CL_SkyShot_f, "takes a six-sides envmap (skybox) shot with specified name" );
 	Cmd_AddCommand ("levelshot", CL_LevelShot_f, "same as \"screenshot\", used to create plaque images" );
 	Cmd_AddCommand ("saveshot", CL_SaveShot_f, "used to create save previews with LoadGame menu" );
-	Cmd_AddCommand ("demoshot", CL_DemoShot_f, "used to create demo previews with PlayDemo menu" );
 
 	Cmd_AddCommand ("reconnect", CL_Reconnect_f, "reconnect to current level" );
 
@@ -2104,8 +2078,8 @@ void Host_ClientFrame( void )
 		// menu time (not paused, not clamped)
 		menu.globals->time = host.realtime;
 		menu.globals->frametime = host.realframetime;
-		menu.globals->demoplayback = cls.demoplayback;
-		menu.globals->demorecording = cls.demorecording;
+		menu.globals->demoplayback = 0;
+		menu.globals->demorecording = 0;
 	}
 
 	VGui_RunFrame ();
@@ -2211,8 +2185,6 @@ void CL_Init( void )
 		cls.initialized = true;
 		cls.keybind_changed = false;
 		cl.maxclients = 1; // allow to drawing player in menu
-		cls.olddemonum = -1;
-		cls.demonum = -1;
 	}
 	else
 		Sys_Warn("Could not load client library:\n%s", Com_GetLibraryError());
@@ -2233,7 +2205,6 @@ void CL_Shutdown( void )
 		Host_WriteOpenGLConfig ();
 		Host_WriteVideoConfig ();
 	}
-	CL_CloseDemoHeader();
 	IN_Shutdown ();
 
 	SCR_Shutdown ();
@@ -2243,7 +2214,6 @@ void CL_Shutdown( void )
 		cls.initialized = false;
 	}
 
-	FS_Delete( "demoheader.tmp" ); // remove tmp file
 	SCR_FreeCinematic (); // release AVI's *after* client.dll because custom renderer may use them
 	S_Shutdown ();
 	R_Shutdown ();

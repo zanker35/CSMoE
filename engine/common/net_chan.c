@@ -493,7 +493,6 @@ void Netchan_OutOfBand( int net_socket, netadr_t adr, int length, byte *data )
 	BF_WriteLong( &send, -1 );	// -1 sequence means out of band
 	BF_WriteBytes( &send, data, length );
 
-	if( !CL_IsPlaybackDemo( ))
 	{
 		// send the datagram
 		NET_SendPacket( net_socket, BF_GetNumBytesWritten( &send ), BF_GetData( &send ), adr );
@@ -1567,7 +1566,6 @@ void Netchan_TransmitBits( netchan_t *chan, int length, byte *data )
 	chan->total_sended_uncompressed += size1;
 
 	// send the datagram
-	if( !CL_IsPlaybackDemo( ))
 	{
 		unsigned int size = BF_GetNumBytesWritten( &send );
 
@@ -1641,7 +1639,7 @@ qboolean Netchan_Process( netchan_t *chan, sizebuf_t *msg )
 	size_t	size1, size2;
 	int	i, qport;
 
-	if( !CL_IsPlaybackDemo() && !NET_CompareAdr( net_from, chan->remote_address ))
+	if(!(NET_CompareAdr( net_from, chan->remote_address )))
 	{
 		return false;
 	}

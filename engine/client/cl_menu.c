@@ -1041,7 +1041,7 @@ static ui_enginefuncs_t gEngfuncs =
 	pfnGetGamesList,
 	pfnGetFilesList,
 	(void*)SV_GetComment,
-	(void*)CL_GetComment,
+	NULL, // Reserved demo-comment API slot
 	pfnCheckGameDll,
 	pfnGetClipboardData,
 	(void*)Sys_ShellExecute,

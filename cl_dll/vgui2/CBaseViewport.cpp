@@ -13,7 +13,6 @@
 #include "CBaseViewport.h"
 
 #include "cl_util.h"
-#include "demo_api.h"
 
 CBaseViewport* g_pViewport = nullptr;
 
@@ -347,8 +346,7 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 		if( pPanel->HasInputElements() )
 		{
 			// don't show input panels during normal demo playback
-			if( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
-				return;
+
 
 			if( ( m_pActivePanel != nullptr ) && ( m_pActivePanel != pPanel ) )
 			{

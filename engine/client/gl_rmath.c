@@ -30,8 +30,7 @@ float V_CalcFov( float *fov_x, float width, float height )
 
 	if( *fov_x < 1.0f || *fov_x > 170.0f )
 	{
-		if( !cls.demoplayback )
-			MsgDev( D_ERROR, "V_CalcFov: bad fov %g!\n", *fov_x );
+		MsgDev( D_ERROR, "V_CalcFov: bad fov %g!\n", *fov_x );
 		*fov_x = 90.0f;
 	}
 

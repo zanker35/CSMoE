@@ -566,7 +566,6 @@ void CL_ParseServerData( sizebuf_t *msg )
 
 	MsgDev( D_NOTE, "Serverdata packet received.\n" );
 
-	cls.demowaiting = false;	// server is changed
 	clgame.load_sequence++;	// now all hud sprites are invalid
 
 	// wipe the client_t struct
@@ -597,13 +596,7 @@ void CL_ParseServerData( sizebuf_t *msg )
 		host.developer++;
 
 	// set the background state
-	if( cls.demoplayback && ( cls.demonum != -1 ))
-	{
-		// re-init mouse
-		host.mouse_visible = false;
-		cl.background = true;
-	}
-	else cl.background = background;
+	cl.background = background;
 
 	if( cl.background )	// tell the game parts about background state
 		Cvar_FullSet( "cl_background", "1", CVAR_READ_ONLY );
@@ -628,7 +621,7 @@ void CL_ParseServerData( sizebuf_t *msg )
 #endif
 	if( !cls.changedemo )
 		UI_SetActiveMenu( cl.background );
-	if( cl.maxclients > 1 && !CL_IsPlaybackDemo() )
+	if(cl.maxclients > 1)
 		Cbuf_AddText( "menu_connectionprogress serverinfo server\n" );
 
 	cl.refdef.viewentity = cl.playernum + 1; // always keep viewent an actual
@@ -643,9 +636,7 @@ void CL_ParseServerData( sizebuf_t *msg )
 		CL_InitEdicts (); // re-arrange edicts
 
 	// get splash name
-	if( cls.demoplayback && ( cls.demonum != -1 ))
-		Cvar_Set( "cl_levelshot_name", va( "levelshots/%s_%s", cls.demoname, glState.wideScreen ? "16x9" : "4x3" ));
-	else Cvar_Set( "cl_levelshot_name", va( "levelshots/%s_%s", clgame.mapname, glState.wideScreen ? "16x9" : "4x3" ));
+	Cvar_Set( "cl_levelshot_name", va( "levelshots/%s_%s", clgame.mapname, glState.wideScreen ? "16x9" : "4x3" ));
 	Cvar_SetFloat( "scr_loading", 0.0f ); // reset progress bar
 
 	if(( cl_allow_levelshots->integer && !cls.changelevel ) || cl.background )
@@ -762,7 +753,6 @@ void CL_ParseClientData( sizebuf_t *msg )
 	cl.last_command_ack = cls.netchan.incoming_acknowledged;
 	cl.last_incoming_sequence = cls.netchan.incoming_sequence;
 
-	if( !cls.demoplayback )
 	{
 		// calculate latency of this frame.
 		// sent time is set when usercmd is sent to server in CL_Move
@@ -782,10 +772,6 @@ void CL_ParseClientData( sizebuf_t *msg )
 				cls.latency = latency;
 			else cls.latency += 0.001f; // drift up, so corrections are needed	
 		}	
-	}
-	else
-	{
-		frame->latency = 0.0f;
 	}
 
 	if( hltv->integer ) return;	// clientdata for spectators ends here
@@ -1158,10 +1144,7 @@ void CL_ParseResourceList( sizebuf_t *msg )
 		Q_strncpy( reslist.resnames[i], BF_ReadString( msg ), CS_SIZE );
 	}
 
-	if( CL_IsPlaybackDemo() )
-	{
-		return;
-	}
+
 
 	downloadcount = 0;
 
@@ -1518,7 +1501,7 @@ void CL_ParseStuffText( sizebuf_t *msg )
 	{
 		Msg("^3STUFFTEXT:\n^2%s\n^3END^7\n", s);
 	}
-	if( cls.state != ca_active && !CL_IsPlaybackDemo() )
+	if(cls.state != ca_active)
 	{
 		char token[256], *s2;
 		int i;
@@ -1619,26 +1602,16 @@ void CL_ParseServerMessage( sizebuf_t *msg )
 
 				S_StopAllSounds();
 
-				if( cls.demoplayback )
-				{
-					SCR_BeginLoadingPlaque( cl.background );
-					cls.changedemo = true;
-				}
+
 			}
 			else MsgDev( D_INFO, "Server disconnected, reconnecting\n" );
 
 			CL_ClearState ();
 			CL_InitEdicts (); // re-arrange edicts
 
-			if( cls.demoplayback )
-			{
-				cl.background = (cls.demonum != -1) ? true : false;
-				cls.state = ca_connected;
-			}
-			else cls.state = ca_connecting;
+			cls.state = ca_connecting;
 			cls.connect_time = MAX_HEARTBEAT; // CL_CheckForResend() will fire immediately
-			if( !CL_IsPlaybackDemo() )
-				Cbuf_AddText( "menu_connectionprogress changelevel\n" );
+			Cbuf_AddText( "menu_connectionprogress changelevel\n" );
 			break;
 		case svc_setview:
 			cl.refdef.viewentity = BF_ReadWord( msg );
@@ -1831,15 +1804,9 @@ void CL_ParseServerMessage( sizebuf_t *msg )
 
 	// we don't know if it is ok to save a demo message until
 	// after we have parsed the frame
-	if( !cls.demoplayback )
 	{
-		if( cls.demorecording && !cls.demowaiting )
+		if( cls.state != ca_active )
 		{
-			CL_WriteDemoMessage( false, starting_count, msg );
-		}
-		else if( cls.state != ca_active )
-		{
-			CL_WriteDemoMessage( true, starting_count, msg );
 		}
 	}
 }

@@ -27,8 +27,6 @@ GNU General Public License for more details.
 #include "ref_params.h"
 #include "cl_entity.h"
 #include "cdll_exp.h"
-#include "demo.h"
-#include "demo_api.h"
 #include "draw_util.h"
 #include "triangleapi.h"
 #include "entity_types.h"

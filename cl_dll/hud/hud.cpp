@@ -28,8 +28,6 @@
 #include <assert.h>
 #include "parsemsg.h"
 
-#include "demo.h"
-#include "demo_api.h"
 #include "vgui_parser.h"
 #include "rain.h"
 
@@ -550,21 +548,9 @@ Returns last FOV
 */
 float HUD_GetFOV( void )
 {
-	if ( gEngfuncs.pDemoAPI->IsRecording() )
-	{
-		// Write it
-		unsigned char buf[ sizeof(float) ];
 
-		// Active
-		*( float * )&buf = g_lastFOV;
 
-		Demo_WriteBuffer( TYPE_ZOOM, sizeof(float), buf );
-	}
 
-	if ( gEngfuncs.pDemoAPI->IsPlayingback() )
-	{
-		g_lastFOV = g_demozoom;
-	}
 	return g_lastFOV;
 }
 

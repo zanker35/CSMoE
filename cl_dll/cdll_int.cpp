@@ -409,7 +409,7 @@ extern "C" void DLLEXPORT F(void *pv) {
 			HUD_TxferLocalOverrides,
 			HUD_ProcessPlayerState,
 			HUD_TxferPredictionData,
-			Demo_ReadBuffer,
+			nullptr, // Reserved demo callback ABI slot
 			HUD_ConnectionlessPacket,
 			HUD_GetHullBounds,
 			HUD_Frame,
@@ -467,7 +467,6 @@ static dllexport_t switch_client_exports[] = {
 	{ "HUD_DrawNormalTriangles", (void*)HUD_DrawNormalTriangles },
 	{ "HUD_DrawTransparentTriangles", (void*)HUD_DrawTransparentTriangles },
 	{ "HUD_GetUserEntity", (void*)HUD_GetUserEntity },
-	{ "Demo_ReadBuffer", (void*)Demo_ReadBuffer },
 	{ "CAM_Think", (void*)CAM_Think },
 	{ "CL_IsThirdPerson", (void*)CL_IsThirdPerson_CL },
 	{ "CL_CameraOffset", (void*)CL_CameraOffset },

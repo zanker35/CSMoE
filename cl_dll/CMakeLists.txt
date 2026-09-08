@@ -181,7 +181,6 @@ set (CLDLL_SOURCES
 	./hud/showwin.cpp
 	../dlls/player/player_model.cpp
 	./cdll_int.cpp
-    ./demo.cpp
     ./entity.cpp
     ./in_camera.cpp
     ./input.cpp
