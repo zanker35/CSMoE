@@ -3,6 +3,9 @@
 [中文(简体)](#关于本项目) | [测试](#Benchmark) | [支援平台](#Platforms)
 
 ## Counter-Strike Mobile-oriented Edition
+
+当前分支以 Apple Silicon Mac 本地游戏 + BOT 为 MVP：保留 5 种模式、44 项购买目录、18 个人物，统一使用 VGUI2 和当前 HUD。构建与内容范围见 [MVP 清理记录](docs/mvp-cleanup.md)、[内容清单](docs/content-scope.md)和[运行说明](docs/cso-ui-port.md)。其他平台源码暂时保留，以下历史平台说明不代表本轮已完成四端验收。
+
 CSMoE is a project that based on Xash3D Engine and CS1.6 Mods to restore like Counter-Strike Online (CSO) or Counter-Strike Nexon: Studio (CSN:S known as CSN:Z)
 
 What makes this special, Because CSMoE are cross-platform designed. Click [Here](#Platforms) To See Supported Platform.
@@ -10,23 +13,20 @@ What makes this special, Because CSMoE are cross-platform designed. Click [Here]
 This project includes CSMoE's Engine, Server and Client.
 
 ## Current Features
+* [x] Classic Counter-Strike with local BOT support
 * [x] New HUD elements (ScoreBoard, KillerEffects, C4 follow icons, Custom Crosshair)
 * [x] GameMode : Team Deathmatch (TDM)
 * [x] GameMode : Deathmatch (DM) with BOT support
 * [x] GameMode : Zombie Mod 1
 * [x] GameMode : Zombie Mod 2
-* [ ] GameMode : Zombie United
-* [x] GameMode : Zombie Mod 3 (Classic)
-* [x] GameMode : Zombie Scenario (Classic) with BOT support
-* [ ] GameMode : GunDeath
-* [ ] GameMode : Zombie Mod 4
+* [x] VGUI2 menus, character selection, purchase presets and Chinese text
 
 ## Differ with other CSO-like mods
 * No dominating weapons and immortal player classes
 * Simplified gameplay
 * No AMXX, all written as C/C++ code 
-* Lightweight implement, VGUI2-less
-* English only
+* One VGUI2 menu implementation and one HUD layout
+* English and Chinese UI text
 * Support low-end specs
 * Cross-platform
 * Fully open-source under GPLv3 licence

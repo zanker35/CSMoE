@@ -96,8 +96,9 @@ node tools/check-cso-hud-messages.js
 ## 数据与边界
 
 所有新配置、日志和截图写入 `build-cso-ui/run`。`dist` 通过 Xash 的只读
-搜索路径挂载，旧程序、已有资源包，以及连接 Steam 的 `cstrike`／`valve`
-符号链接均保留。构建产物和游戏素材不进入源码提交。
+搜索路径挂载。后续 MVP 清理已更新本地应用和资源包；连接 Steam 的
+`cstrike`／`valve` 符号链接保留。构建产物和游戏素材不进入源码提交。
+当前实施范围及资源清理命令见 [MVP 清理记录](mvp-cleanup.md)。
 
 这次交付是可以本地游玩的 master 界面移植，不是新版 citrus 完整玩法的重造：
 
