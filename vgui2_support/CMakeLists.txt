@@ -71,7 +71,6 @@ add_library(vgui_surfacelib STATIC
 		)
 	target_sources(vgui_surfacelib PRIVATE
 			# MoeMod : We dont use Carbon API any more...
-			#vgui2/vgui_surfacelib/osxfont.cpp
 			vgui2/vgui_surfacelib/linuxfont.cpp
 			)
 	target_link_libraries(vgui_surfacelib PUBLIC 3rdparty-freetype)

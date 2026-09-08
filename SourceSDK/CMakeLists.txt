@@ -26,7 +26,6 @@ add_library(tier0 STATIC
         ${HL2SDK_PATH}/tier0/memvalidate.cpp
         ${HL2SDK_PATH}/tier0/minidump.cpp
         ${HL2SDK_PATH}/tier0/pch_tier0.cpp
-        #${HL2SDK_PATH}/tier0/PMELib.cpp
         ${HL2SDK_PATH}/tier0/progressbar.cpp
         ${HL2SDK_PATH}/tier0/security.cpp
         ${HL2SDK_PATH}/tier0/systeminformation.cpp
@@ -126,7 +125,6 @@ add_library(vstdlib STATIC
         ${HL2SDK_PATH}/vstdlib/osversion.cpp
         ${HL2SDK_PATH}/vstdlib/random.cpp
         ${HL2SDK_PATH}/vstdlib/vcover.cpp
-#        ${HL2SDK_PATH}/public/tier0/memoverride.cpp
         )
 target_link_libraries(vstdlib PRIVATE tier0 tier1)
 target_compile_definitions(vstdlib PRIVATE -DVSTDLIB_DLL_EXPORT=1)
