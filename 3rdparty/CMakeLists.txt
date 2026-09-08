@@ -63,10 +63,6 @@ endif()
 add_library(nameof_3p INTERFACE)
 target_link_libraries(nameof_3p INTERFACE nameof::nameof)
 
-add_library(qrcode INTERFACE)
-target_sources(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode/src/qrcode.c)
-target_include_directories(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode/src)
-
 if(XASH_VGUI2)
 	add_library(3rdparty-sdl2 INTERFACE)
 	target_link_libraries(3rdparty-sdl2 INTERFACE sdl2)

@@ -60,7 +60,7 @@
 		3DC1E4C9228AE05000114D80 /* TutorStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DC1E4C8228AE05000114D80 /* TutorStoryboard.storyboard */; };
 		3DC8946F260FAC5600F7A4A5 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DC8946E260FAC5600F7A4A5 /* MainStoryboard.storyboard */; };
 		3DE829B5260F8F00009DABD0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DE829A7260F8F00009DABD0 /* Assets.xcassets */; };
-		3DEAED1A260F84920045F79B /* libmenu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEAED19260F846D0045F79B /* libmenu.a */; };
+		3DEAED1A260F84920045F79B /* libvgui2_support.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEAED19260F846D0045F79B /* libvgui2_support.a */; };
 		3DEAEE6E260F8B750045F79B /* libserver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEAEE6D260F8B340045F79B /* libserver.a */; };
 		3DF2719E23D45158005D151E /* libimgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DF2719523D4511C005D151E /* libimgui.a */; };
 		495E1A1A1E13199A0022E4AA /* launchdialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 495E1A191E13199A0022E4AA /* launchdialog.m */; };
@@ -220,7 +220,7 @@
 		3DC1E4C8228AE05000114D80 /* TutorStoryboard.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = TutorStoryboard.storyboard; sourceTree = "<group>"; };
 		3DC8946E260FAC5600F7A4A5 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
 		3DE829A7260F8F00009DABD0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
-		3DEAED19260F846D0045F79B /* libmenu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmenu.a; sourceTree = "<group>"; };
+		3DEAED19260F846D0045F79B /* libvgui2_support.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libvgui2_support.a; sourceTree = "<group>"; };
 		3DEAEE6D260F8B340045F79B /* libserver.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libserver.a; sourceTree = "<group>"; };
 		3DF2719523D4511C005D151E /* libimgui.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libimgui.a; sourceTree = "<group>"; };
 		495E1A191E13199A0022E4AA /* launchdialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchdialog.m; sourceTree = "<group>"; };
@@ -265,7 +265,7 @@
 				3D4DAA0A23BCED7000F575C1 /* libxash.a in Frameworks */,
 				B62AADA826274FB800F77FE7 /* libclient.a in Frameworks */,
 				3DEAEE6E260F8B750045F79B /* libserver.a in Frameworks */,
-				3DEAED1A260F84920045F79B /* libmenu.a in Frameworks */,
+				3DEAED1A260F84920045F79B /* libvgui2_support.a in Frameworks */,
 				3D8777C624A26838006806BF /* libimgui_ext.a in Frameworks */,
 				3DF2719E23D45158005D151E /* libimgui.a in Frameworks */,
 			);
@@ -380,7 +380,7 @@
 				3D4DA95A23BCEA4700F575C1 /* cl_dll */,
 				3DEAED46260F8B340045F79B /* dlls */,
 				3D4DA95E23BCEAFB00F575C1 /* engine */,
-				3DEAECC0260F846D0045F79B /* mainui_cpp */,
+				3DEAECC0260F846D0045F79B /* vgui2_support */,
 			);
 			path = "cmake-build";
 			sourceTree = SOURCE_ROOT;
@@ -401,12 +401,12 @@
 			path = engine;
 			sourceTree = "<group>";
 		};
-		3DEAECC0260F846D0045F79B /* mainui_cpp */ = {
+		3DEAECC0260F846D0045F79B /* vgui2_support */ = {
 			isa = PBXGroup;
 			children = (
-				3DEAED19260F846D0045F79B /* libmenu.a */,
+				3DEAED19260F846D0045F79B /* libvgui2_support.a */,
 			);
-			path = mainui_cpp;
+			path = vgui2_support;
 			sourceTree = "<group>";
 		};
 		3DEAED46260F8B340045F79B /* dlls */ = {
@@ -683,7 +683,7 @@
 			outputPaths = (
 				"$(SRCROOT)/cmake-build/cl_dll/libclient.a",
 				"$(SRCROOT)/cmake-build/dlls/libserver.a",
-				"$(SRCROOT)/cmake-build/mainui_cpp/libmenu.a",
+				"$(SRCROOT)/cmake-build/vgui2_support/libvgui2_support.a",
 				"$(SRCROOT)/cmake-build/engine/libxash.a",
 				"$(SRCROOT)/cmake-build/libimgui_ext.a",
 				"$(SRCROOT)/cmake-build/libimgui.a",
@@ -750,7 +750,7 @@
 					"$(PROJECT_DIR)/Resources",
 					"$(PROJECT_DIR)/cmake-build/cl_dll",
 					"$(PROJECT_DIR)/cmake-build/dlls",
-					"$(PROJECT_DIR)/cmake-build/mainui_cpp",
+					"$(PROJECT_DIR)/cmake-build/vgui2_support",
 					"$(PROJECT_DIR)/cmake-build/engine",
 					"$(PROJECT_DIR)/cmake-build",
 					"$(PROJECT_DIR)/cmake-build/3rdparty",
@@ -866,7 +866,7 @@
 					"$(PROJECT_DIR)/Resources",
 					"$(PROJECT_DIR)/cmake-build/cl_dll",
 					"$(PROJECT_DIR)/cmake-build/dlls",
-					"$(PROJECT_DIR)/cmake-build/mainui_cpp",
+					"$(PROJECT_DIR)/cmake-build/vgui2_support",
 					"$(PROJECT_DIR)/cmake-build/engine",
 					"$(PROJECT_DIR)/cmake-build",
 					"$(PROJECT_DIR)/cmake-build/3rdparty",

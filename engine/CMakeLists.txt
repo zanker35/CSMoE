@@ -380,8 +380,6 @@ if(XASH_STATIC_GAMELIB)
 	if(XASH_VGUI2)
 		target_link_libraries(${XASH_ENGINE} client server vgui2_support vgui2 GameUI)
 		target_compile_definitions(${XASH_ENGINE} PRIVATE XASH_VGUI2=1)
-	else()
-		target_link_libraries(${XASH_ENGINE} xashmenu client server)
 	endif()
 endif()
 

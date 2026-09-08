@@ -1,6 +1,3 @@
-[submodule "mainui_cpp"]
-	path = mainui_cpp
-	url = https://github.com/zanker35/mainui_cpp.git
 [submodule "nanogl"]
 	path = nanogl
 	url = https://github.com/MoeMod/nanogl
@@ -13,9 +10,6 @@
 [submodule "3rdparty/QindieGL"]
 	path = 3rdparty/QindieGL
 	url = https://github.com/MoeMod/QindieGL
-[submodule "3rdparty/QRCode"]
-	path = 3rdparty/QRCode
-	url = https://github.com/ricmoo/QRCode
 [submodule "3rdparty/luajit-cmake"]
 	path = 3rdparty/luajit-cmake
 	url = https://github.com/MoeMod/luajit-cmake

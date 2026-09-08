@@ -262,7 +262,7 @@ const char *name;
 void *func;
 } dllexport_t;
 
-static dllexport_t switch_mainui_exports[] = {
+static dllexport_t switch_menu_exports[] = {
 	{ "GetMenuAPI", (void*)ui::GetMenuAPI },
 #ifndef XASH_DISABLE_FWGS_EXTENSIONS
 	{ "GiveTextAPI", (void*)ui::GiveTextAPI },
@@ -273,8 +273,8 @@ static dllexport_t switch_mainui_exports[] = {
 
 extern "C" int dll_register( const char *name, dllexport_t *exports );
 
-extern "C" int switch_installdll_mainui( void )
+extern "C" int switch_installdll_menu( void )
 {
-	return dll_register( "menu", switch_mainui_exports );
+	return dll_register( "menu", switch_menu_exports );
 }
 #endif

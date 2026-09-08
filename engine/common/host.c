@@ -1270,8 +1270,8 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	extern int switch_installdll_vgui( void );
 	switch_installdll_vgui();
 #endif
-  	extern int switch_installdll_mainui( void );
- 	switch_installdll_mainui(); // mainui_cpp/udll_int.cpp
+	extern int switch_installdll_menu( void );
+	switch_installdll_menu(); // vgui2_support/udll_int.cpp
  	extern int switch_installdll_client( void );
  	switch_installdll_client(); // cl_dll/cdll_int.cpp
  	extern int switch_installdll_server( void );
