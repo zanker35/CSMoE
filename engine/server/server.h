@@ -397,7 +397,6 @@ typedef struct
 	entity_state_t	*packet_entities;		// [num_client_entities]
 	entity_state_t	*baselines;		// [GI->max_edicts]
 
-	double		last_heartbeat;
 	challenge_t	challenges[MAX_CHALLENGES];	// to prevent invalid IPs from connecting
 } server_static_t;
 
@@ -456,7 +455,6 @@ extern	convar_t		*sv_downloadurl;
 extern 	convar_t		*sv_skipshield; // HACK for shield (cstrike)
 extern	convar_t		*sv_trace_messages;
 extern	convar_t		*mp_consistency;
-extern	convar_t		*public_server;
 extern	convar_t		*physinfo;
 extern	convar_t		*deathmatch;
 extern	convar_t		*teamplay;
@@ -492,10 +490,6 @@ void SV_KillOperatorCommands( void );
 void SV_PrepWorldFrame( void );
 void SV_ProcessFile( sv_client_t *cl, char *filename );
 void SV_SendResourceList_f( sv_client_t *cl );
-void Master_Add( void );
-void Master_Heartbeat( void );
-void Master_Packet( void );
-void SV_AddToMaster( netadr_t from, sizebuf_t *msg );
 qboolean SV_ProcessUserAgent( netadr_t from, char *useragent );
 
 //

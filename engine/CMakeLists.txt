@@ -51,7 +51,6 @@ set(XASH_ENGINE_SOURCES
 	common/hpak.c
 	common/infostring.c
 	common/identification.c
-	common/masterlist.c
 	common/mathlib.c
 	common/matrixlib.c
 	common/mod_studio.c

@@ -57,7 +57,6 @@ convar_t	*sv_lighting_modulate;
 convar_t	*sv_maxclients;
 convar_t	*sv_check_errors;
 convar_t	*sv_footsteps;
-convar_t	*public_server;			// should heartbeats be sent
 convar_t	*sv_reconnect_limit;		// minimum seconds between connect messages
 convar_t	*sv_failuretime;
 convar_t	*sv_allow_upload;
@@ -121,7 +120,6 @@ convar_t	*sv_allow_mouse;
 convar_t	*sv_allow_joystick;
 convar_t	*sv_allow_vr;
 
-void Master_Shutdown( void );
 
 char localinfo[MAX_LOCALINFO];
 
@@ -700,113 +698,42 @@ void Host_ServerFrame( void )
 	SV_PrepWorldFrame ();
 
 	// send a heartbeat to the master if needed
-	Master_Heartbeat ();
 }
 
 //============================================================================
 
 /*
 =================
-Master_Add
 =================
 */
-void Master_Add( void )
-{
-	if( NET_SendToMasters( NS_SERVER, 2, "q\xFF" ) )
-		svs.last_heartbeat = MAX_HEARTBEAT; // try next frame
-}
+
 
 
 /*
 ================
-Master_Heartbeat
 
 Send a message to the master every few minutes to
 let it know we are alive, and log information
 ================
 */
-void Master_Heartbeat( void )
-{
-	if( !public_server->integer || sv_maxclients->integer == 1 )
-		return; // only public servers send heartbeats
 
-	// check for time wraparound
-	if( svs.last_heartbeat > host.realtime )
-		svs.last_heartbeat = host.realtime;
-
-	if(( host.realtime - svs.last_heartbeat ) < HEARTBEAT_SECONDS )
-		return; // not time to send yet
-
-	svs.last_heartbeat = host.realtime;
-
-	Master_Add();
-}
 
 /*
 =================
-Master_Shutdown
 
 Informs all masters that this server is going down
 =================
 */
-void Master_Shutdown( void )
-{
-	NET_Config( true, false ); // allow remote
-	while( NET_SendToMasters( NS_SERVER, 2, "\x62\x0A" ) );
-}
+
 
 /*
 =================
-SV_AddToMaster
 
 A server info answer to master server.
 Master will validate challenge and this server to public list
 =================
 */
-void SV_AddToMaster( netadr_t from, sizebuf_t *msg )
-{
-	uint challenge;
-	char s[4096] = "0\n"; // skip 2 bytes of header
-	int clients = 0, bots = 0, index;
-	qboolean havePassword;
 
-	if( svs.clients )
-	{
-		for( index = 0; index < sv_maxclients->integer; index++ )
-		{
-			if( svs.clients[index].state >= cs_connected )
-			{
-				if( svs.clients[index].fakeclient )
-					bots++;
-				else clients++;
-			}
-		}
-	}
-
-	challenge = BF_ReadUBitLong( msg, sizeof( uint ) << 3 );
-	havePassword = sv_password->string[0] && Q_stricmp( sv_password->string, "none" );
-
-	Info_SetValueForKey(s, "protocol",  va( "%d", PROTOCOL_VERSION ), sizeof( s ) ); // protocol version
-	Info_SetValueForKey(s, "challenge", va( "%u", challenge ), sizeof( s )  ); // challenge number
-	Info_SetValueForKey(s, "players",   va( "%d", clients ), sizeof( s ) ); // current player number, without bots
-	Info_SetValueForKey(s, "max",       sv_maxclients->string, sizeof( s ) ); // max_players
-	Info_SetValueForKey(s, "bots",      va( "%d", bots ), sizeof( s ) ); // bot count
-	Info_SetValueForKey(s, "gamedir",   GI->gamefolder, sizeof( s ) ); // gamedir
-	Info_SetValueForKey(s, "map",       sv.name, sizeof( s ) ); // current map
-	Info_SetValueForKey(s, "type",      Host_IsDedicated() ? "d" : "l", sizeof( s ) ); // dedicated
-	Info_SetValueForKey(s, "password",  havePassword       ? "1" : "0", sizeof( s ) ); // is password set
-
-	Info_SetValueForKey(s, "os",        "l", sizeof( s ) ); // Linux
-
-	Info_SetValueForKey(s, "secure",    "0", sizeof( s ) ); // server anti-cheat
-	Info_SetValueForKey(s, "lan",       "0", sizeof( s ) ); // LAN servers doesn't send info to master
-	Info_SetValueForKey(s, "version",   XASH_VERSION, sizeof( s ) ); // server region. 255 -- all regions
-	Info_SetValueForKey(s, "region",    "255", sizeof( s ) ); // server region. 255 -- all regions
-	Info_SetValueForKey(s, "product",   GI->gamefolder, sizeof( s ) ); // product? Where is the difference with gamedir?
-	Info_SetValueForKey(s, "nat",       sv_nat->string, sizeof( s ) ); // Server running under NAT, use reverse connection
-
-	NET_SendPacket( NS_SERVER, Q_strlen( s ), s, from );
-}
 
 /*
 ====================
@@ -960,7 +887,6 @@ void SV_Init( void )
 	sv_check_errors = Cvar_Get( "sv_check_errors", "0", CVAR_ARCHIVE, "check edicts for errors" );
 	physinfo = Cvar_Get( "@physinfo", "0", CVAR_READ_ONLY, "" ); // use ->modified value only
 	serverinfo = Cvar_Get( "@serverinfo", "0", CVAR_READ_ONLY, "" ); // use ->modified value only
-	public_server = Cvar_Get ("public", "0", 0, "change server type from private to public" );
 	sv_lighting_modulate = Cvar_Get( "r_lighting_modulate", "0.6", CVAR_ARCHIVE, "lightstyles modulate scale" );
 	sv_reconnect_limit = Cvar_Get ("sv_reconnect_limit", "3", CVAR_ARCHIVE, "max reconnect attempts" );
 	sv_failuretime = Cvar_Get( "sv_failuretime", "0.5", 0, "after this long without a packet from client, don't send any more until client starts sending again" );
@@ -1088,8 +1014,6 @@ void SV_Shutdown( qboolean reconnect )
 	if( svs.clients )
 		SV_FinalMessage( host.finalmsg, reconnect );
 
-	if( public_server->integer && sv_maxclients->integer != 1 )
-		Master_Shutdown();
 
 	Sequence_PurgeEntries( true ); // clear Sequence
 

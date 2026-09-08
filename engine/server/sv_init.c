@@ -379,11 +379,7 @@ void SV_ActivateServer( void )
 				Cbuf_AddText( va( "exec %s\n", plservercfgfile ) );
 		}
 
-		if( public_server->integer )
-		{
-			MsgDev( D_INFO, "Adding your server to master server list\n" );
-			Master_Add( );
-		}
+
 	}
 
 	// mapchangecfgfile
@@ -724,7 +720,6 @@ void SV_InitGame( void )
 	svgame.globals->coop = ( sv_maxclients->integer > 1 ) ? Cvar_VariableInteger( "coop" ):0;
 
 	// heartbeats will always be sent to the id master
-	svs.last_heartbeat = MAX_HEARTBEAT; // send immediately
 
 	// set client fields on player ents
 	for( i = 0; i < svgame.globals->maxClients; i++ )

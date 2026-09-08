@@ -1027,7 +1027,6 @@ SV_Heartbeat_f
 */
 void SV_Heartbeat_f( void )
 {
-	svs.last_heartbeat = MAX_HEARTBEAT;
 }
 
 /*

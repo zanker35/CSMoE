@@ -131,8 +131,6 @@ public:
 public:
 	void OnWelcomeNewbie(void);
 	void OnGameUIActivated(void);
-	void OnOpenServerBrowser(void);
-	MESSAGE_FUNC_CHARPTR(OnServerAddressEntered, "InputCompleted", text);
 	void OnOpenCreateMultiplayerGameDialog(void);
 	void OnOpenQuitConfirmationDialog(void);
 	void OnOpenOptionsDialog(void);

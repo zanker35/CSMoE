@@ -776,9 +776,7 @@ CGameMenu *CBasePanel::RecursiveLoadGameMenu(KeyValues *datafile)
 		if (dat->GetInt("OnlyInCareerGame") || (cmd && !Q_stricmp(cmd, "OpenPlayerListDialog")))
 			continue;
 		const char *name = dat->GetString("name", label);
-		if (cmd && !Q_stricmp(cmd, "OpenServerBrowser"))
-			label = "连接服务器";
-		else if (cmd && !Q_stricmp(cmd, "OpenCreateMultiplayerGameDialog"))
+		if (cmd && !Q_stricmp(cmd, "OpenCreateMultiplayerGameDialog"))
 			label = "创建游戏";
 
 		menu->AddMenuItem(name, label, cmd, this, dat);
@@ -977,11 +975,8 @@ void CBasePanel::OnGameUIActivated(void)
 
 void CBasePanel::RunMenuCommand(const char *command)
 {
-	if (!Q_stricmp(command, "OpenServerBrowser"))
-	{
-		OnOpenServerBrowser();
-	}
-	else if (!Q_stricmp(command, "OpenCreateMultiplayerGameDialog"))
+
+	if (!Q_stricmp(command, "OpenCreateMultiplayerGameDialog"))
 	{
 		OnOpenCreateMultiplayerGameDialog();
 	}
@@ -1091,25 +1086,9 @@ void CBasePanel::OnOpenQuitConfirmationDialog(void)
     }
 }
 
-void CBasePanel::OnOpenServerBrowser(void)
-{
-	auto dialog = new vgui2::InputDialog(this, "连接服务器", "输入服务器地址，例如 192.168.1.10:27015", "127.0.0.1:27015");
-	dialog->AddActionSignalTarget(this);
-	dialog->DoModal();
-}
 
-void CBasePanel::OnServerAddressEntered(const char *text)
-{
-	if (!text || !*text || strlen(text) > 255 || strpbrk(text, ";\"\r\n\t "))
-	{
-		auto dialog = new vgui2::MessageBox("连接服务器", "请输入有效的服务器地址和端口。", this);
-		dialog->DoModal();
-		return;
-	}
-	char command[300];
-	snprintf(command, sizeof(command), "connect %s\n", text);
-	engine->pfnClientCmd(command);
-}
+
+
 
 void CBasePanel::OnOpenOptionsDialog(void)
 {

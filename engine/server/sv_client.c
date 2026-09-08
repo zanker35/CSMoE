@@ -325,8 +325,6 @@ gotnewcl:
 	for( i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++ )
 		if( cl->state >= cs_connected ) count++;
 
-	if( count == 1 || count == sv_maxclients->integer )
-		svs.last_heartbeat = MAX_HEARTBEAT;
 }
 
 /*
@@ -538,8 +536,6 @@ void SV_DropClient( sv_client_t *drop )
 			break;
 	}
 
-	if( i == sv_maxclients->integer )
-		svs.last_heartbeat = MAX_HEARTBEAT;
 }
 
 /*
@@ -3375,7 +3371,6 @@ void SV_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 	else if( !Q_strcmp( c, "connect" )) SV_DirectConnect( from );
 	else if( !Q_strcmp( c, "rcon" )) SV_RemoteCommand( from, msg );
 	else if( !Q_strcmp( c, "netinfo" )) SV_BuildNetAnswer( from );
-	else if( !Q_strcmp( c, "s")) SV_AddToMaster( from, msg );
 	else if( !Q_strcmp( c, "T" "Source" ) ) SV_TSourceEngineQuery( from );
 	else if( !Q_strcmp( c, "c" ) )
 	{

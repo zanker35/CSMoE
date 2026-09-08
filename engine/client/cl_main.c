@@ -34,7 +34,6 @@ GNU General Public License for more details.
 #define MAX_CMD_BUFFER		4000
 #define CONNECTION_PROBLEM_TIME	15.0	// 15 seconds
 
-void CL_InternetServers_f( void );
 
 convar_t	*r_oldparticles;
 convar_t	*rcon_client_password;
@@ -863,8 +862,6 @@ void CL_CheckForResend( void )
 	netadr_t	adr;
 	int res;
 
-	if( cls.internetservers_wait )
-		CL_InternetServers_f();
 
 	// if the local server is running and we aren't then connect
 	if( cls.state == ca_disconnected && ( SV_Active( ) ) )
@@ -915,63 +912,10 @@ void CL_CheckForResend( void )
 
 /*
 ================
-CL_Connect_f
 
 ================
 */
-void CL_Connect_f( void )
-{
-	string server;
 
-	if( Cmd_Argc() != 2 )
-	{
-		Msg( "Usage: connect <server>\n" );
-		return;
-	}
-
-	// default value 40000 ignored as we don't want to grow userinfo string
-	if( ( cl_maxpacket->integer < 40000 ) && ( cl_maxpacket->integer > 99 ) )
-	{
-		cl_maxpacket->flags |= CVAR_USERINFO;
-		userinfo->modified = true;
-	}
-	else if( cl_maxpacket->flags & CVAR_USERINFO )
-	{
-		cl_maxpacket->flags &= ~CVAR_USERINFO;
-		userinfo->modified = true;
-	}
-
-	// allow override payload size for some bad networks
-	if( ( cl_maxpayload->integer < 40000 ) && ( cl_maxpayload->integer > 99 ) )
-	{
-		cl_maxpayload->flags |= CVAR_USERINFO;
-		userinfo->modified = true;
-	}
-	else if( cl_maxpayload->flags & CVAR_USERINFO )
-	{
-		cl_maxpayload->flags &= ~CVAR_USERINFO;
-		userinfo->modified = true;
-	}
-
-	Q_strncpy( server, Cmd_Argv( 1 ), MAX_STRING );
-
-	if( Host_ServerState())
-	{
-		// if running a local server, kill it and reissue
-		Q_strncpy( host.finalmsg, "Server quit", MAX_STRING );
-		SV_Shutdown( false );
-	}
-
-	NET_Config( true, !cl_nat->integer ); // allow remote
-
-	//Msg( "server %s\n", server );
-	CL_Disconnect();
-
-	HTTP_Clear_f();
-	cls.state = ca_connecting;
-	Q_strncpy( cls.servername, server, sizeof( cls.servername ));
-	cls.connect_time = MAX_HEARTBEAT; // CL_CheckForResend() will fire immediately
-}
 
 
 /*
@@ -1198,74 +1142,22 @@ void CL_Crashed( void )
 
 /*
 =================
-CL_LocalServers_f
 =================
 */
-void CL_LocalServers_f( void )
-{
-	netadr_t	adr;
 
-	MsgDev( D_INFO, "Scanning for servers on the local network area...\n" );
-	NET_Config( true, true ); // allow remote
 
-	// send a broadcast packet
-	adr.type = NA_BROADCAST;
-	adr.port = BF_BigShort( PORT_SERVER );
-
-	Netchan_OutOfBandPrint( NS_CLIENT, adr, "info %i", PROTOCOL_VERSION );
-}
-
-#define MS_SCAN_REQUEST "1\xFF" "0.0.0.0:0\0"
 
 /*
 =================
-CL_InternetServers_f
 =================
 */
-void CL_InternetServers_f( void )
-{
-	char	fullquery[512] = MS_SCAN_REQUEST;
-	char *info = fullquery + sizeof( MS_SCAN_REQUEST ) - 1;
-	const size_t remaining = sizeof( fullquery ) - sizeof( MS_SCAN_REQUEST );
 
-	Info_SetValueForKey( info, "nat", cl_nat->string, remaining );
-	Info_SetValueForKey( info, "gamedir", GI->gamefolder, remaining );
-
-	// let master know about client version
-	Info_SetValueForKey( info, "clver", XASH_VERSION, remaining );
-
-	NET_Config( true, true ); // allow remote
-
-	cls.internetservers_wait = NET_SendToMasters( NS_CLIENT, sizeof( MS_SCAN_REQUEST ) + Q_strlen( info ), fullquery );
-	cls.internetservers_pending = true;
-}
 
 /*
 ====================
-CL_QueryServer_f
 ====================
 */
-void CL_QueryServer_f( void )
-{
-	netadr_t adr;
 
-	if( Cmd_Argc() != 2 )
-	{
-		MsgDev( D_INFO, "Usage: queryserver <adr>\n" );
-		return;
-	}
-
-	NET_Config( true, true ); // allow remote
-
-	if( NET_StringToAdr( Cmd_Argv( 1 ), &adr ) )
-	{
-		Netchan_OutOfBandPrint( NS_CLIENT, adr, "info %i", PROTOCOL_VERSION );
-	}
-	else
-	{
-		Msg( "Bad address\n" );
-	}
-}
 
 /*
 ====================
@@ -1739,30 +1631,7 @@ void CL_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 			Cmd_ExecuteString( va("menu_showmessagebox \"^3Server message^7\n%s\"", str ), src_command );
 		Msg( "%s", str );
 	}
-	else if( !Q_strcmp( c, "updatemsg" ))
-	{
-		// got an update message from master server
-		// show update dialog from menu
-		netadr_t adr;
-		qboolean preferStore = true;
 
-		if( !Q_strcmp( Cmd_Argv( 1 ), "nostore" ) )
-			preferStore = false;
-
-		if( NET_StringToAdr( DEFAULT_PRIMARY_MASTER, &adr ) )
-		{
-			if( NET_CompareAdr( from, adr ))
-			{
-				// update from masterserver
-				Cbuf_AddText( va( "menu_updatedialog %s\n", preferStore ? "store" : "nostore" ) );
-			}
-		}
-		else
-		{
-			// in case we don't have master anymore
-			Cbuf_AddText( va( "menu_updatedialog %s\n", preferStore ? "store" : "nostore" ) );
-		}
-	}
 	else if( !Q_strcmp( c, "ping" ))
 	{
 		// ping from somewhere
@@ -1793,32 +1662,7 @@ void CL_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 		CL_Disconnect();
 		CL_ClearEdicts();
 	}
-	else if( !Q_strcmp( c, "f") )
-	{
-		// serverlist got from masterserver
-		while( !msg->bOverflow )
-		{
-			servadr.type = NA_IP;
-			// 4 bytes for IP
-			BF_ReadBytes( msg, servadr.ip, sizeof( servadr.ip ));
-			// 2 bytes for Port
-			servadr.port = BF_ReadShort( msg );
 
-			if( !servadr.port )
-				break;
-
-			MsgDev( D_INFO, "Found server: %s\n", NET_AdrToString( servadr ));
-
-			NET_Config( true, false ); // allow remote
-
-			Netchan_OutOfBandPrint( NS_CLIENT, servadr, "info %i", PROTOCOL_VERSION );
-		}
-
-		// execute at next frame preventing relation on fps
-		if( cls.internetservers_pending )
-			Cbuf_AddText("menu_resetping\n");
-		cls.internetservers_pending = false;
-	}
 	else if( clgame.dllFuncs.pfnConnectionlessPacket( &from, args, buf, &len ))
 	{
 		// user out of band message (must be handled in CL_ConnectionlessPacket)
@@ -2164,9 +2008,6 @@ void CL_InitLocal( void )
 
 	// register our commands
 	Cmd_AddCommand ("pause", NULL, "pause the game (if the server allows pausing)" );
-	Cmd_AddCommand ("localservers", CL_LocalServers_f, "collect info about local servers" );
-	Cmd_AddCommand ("internetservers", CL_InternetServers_f, "collect info about internet servers" );
-	Cmd_AddCommand ("queryserver", CL_QueryServer_f, "collect info about server by address");
 	Cmd_AddCommand ("cd", CL_PlayCDTrack_f, "play cd-track (not real cd-player of course)" );
 	Cmd_AddCommand ("mp3", CL_MP3Command_f, "mp3 command" );
 
@@ -2196,7 +2037,6 @@ void CL_InitLocal( void )
 	Cmd_AddCommand ("saveshot", CL_SaveShot_f, "used to create save previews with LoadGame menu" );
 	Cmd_AddCommand ("demoshot", CL_DemoShot_f, "used to create demo previews with PlayDemo menu" );
 
-	Cmd_AddCommand ("connect", CL_Connect_f, "connect to a server by hostname" );
 	Cmd_AddCommand ("reconnect", CL_Reconnect_f, "reconnect to current level" );
 
 	Cmd_AddCommand ("rcon", CL_Rcon_f, "sends a command to the server console (rcon_password and rcon_address required)" );

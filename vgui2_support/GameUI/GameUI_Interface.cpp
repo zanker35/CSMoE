@@ -14,7 +14,6 @@
 #include <IEngineVGui.h>
 #include <IGameUIFuncs.h>
 #include <IBaseUI.h>
-#include <ServerBrowser/IServerBrowser.h>
 #include <IVGuiModule.h>
 
 #include <IEngineVGui.h>
@@ -35,7 +34,6 @@
 #include "GameUI_Interface.h"
 #include "menu_int.h"
 
-IServerBrowser *serverbrowser = NULL;
 static CBasePanel *staticPanel = NULL;
 
 static CGameUI g_GameUI;
@@ -282,38 +280,14 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	
 	baseuifuncs = static_cast<IBaseUI*>(pEngFactory(BASEUI_INTERFACE_VERSION, nullptr));
 
-	/*
-	HINTERFACEMODULE hServerBrowser = Sys_LoadModule("platform\\servers\\serverbrowser.dll");
-	CreateInterfaceFn pfnServerBrowserFactory = Sys_GetFactory(hServerBrowser);
 	
-	serverbrowser = (IServerBrowser *)pfnServerBrowserFactory(SERVERBROWSER_INTERFACE_VERSION, NULL);
-	serverbrowserModule = (IVGuiModule *)pfnServerBrowserFactory("VGuiModuleServerBrowser001", NULL);
-	
-	if (serverbrowserModule)
-	{
-		serverbrowserModule->Initialize(factories, count);
-		serverbrowserModule->SetParent(staticPanel->GetVPanel());
 
-		serverbrowserModule->PostInitialize(factories, count);
-	}*/
 
-	/*
-	serverbrowser = (IServerBrowser *)CreateInterface(SERVERBROWSER_INTERFACE_VERSION, NULL);
-	//serverbrowser = &ServerBrowser();
-
-	if (serverbrowser)
-		serverbrowser->Initialize(factories, count);
-
-	if (serverbrowser)
-		serverbrowser->SetParent(staticPanel->GetVPanel());
-		*/
 	
 	vgui2::surface()->SetAllowHTMLJavaScript(true);
 
-	engine->pfnAddCommand("menu_connectionprogress", UI_ConnectionProgress_f);
 	engine->pfnAddCommand("menu_newgame", [] { OpenMenuPage("OpenCreateMultiplayerGameDialog"); });
 	engine->pfnAddCommand("menu_options", [] { OpenMenuPage("OpenOptionsDialog"); });
-	engine->pfnAddCommand("menu_connect", [] { OpenMenuPage("OpenServerBrowser"); });
 }
 
 void CGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, void *system)
@@ -323,13 +297,7 @@ void CGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 
 	ModInfo().LoadCurrentGameInfo();
 	
-	/*
-	if (serverbrowser)
-	{
-		serverbrowser->ActiveGameName(ModInfo().GetGameDescription(), engine->pfnGetGameDirectory());
-		serverbrowser->Reactivate();
-	}
-	*/
+
 
 	// start mp3 playing
 	engine->pfnClientCmd("mp3 loop media/gamestartup.mp3\n");
@@ -338,19 +306,8 @@ void CGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 
 void CGameUI::Shutdown(void)
 {
-	/*if (serverbrowserModule)
-	{
-	//	serverbrowser->Deactivate();
-	//	serverbrowser->Shutdown();
-		serverbrowserModule->Shutdown();
-	}*/
-	/*
-	if (serverbrowser)
-	{
-		serverbrowser->Deactivate();
-		serverbrowser->Shutdown();
-	}
-	*/
+
+
 	ModInfo().FreeModInfo();
 }
 
@@ -407,30 +364,18 @@ void CGameUI::RunFrame(void)
 
 void CGameUI::ConnectToServer(const char *game, int IP, int port)
 {
-	/*
-	if (serverbrowser)
-		serverbrowser->ConnectToGame(IP, port);
-		*/
+
 
 	engine->pfnClientCmd("mp3 stop\n");
 	//engine->pfnClientCmd("fmod stop\n");
 
 	baseuifuncs->HideGameUI();
-	/*
-	KeyValues *pKV = new KeyValues("ConnectedToGame");
-	pKV->SetInt("ip", IP);
-	pKV->SetInt("port", port);
-	pKV->SetString("gamedir", game);
 
-	vgui2::ivgui()->PostMessageA(serverbrowserModule->GetPanel(), pKV, staticPanel->GetVPanel());*/
 }
 
 void CGameUI::DisconnectFromServer(void)
 {
-	/*
-	if (serverbrowser)
-		serverbrowser->DisconnectFromGame();
-		*/
+
 
 	baseuifuncs->ActivateGameUI();
 }
@@ -637,19 +582,9 @@ void CGameUI::ValidateCDKey(bool force, bool inConnect)
 	
 }
 
-bool CGameUI::IsServerBrowserValid(void)
-{
-	return serverbrowser != NULL;
-}
 
-void CGameUI::ActivateServerBrowser(void)
-{
-	/*if (serverbrowser)
-		serverbrowser->Activate();*/
 
-	if (staticPanel)
-		staticPanel->OnOpenServerBrowser();
-}
+
 
 bool CGameUI::IsInLevel(void)
 {

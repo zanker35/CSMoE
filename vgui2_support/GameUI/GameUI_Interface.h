@@ -46,8 +46,6 @@ public:
 	virtual void PaddingFunction5(int param1, int param2) {}
 
 public:
-	bool IsServerBrowserValid(void);
-	void ActivateServerBrowser(void);
 
 public:
 	bool IsInLevel(void);
