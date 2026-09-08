@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit static weapon asset paths in the server's actual CMake source list.
+"""Audit static weapon asset paths in the shared weapon CMake source list.
 
 This is a conservative source scan, not a C++ preprocessor/call-graph evaluator.
 It separates direct Precache calls from later-use paths and disabled shield
@@ -38,14 +38,14 @@ def main():
     def found(asset):
         return any(case_file(root, asset) for root in roots)
 
-    cmake = (REPO / "src/game/server/CMakeLists.txt").read_text()
+    cmake = (REPO / "src/game/shared/sources.cmake").read_text()
     files = {
         REPO / relative
         for relative in re.findall(r'\$\{CMAKE_SOURCE_DIR\}/(src/game/shared/weapons/[^"\s)]+\.cpp)', cmake)
     }
     weapon_count = len(files)
     if not weapon_count:
-        raise RuntimeError("No weapon sources found in the server CMake list")
+        raise RuntimeError("No weapon sources found in the shared weapon CMake list")
     files.update(REPO / relative for relative in (
         "src/game/server/combat/weapons_precache.cpp",
         "src/game/server/combat/ammo.cpp",

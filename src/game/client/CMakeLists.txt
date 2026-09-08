@@ -61,61 +61,6 @@ set (CLWEAPON_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/client/prediction/bte_weapons.cpp"
 )
 
-set (HLWPN_SRCS
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_aug.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_awp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_c4.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_deagle.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_elite.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_famas.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_fiveseven.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_flashbang.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_g3sg1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_galil.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_glock18.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_hegrenade.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_knife.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m249.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m3.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m4a1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mac10.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp5navy.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_p228.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_p90.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scout.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_sg550.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_sg552.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_smokegrenade.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_tmp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ump45.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_usp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm1014.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/knife_zombi.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47l.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1d.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_deagled.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinity.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_k1a.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m1887.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scarh.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scarl.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm8c.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm8s.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mg3.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1c.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1p.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinitys.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m14ebr.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m134.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m4a1dragon.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47dragon.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_knifedragon.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinityex1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinityex2.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_anaconda.cpp"
-	)
-
 set (HUD_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/client/hud/ammo.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/hud/ammo_secondary.cpp"
@@ -165,21 +110,12 @@ set (STUDIORENDER_SRCS
 
 )
 
-set(PM_SRCS
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_shared.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_debug.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_math.cpp"
-)
+set(INPUT_SRCS "${CMAKE_SOURCE_DIR}/src/game/client/input/input_xash3d.cpp")
 
-
-
-	set(INPUT_SRCS "${CMAKE_SOURCE_DIR}/src/game/client/input/input_xash3d.cpp")
-
-set (CLDLL_SOURCES
+set (CLIENT_SOURCES
 	"${CMAKE_SOURCE_DIR}/src/game/client/view/r_texture.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/hud/newhud/NewHud.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/hud/showwin.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/data/player_model.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/runtime/cdll_int.cpp"
     "${CMAKE_SOURCE_DIR}/src/game/client/runtime/entity.cpp"
     "${CMAKE_SOURCE_DIR}/src/game/client/view/in_camera.cpp"
@@ -189,20 +125,19 @@ set (CLDLL_SOURCES
 	"${CMAKE_SOURCE_DIR}/src/game/client/runtime/util.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/view/view.cpp"
     "${CMAKE_SOURCE_DIR}/src/game/client/hud/vgui_parser.cpp"
-    "${CMAKE_SOURCE_DIR}/src/game/shared/strings/unicode_strtools.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/hud/draw_util.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/client/view/calcscreen.cpp"
 
 	${INPUT_SRCS}
-	${PM_SRCS}
+	${CSMOE_GAME_SHARED_SOURCES}
 	${HUD_SRCS}
 	${WEAPONEVENT_SRCS}
 	${CLWEAPON_SRCS}
-	${HLWPN_SRCS}
+
 	${STUDIORENDER_SRCS}
 )
 
-	list(APPEND CLDLL_SOURCES
+	list(APPEND CLIENT_SOURCES
 		"${CMAKE_SOURCE_DIR}/src/game/client/menus/CBackGroundPanel.cpp"
 		"${CMAKE_SOURCE_DIR}/src/game/client/menus/CBaseViewport.cpp"
 		"${CMAKE_SOURCE_DIR}/src/game/client/menus/CClientMOTD.cpp"
@@ -227,7 +162,7 @@ set (CLDLL_SOURCES
 
 
 
-	add_library (${CLIENT_LIBRARY} STATIC ${CLDLL_SOURCES} "${CMAKE_SOURCE_DIR}/src/game/client/effects/events/eventdef.h")
+	add_library (${CLIENT_LIBRARY} STATIC ${CLIENT_SOURCES} "${CMAKE_SOURCE_DIR}/src/game/client/effects/events/eventdef.h")
 
 	add_definitions(
 			-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp

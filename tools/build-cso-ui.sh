@@ -12,4 +12,5 @@ cmake -S "$repo_dir" -B "$build_dir" -G Ninja \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_OSX_ARCHITECTURES=arm64 \
     -DXASH_PCH=OFF -DXASH_UNITY_BUILD=OFF
+python3 "$script_dir/check-source-layout.py" --build-dir "$build_dir"
 cmake --build "$build_dir" --target game_launch --parallel "${CSMOE_BUILD_JOBS:-6}"

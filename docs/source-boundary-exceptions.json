@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "d1f442a98be23f71d95bc6a1ed42293ab5d08aac",
+  "exceptions": [
+    {
+      "source": "src/engine/physics/world.h",
+      "include": "game/shared/movement/pm_shared.h",
+      "reason": "既有引擎世界物理头引用共享移动入口声明；本次保留调用边界。"
+    },
+    {
+      "source": "src/game/shared/entities/cbase_entity_factory.h",
+      "include": "game/client/prediction/bte_weapons_register.h",
+      "reason": "既有实体工厂的 CLIENT_DLL 分支接入客户端预测注册模板。"
+    },
+    {
+      "source": "src/game/shared/weapons/templates/WeaponTemplate.hpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_ak47.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_ak47dragon.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_aug.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_awp.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_deagle.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_elite.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_fiveseven.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_g3sg1.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_galil.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_infinityex2.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_k1a.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_knife.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_knifedragon.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_m134.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_m249.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_mg3.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_scarh.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_scarl.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_sg550.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "src/game/shared/weapons/wpn_xm8s.cpp",
+      "include": "game/server/match/modes/mods.h",
+      "reason": "既有武器实现的服务端条件分支调用模式策略；CLIENT_DLL 分支不包含该头。"
+    },
+    {
+      "source": "vendor/source_sdk/public/OfflineMode.h",
+      "include": "ui/vgui2/interfaces/vgui/ISystem.h",
+      "reason": "保留 SDK OfflineMode 头中的历史 VGUI 接口依赖；不声称 SDK 完全独立。"
+    },
+    {
+      "source": "vendor/source_sdk/public/OfflineMode.h",
+      "include": "ui/vgui2/vgui_controls/Controls.h",
+      "reason": "保留 SDK OfflineMode 头中的历史 VGUI 接口依赖；不声称 SDK 完全独立。"
+    }
+  ]
+}

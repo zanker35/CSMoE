@@ -40,7 +40,7 @@ set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Where put server dll")
 # MAIN BUILD CODE \
 ###################\
 
-set(HLDLL_SRCS
+set(SERVER_GAME_SOURCES
 	"${CMAKE_SOURCE_DIR}/src/game/server/combat/ammo.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/entities/animating.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/entities/animation.cpp"
@@ -65,7 +65,6 @@ set(HLDLL_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/hintmessage.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/player_msg.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/player_spawnpoint.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/data/player_model.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/player_zombie.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/player_spawnprotection.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/players/player_knockback.cpp"
@@ -131,7 +130,6 @@ set(HLDLL_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/server/match/modes/mod_tdm.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/match/modes/mod_dm.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/match/modes/mod_zb1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/strings/unicode_strtools.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/match/modes/mod_zb2.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/match/modes/zb2/supplybox.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/ai/cs_bot/cs_bot_bhopjump.cpp"
@@ -151,68 +149,7 @@ set(HLDLL_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/server/entities/base/cbase_physint.cpp"
 	)
 
-set (HLWPN_SRCS
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_aug.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_awp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_c4.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_deagle.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_elite.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_famas.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_fiveseven.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_flashbang.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_g3sg1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_galil.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_glock18.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_hegrenade.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_knife.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m249.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m3.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m4a1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mac10.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp5navy.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_p228.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_p90.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scout.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_sg550.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_sg552.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_smokegrenade.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_tmp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ump45.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_usp.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm1014.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/knife_zombi.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47l.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1d.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_deagled.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinity.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_k1a.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m1887.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scarh.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_scarl.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm8c.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_xm8s.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mg3.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1c.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_mp7a1p.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinitys.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m14ebr.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinityex1.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_infinityex2.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_anaconda.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m134.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_m4a1dragon.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_ak47dragon.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/weapons/wpn_knifedragon.cpp"
-	)
-
-set(PM_SRCS
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_shared.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_debug.cpp"
-	"${CMAKE_SOURCE_DIR}/src/game/shared/movement/pm_math.cpp"
-    )
-
-set(GAME_SHARED_SRCS
+set(SERVER_AI_AND_UTILITY_SOURCES
 	"${CMAKE_SOURCE_DIR}/src/game/server/runtime/shared_util.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/ai/navigation/bot.cpp"
 	"${CMAKE_SOURCE_DIR}/src/game/server/ai/navigation/bot_manager.cpp"
@@ -224,16 +161,16 @@ set(GAME_SHARED_SRCS
 	"${CMAKE_SOURCE_DIR}/src/game/server/ai/navigation/nav_path.cpp"
     )
 
-set(PUBLIC_SRCS
+set(SERVER_MEMORY_SOURCES
 	"${CMAKE_SOURCE_DIR}/src/game/server/runtime/memory/MemPool.cpp"
     )
 
 set (SERVER_SOURCES
-	${HLWPN_SRCS}
-	${HLDLL_SRCS}
-	${PM_SRCS}
-	${GAME_SHARED_SRCS}
-	${PUBLIC_SRCS}
+
+	${SERVER_GAME_SOURCES}
+	${CSMOE_GAME_SHARED_SOURCES}
+	${SERVER_AI_AND_UTILITY_SOURCES}
+	${SERVER_MEMORY_SOURCES}
 )
 
 
