@@ -155,7 +155,6 @@ set (HUD_SRCS
 	./hud/legacy/hud_radar_legacy.cpp
 	./hud/legacy/hud_scoreboard_legacy.cpp
 	./hud/modern/hud_radar_modern.cpp
-	./hud/moe/moe_touch.cpp
 
 )
 
@@ -194,7 +193,6 @@ set (CLDLL_SOURCES
     ../public/unicode_strtools.cpp
 	./draw_util.cpp
 	./calcscreen.cpp
-	./input_touch.cpp
 	
 	${INPUT_SRCS}
 	${PM_SRCS}

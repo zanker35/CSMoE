@@ -17,8 +17,6 @@ GNU General Public License for more details.
 #include "input.h"
 #include "input_ime.h"
 #include "client.h"
-#include "joyinput.h"
-#include "touch.h"
 #include "vgui_draw.h"
 #ifdef XASH_VGUI2
 #include "vgui2_surface.h"
@@ -605,7 +603,6 @@ void GAME_EXPORT Key_Event( int key, qboolean down )
 	}
 
 	VGui_KeyEvent( key, clicks );
-	Touch_KeyEvent( key, down );
 
 	// console key is hardcoded, so the user can never unbind it
 	if( key == '`' || key == '~' )
@@ -779,7 +776,6 @@ void Key_EnableTextInput( qboolean enable, qboolean force )
 {
 	IME_SetIMEEnabled(enable, force);
 #if 0
-	Joy_EnableTextInput( enable, force );
 #endif
 }
 

@@ -19,7 +19,6 @@ GNU General Public License for more details.
 #include "cl_util.h"
 
 #include "render_api.h"
-#include "mobility_int.h"
 #include "vgui_parser.h"
 
 #include "const.h"

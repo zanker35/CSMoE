@@ -113,7 +113,6 @@ struct HUDLIST {
 #include "scoreboard.h"
 #include "zb2/zb2.h"
 #include "retina.h"
-#include "moe/moe_touch.h"
 #include "newhud/NewHud.h"
 #include "showwin.h"
 
@@ -814,10 +813,6 @@ public:
 	CHudMsgFunc( SpecHealth );
 	CHudMsgFunc( SpecHealth2 );
 
-	CHudUserCmd( ToggleSpectatorMenu );
-	CHudUserCmd( ToggleSpectatorMenuOptions );
-	CHudUserCmd( ToggleSpectatorMenuOptionsSettings );
-	CHudUserCmd( ToggleSpectatorMenuSpectateOptions );
 
 	void CalcAllNeededData( );
 
@@ -838,13 +833,7 @@ private:
 	} label;
 	UniqueTexture m_hTimerTexture;
 
-	enum {
-		ROOT_MENU = (1<<0),
-		MENU_OPTIONS = (1<<1),
-		MENU_OPTIONS_SETTINGS = (1<<2),
-		MENU_SPEC_OPTIONS = (1<<3)
-	};
-	byte m_menuFlags;
+
 };
 
 //
@@ -998,7 +987,6 @@ public:
 	CHudHeadName	m_HeadName;
 	CHudRetina		m_Retina;
 	CHudZB2 m_ZB2;
-	CHudMoeTouch m_MoeTouch;
 
 	// user messages
 	CHudMsgFunc(Damage);

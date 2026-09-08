@@ -33,7 +33,6 @@ GNU General Public License for more details.
 #include "mod_local.h"
 #include "mathlib.h"
 #include "input.h"
-#include "touch.h"
 #include "engine_features.h"
 #include "render_api.h"	// decallist_t
 #include "library.h"
@@ -1316,7 +1315,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	if( !host.stuffcmdsrun )
 		Cbuf_AddText( "stuffcmds\n" );
 
-	Touch_InitConfig();
 	SCR_CheckStartupVids();	// must be last
 	SDL_StopTextInput(); // disable text input event. Enable this in chat/console?
 
@@ -1356,7 +1354,6 @@ void EXPORT Host_Shutdown( void )
 			// restore all latched cheat cvars
 			Cvar_SetCheatState( true );
 			Host_WriteConfig();
-			Touch_WriteConfig();
 			host.skip_configs = false;
 		}
 		host.state = HOST_SHUTDOWN; // prepare host to normal shutdown

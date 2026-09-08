@@ -25,7 +25,6 @@
 #include <string.h>
 //#include "interface.h" // not used here
 #include "render_api.h"
-#include "mobility_int.h"
 #include "vgui_parser.h"
 #ifdef XASH_VGUI2
 #include "vgui2/CBaseViewport.h"
@@ -49,10 +48,8 @@ using namespace cl;
 
 cl_enginefunc_t gEngfuncs = { };
 render_api_t gRenderAPI = { };
-mobile_engfuncs_t gMobileAPI = { };
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
-int g_iMobileAPIVersion = 0;
 
 void InitInput (void);
 void IN_Commands( void );
@@ -347,24 +344,9 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 
 /*
 ========================
-HUD_MobilityInterface
 ========================
 */
-int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
-{
-	if( mobileapi->version != MOBILITY_API_VERSION )
-	{
-		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n",
-			mobileapi->version, MOBILITY_API_VERSION);
 
-		return 1;
-	}
-
-	g_iMobileAPIVersion = MOBILITY_API_VERSION;
-	gMobileAPI = *mobileapi;
-
-	return 0;
-}
 
 
 /*
@@ -445,7 +427,7 @@ extern "C" void DLLEXPORT F(void *pv) {
 			ClientFactory,	// pfnGetClientFactory
 			HUD_GetRenderInterface,	// Xash3D pfnGetRenderInterface
 			nullptr,	// Xash3D pfnClipMoveToEntity
-			IN_ClientTouchEvent,	// SDL Xash pfnTouchEvent
+			nullptr,	// Reserved touch callback ABI slot
 			nullptr,	// SDL Xash pfnMoveEvent
 			nullptr,	// SDL Xash pfnLookEvent
 			nullptr,	// Reserved GUI callback ABI slot
@@ -503,8 +485,7 @@ static dllexport_t switch_client_exports[] = {
 	{ "HUD_GetStudioModelInterface", (void*)HUD_GetStudioModelInterface },
 	{ "HUD_DirectorMessage", (void*)HUD_DirectorMessage },
 	{ "HUD_VoiceStatus", (void*)HUD_VoiceStatus },
-	{ "IN_ClientMoveEvent", (void*)IN_ClientMoveEvent}, // Xash3D ext
-	{ "IN_ClientLookEvent", (void*)IN_ClientLookEvent}, // Xash3D ext
+	{ "IN_MouseLook", (void*)IN_MouseLook },
 	{ NULL, NULL },
 };
 

@@ -19,7 +19,6 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "cdll_int.h"
 #include "menu_int.h"
-#include "mobility_int.h"
 #include "cl_entity.h"
 #include "com_model.h"
 #include "mod_local.h"
@@ -918,7 +917,6 @@ qboolean UI_CreditsActive( void );
 void UI_CharEvent( int key );
 qboolean UI_MouseInRect( void );
 qboolean UI_IsVisible( void );
-void UI_AddTouchButtonToList( const char *name, const char *texture, const char *command, unsigned char *color, int flags );
 int UI_HandleMessageMode_f(void);
 void pfnPIC_Set( HIMAGE hPic, int r, int g, int b, int a );
 void pfnPIC_Draw( int x, int y, int width, int height, const wrect_t *prc );
@@ -929,8 +927,6 @@ void pfnPIC_DrawAdditive( int x, int y, int width, int height, const wrect_t *pr
 //
 // cl_mobile.c
 //
-void Mobile_Init( void );
-void Mobile_Shutdown( void );
 
 //
 // cl_video.c

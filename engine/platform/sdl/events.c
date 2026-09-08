@@ -21,8 +21,6 @@ GNU General Public License for more details.
 #include "client.h"
 #include "vgui_draw.h"
 #include "events.h"
-#include "touch.h"
-#include "joyinput.h"
 #include "sound.h"
 #include "gl_vidnt.h"
 
@@ -235,42 +233,13 @@ static void SDLash_EventFilter( SDL_Event *event )
 	case SDL_MOUSEMOTION:
 		if( !host.mouse_visible && event->motion.which != SDL_TOUCH_MOUSEID )
 			IN_MouseEvent(0);
-#ifdef TOUCHEMU
-		if( mdown )
-			IN_TouchEvent( event_motion, 0,
-						   event->motion.x/scr_width->value,
-						   event->motion.y/scr_height->value,
-						   event->motion.xrel/scr_width->value,
-						   event->motion.yrel/scr_height->value );
-
-#endif
 		break;
 
 	case SDL_MOUSEBUTTONUP:
-#ifdef TOUCHEMU
-		mdown = 0;
-		IN_TouchEvent( event_up, 0,
-					   event->button.x/scr_width->value,
-					   event->button.y/scr_height->value, 0, 0);
-		SDL_SetRelativeMouseMode( SDL_FALSE );
-		SDL_ShowCursor( true );
-		IN_DeactivateMouse();
-#else
 		SDLash_MouseEvent( event->button );
-#endif
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-#ifdef TOUCHEMU
-		mdown = 1;
-		IN_TouchEvent( event_down, 0,
-					   event->button.x/scr_width->value,
-					   event->button.y/scr_height->value, 0, 0);
-		SDL_SetRelativeMouseMode( SDL_FALSE );
-		SDL_ShowCursor( true );
-		IN_DeactivateMouse();
-#else
 		SDLash_MouseEvent( event->button );
-#endif
 		break;
 
 	case SDL_MOUSEWHEEL:
@@ -288,134 +257,9 @@ static void SDLash_EventFilter( SDL_Event *event )
 		break;
 
 
-	/* Touch events */
-	case SDL_FINGERDOWN:
-	case SDL_FINGERUP:
-	case SDL_FINGERMOTION:
-	{
-		touchEventType type;
-		static int scale = 0;
-		float x, y, dx, dy;
-		float pressure;
-
-		if( event->type == SDL_FINGERDOWN )
-			type = event_down;
-		else if( event->type == SDL_FINGERUP )
-			type = event_up ;
-		else if(event->type == SDL_FINGERMOTION )
-			type = event_motion;
-		else break;
-
-		/*
-		SDL sends coordinates in [0..width],[0..height] values
-		on some devices
-		*/
-		if( !scale )
-		{
-			if( ( event->tfinger.x > 0 ) && ( event->tfinger.y > 0 ) )
-			{
-				if( ( event->tfinger.x > 2 ) && ( event->tfinger.y > 2 ) )
-				{
-					scale = 2;
-					MsgDev( D_INFO, "SDL reports screen coordinates, workaround enabled!\n");
-				}
-				else
-				{
-					scale = 1;
-				}
-			}
-		}
-		if( scale == 2 )
-		{
-			x = event->tfinger.x / scr_width->value;
-			y = event->tfinger.y / scr_height->value;
-			dx = event->tfinger.dx / scr_width->value;
-			dy = event->tfinger.dy / scr_height->value;
-		}
-		else
-		{
-			x = event->tfinger.x;
-			y = event->tfinger.y;
-			dx = event->tfinger.dx;
-			dy = event->tfinger.dy;
-		}
-		pressure = event->tfinger.pressure;
-
-		IN_TouchEvent( type, event->tfinger.fingerId, x, y, dx, dy, pressure );
-		break;
-	}
-
-
 	/* IME */
 	case SDL_TEXTINPUT:
 		SDLash_InputEvent( event->text );
-		break;
-
-	/* Joystick events */
-	case SDL_JOYAXISMOTION:
-		Joy_AxisMotionEvent( event->jaxis.which, event->jaxis.axis, event->jaxis.value );
-		break;
-
-	case SDL_JOYBALLMOTION:
-		Joy_BallMotionEvent( event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel );
-		break;
-
-	case SDL_JOYHATMOTION:
-		Joy_HatMotionEvent( event->jhat.which, event->jhat.hat, event->jhat.value );
-		break;
-
-	case SDL_JOYBUTTONDOWN:
-	case SDL_JOYBUTTONUP:
-		Joy_ButtonEvent( event->jbutton.which, event->jbutton.button, event->jbutton.state );
-		break;
-
-	case SDL_JOYDEVICEADDED:
-		Joy_AddEvent( event->jdevice.which );
-		break;
-	case SDL_JOYDEVICEREMOVED:
-		Joy_RemoveEvent( event->jdevice.which );
-		break;
-
-	/* GameController API */
-	case SDL_CONTROLLERAXISMOTION:
-		if( event->caxis.axis == (Uint8)SDL_CONTROLLER_AXIS_INVALID )
-			break;
-
-		// Swap axis to follow default axis binding:
-		// LeftX, LeftY, RightX, RightY, TriggerRight, TriggerLeft
-		if( event->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT )
-			event->caxis.axis = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
-		else if( event->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT )
-			event->caxis.axis = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
-
-		Joy_AxisMotionEvent( event->caxis.which, event->caxis.axis, event->caxis.value );
-		break;
-
-	case SDL_CONTROLLERBUTTONDOWN:
-	case SDL_CONTROLLERBUTTONUP:
-	{
-		static int sdlControllerButtonToEngine[] =
-		{
-			K_AUX16, // invalid
-			K_A_BUTTON, K_B_BUTTON, K_X_BUTTON,	K_Y_BUTTON,
-			K_BACK_BUTTON, K_MODE_BUTTON, K_START_BUTTON,
-			K_LSTICK, K_RSTICK,
-			K_L1_BUTTON, K_R1_BUTTON,
-			K_UPARROW, K_DOWNARROW, K_LEFTARROW, K_RIGHTARROW
-		};
-
-		// TODO: Use joyinput funcs, for future multiple gamepads support
-		if( Joy_IsActive() )
-			Key_Event( sdlControllerButtonToEngine[event->cbutton.button], event->cbutton.state );
-		break;
-	}
-
-	case SDL_CONTROLLERDEVICEADDED:
-		Joy_AddEvent( event->cdevice.which );
-		break;
-
-	case SDL_CONTROLLERDEVICEREMOVED:
-		Joy_RemoveEvent( event->cdevice.which );
 		break;
 
 	case SDL_QUIT:
@@ -528,61 +372,7 @@ SDLash_JoyInit_Old
 
 =============
 */
-static int SDLash_JoyInit_Old( int numjoy )
-{
-	int num;
-	int i;
 
-	MsgDev( D_INFO, "Joystick: SDL\n" );
-
-	if( SDL_WasInit( SDL_INIT_JOYSTICK ) != SDL_INIT_JOYSTICK &&
-		SDL_InitSubSystem( SDL_INIT_JOYSTICK ) )
-	{
-		MsgDev( D_INFO, "Failed to initialize SDL Joysitck: %s\n", SDL_GetError() );
-		return 0;
-	}
-
-	if( joy )
-	{
-		SDL_JoystickClose( joy );
-	}
-
-	num = SDL_NumJoysticks();
-
-	if( num > 0 )
-		MsgDev( D_INFO, "%i joysticks found:\n", num );
-	else
-	{
-		MsgDev( D_INFO, "No joystick found.\n" );
-		return 0;
-	}
-
-	for( i = 0; i < num; i++ )
-		MsgDev( D_INFO, "%i\t: %s\n", i, SDL_JoystickNameForIndex( i ) );
-
-	MsgDev( D_INFO, "Pass +set joy_index N to command line, where N is number, to select active joystick\n" );
-
-	joy = SDL_JoystickOpen( numjoy );
-
-	if( !joy )
-	{
-		MsgDev( D_INFO, "Failed to select joystick: %s\n", SDL_GetError( ) );
-		return 0;
-	}
-
-	MsgDev( D_INFO, "Selected joystick: %s\n"
-		"\tAxes: %i\n"
-		"\tHats: %i\n"
-		"\tButtons: %i\n"
-		"\tBalls: %i\n",
-		SDL_JoystickName( joy ), SDL_JoystickNumAxes( joy ), SDL_JoystickNumHats( joy ),
-		SDL_JoystickNumButtons( joy ), SDL_JoystickNumBalls( joy ) );
-
-	SDL_GameControllerEventState( SDL_DISABLE );
-	SDL_JoystickEventState( SDL_ENABLE );
-
-	return num;
-}
 
 /*
 =============
@@ -590,70 +380,7 @@ SDLash_JoyInit_New
 
 =============
 */
-static int SDLash_JoyInit_New( int numjoy )
-{
-	int temp, num;
-	int i;
 
-	MsgDev( D_INFO, "Joystick: SDL GameController API\n" );
-
-	if( SDL_WasInit( SDL_INIT_GAMECONTROLLER ) != SDL_INIT_GAMECONTROLLER &&
-		SDL_InitSubSystem( SDL_INIT_GAMECONTROLLER ) )
-	{
-		MsgDev( D_INFO, "Failed to initialize SDL GameController API: %s\n", SDL_GetError() );
-		return 0;
-	}
-
-	// chance to add mappings from file
-	SDL_GameControllerAddMappingsFromFile( "controllermappings.txt" );
-
-	if( gamecontroller )
-	{
-		SDL_GameControllerClose( gamecontroller );
-	}
-
-	temp = SDL_NumJoysticks();
-	num = 0;
-
-	for( i = 0; i < temp; i++ )
-	{
-		if( SDL_IsGameController( i ))
-			num++;
-	}
-
-	if( num > 0 )
-		MsgDev( D_INFO, "%i joysticks found:\n", num );
-	else
-	{
-		MsgDev( D_INFO, "No joystick found.\n" );
-		return 0;
-	}
-
-	for( i = 0; i < num; i++ )
-		MsgDev( D_INFO, "%i\t: %s\n", i, SDL_GameControllerNameForIndex( i ) );
-
-	MsgDev( D_INFO, "Pass +set joy_index N to command line, where N is number, to select active joystick\n" );
-
-	gamecontroller = SDL_GameControllerOpen( numjoy );
-
-	if( !gamecontroller )
-	{
-		MsgDev( D_INFO, "Failed to select joystick: %s\n", SDL_GetError( ) );
-		return 0;
-	}
-// was added in SDL2-2.0.6, allow build with earlier versions just in case
-#if SDL_MAJOR_VERSION > 2 || SDL_MINOR_VERSION > 0 || SDL_PATCHLEVEL >= 6
-	MsgDev( D_INFO, "Selected joystick: %s (%i:%i:%i)\n",
-		SDL_GameControllerName( gamecontroller ),
-		SDL_GameControllerGetVendor( gamecontroller ),
-		SDL_GameControllerGetProduct( gamecontroller ),
-		SDL_GameControllerGetProductVersion( gamecontroller ));
-#endif
-	SDL_GameControllerEventState( SDL_ENABLE );
-	SDL_JoystickEventState( SDL_DISABLE );
-
-	return num;
-}
 
 /*
 =============
@@ -661,12 +388,3 @@ SDLash_JoyInit
 
 =============
 */
-int SDLash_JoyInit( int numjoy )
-{
-	// SDL_Joystick is now an old API
-	// SDL_GameController is preferred
-	if( Sys_CheckParm( "-sdl_joy_old_api" ) )
-		return SDLash_JoyInit_Old(numjoy);
-
-	return SDLash_JoyInit_New(numjoy);
-}

@@ -50,9 +50,7 @@ version.
 DECLARE_MESSAGE( m_SpectatorGui, SpecHealth )
 DECLARE_MESSAGE( m_SpectatorGui, SpecHealth2 )
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenu )
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions )
 // close
 // help
 // settings
@@ -60,14 +58,12 @@ DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions )
 // autodirector
 // showscores
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptionsSettings )
 // settings
 // // chat msgs
 // // show status
 // // view cone
 // // player names
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuSpectateOptions )
 // chase map overview
 // free map overview
 // first person
@@ -92,16 +88,11 @@ int CHudSpectatorGui::Init()
 	HOOK_MESSAGE( SpecHealth );
 	HOOK_MESSAGE( SpecHealth2 );
 
-	HOOK_COMMAND( "_spec_toggle_menu", ToggleSpectatorMenu );
-	HOOK_COMMAND( "_spec_toggle_menu_options", ToggleSpectatorMenuOptions );
-	HOOK_COMMAND( "_spec_toggle_menu_options_settings", ToggleSpectatorMenuOptionsSettings );
-	HOOK_COMMAND( "_spec_toggle_menu_spectate_options", ToggleSpectatorMenuSpectateOptions );
 	HOOK_COMMAND( "_spec_find_next_player_reverse", FindNextPlayerReverse );
 	HOOK_COMMAND( "_spec_find_next_player", FindNextPlayer );
 
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_DRAW;
-	m_menuFlags = 0;
 	m_fTextScale = 1.0f;
 	return 1;
 }
@@ -127,22 +118,12 @@ void CHudSpectatorGui::Shutdown()
 	m_hTimerTexture = nullptr;
 }
 
-inline void DrawButtonWithText( int x1, int y1, int wide, int tall, const char *sz, int r, int g, int b )
-{
-	DrawUtils::DrawRectangle(x1, y1, wide, tall);
-	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - gHUD.GetCharHeight() * CHudSpectatorGui::m_fTextScale * 0.5, x1 + wide, sz,
-							 r, g, b, CHudSpectatorGui::m_fTextScale );
-}
 
 int CHudSpectatorGui::Draw( float flTime )
 {
 	if( !g_iUser1 )
 	{
-		if( m_menuFlags & ROOT_MENU )
-		{
-			UserCmd_ToggleSpectatorMenu(); // this will remove any submenus;
-			m_menuFlags = 0;
-		}
+
 		return 1;
 	}
 
@@ -198,44 +179,7 @@ int CHudSpectatorGui::Draw( float flTime )
 		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b, m_fTextScale );
 	}
 
-	if( m_menuFlags & ROOT_MENU )
-	{
-		// draw the root menu
-		DrawButtonWithText(INT_XPOS(0.5),  INT_YPOS(8.5), INT_XPOS(4), INT_YPOS(1), "Options", r, g, b);
-		DrawButtonWithText(INT_XPOS(5),    INT_YPOS(8.5), INT_XPOS(1), INT_YPOS(1), "<", r, g, b);
 
-		DrawUtils::DrawRectangle(INT_XPOS(6), INT_YPOS(8.5), INT_XPOS(4), INT_YPOS(1));
-		// name will be drawn later
-
-		DrawButtonWithText(INT_XPOS(10),   INT_YPOS(8.5), INT_XPOS(1), INT_YPOS(1), ">", r, g, b );
-		DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(8.5), INT_XPOS(4), INT_YPOS(1), "Spectate Options", r, g, b);
-		if( m_menuFlags & MENU_OPTIONS )
-		{
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(2.5), INT_XPOS(4), INT_YPOS(1), "Close", r, g, b );
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(3.5), INT_XPOS(4), INT_YPOS(1), "Help", r, g, b );
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), "Settings", r, g, b );
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), "Picture-in-Picture", r, g, b );
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), "Autodirector", r, g, b );
-			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1), "Show scores", r, g, b );
-			if( m_menuFlags & MENU_OPTIONS_SETTINGS )
-			{
-				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), "Chat messages", r, g, b );
-				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), "Show status", r, g, b );
-				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), "View cone", r, g, b );
-				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1), "Player names", r, g, b );
-			}
-		}
-
-		if( m_menuFlags & MENU_SPEC_OPTIONS )
-		{
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(2.5), INT_XPOS(4), INT_YPOS(1), "Chase Map Overview", r, g, b );
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(3.5), INT_XPOS(4), INT_YPOS(1), "Free Map Overview", r, g, b );
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), "First Person", r, g, b );
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), "Free look", r, g, b );
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), "Free Chase Camera", r, g, b );
-			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1), "Locked Chase Camera", r, g, b );
-		}
-	}
 
 	//if( !label.m_szNameAndHealth[0] )
 	//{
@@ -323,11 +267,7 @@ void CHudSpectatorGui::InitHUDData()
 void CHudSpectatorGui::Reset()
 {
 	m_bBombPlanted = false;
-	if( m_menuFlags & ROOT_MENU )
-	{
-		UserCmd_ToggleSpectatorMenu(); // this will remove any submenus;
-		m_menuFlags = 0;
-	}
+
 }
 
 int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *buf)
@@ -353,128 +293,4 @@ int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *
 	m_iPlayerLastPointedAt = g_iUser2;
 
 	return 1;
-}
-
-#define PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y(x, y) XPOS(x), YPOS(y), XPOS(x + 4.0f), YPOS(y + 1.0f)
-
-void CHudSpectatorGui::UserCmd_ToggleSpectatorMenu()
-{
-	static byte color[4] = {0, 0, 0, 0};
-
-	if( !g_iMobileAPIVersion )
-		return;
-
-	gMobileAPI.pfnTouchSetClientOnly( !(m_menuFlags & ROOT_MENU) );
-
-	if( !(m_menuFlags & ROOT_MENU) )
-	{
-		m_menuFlags |= ROOT_MENU;
-
-		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_options", "*white", "_spec_toggle_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 8.5f ), color, 0, 1.0f, 0 );
-
-		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_find_next_player_reverse", "*white", "_spec_find_next_player_reverse",
-			XPOS(5.0f), YPOS(8.5f), XPOS(6.0f), YPOS(9.5f), color, 0, 1.0f, 0 );
-
-		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_find_next_player", "*white", "_spec_find_next_player",
-			XPOS(10.0f),YPOS(8.5f), XPOS(11.0f),YPOS(9.5f), color, 0, 1.0f, 0 );
-
-		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_spectate_options", "*white", "_spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 8.5f ),color, 0, 1.0f, 0 );
-	}
-	else
-	{
-		m_menuFlags &= ~ROOT_MENU;
-		m_menuFlags &= ~MENU_OPTIONS;
-		m_menuFlags &= ~MENU_OPTIONS_SETTINGS;
-		m_menuFlags &= ~MENU_SPEC_OPTIONS;
-		gMobileAPI.pfnTouchRemoveButton( "_spec_*" );
-	}
-}
-
-void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptions()
-{
-	static byte color[4] = {0, 0, 0, 0};
-
-	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
-		return;
-
-	if( !(m_menuFlags & MENU_OPTIONS) )
-	{
-		m_menuFlags |= MENU_OPTIONS;
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_close", "*white", "_spec_toggle_menu",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 2.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_help", "*white", "spec_help; _spec_toggle_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 3.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_settings", "*white", "_spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 4.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_pip", "*white", "toggle spec_pip_internal; _spec_toggle_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 5.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_ad", "*white", "toggle spec_autodirector_internal; _spec_toggle_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 6.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_showscores", "*white", "scoreboard; _spec_toggle_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 7.5f ), color, 0, 1.0f, 0 );
-	}
-	else
-	{
-		m_menuFlags &= ~MENU_OPTIONS;
-		m_menuFlags &= ~MENU_OPTIONS_SETTINGS;
-		gMobileAPI.pfnTouchRemoveButton( "_spec_opt_*" );
-	}
-}
-
-void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptionsSettings()
-{
-	static byte color[4] = {0, 0, 0, 0};
-
-	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
-		return;
-
-	if( !(m_menuFlags & MENU_OPTIONS_SETTINGS) )
-	{
-		m_menuFlags |= MENU_OPTIONS_SETTINGS;
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_chat_msgs", "*white", "messagemode; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 4.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_set_status", "*white", "toggle spec_drawstatus_internal; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 5.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_cones", "*white", "toggle spec_drawcone_internal; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 6.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_names", "*white", "toggle spec_drawnames_internal; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 7.5f ), color, 0, 1.0f, 0 );
-	}
-	else
-	{
-		m_menuFlags &= ~MENU_OPTIONS_SETTINGS;
-		gMobileAPI.pfnTouchRemoveButton( "_spec_opt_set_*" );
-	}
-}
-
-void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuSpectateOptions()
-{
-	static byte color[4] = {0, 0, 0, 0};
-
-	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
-		return;
-
-	if( !(m_menuFlags & MENU_SPEC_OPTIONS) )
-	{
-		m_menuFlags |= MENU_SPEC_OPTIONS;
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_6", "*white", "spec_mode 6; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 2.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_5", "*white", "spec_mode 5; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 3.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_4", "*white", "spec_mode 4; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 4.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_3", "*white", "spec_mode 3; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 5.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_2", "*white", "spec_mode 2; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 6.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_1", "*white", "spec_mode 1; _spec_toggle_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 7.5f ), color, 0, 1.0f, 0 );
-	}
-	else
-	{
-		m_menuFlags &= ~MENU_SPEC_OPTIONS;
-		gMobileAPI.pfnTouchRemoveButton( "_spec_spec_*" );
-	}
 }

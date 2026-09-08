@@ -18,7 +18,6 @@ GNU General Public License for more details.
 #include "const.h"
 #include "bspfile.h"
 #include "kbutton.h"
-#include "touch.h"
 
 extern convar_t	*con_gamemaps;
 

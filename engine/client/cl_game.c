@@ -101,13 +101,11 @@ static dllfunc_t cdll_new_exports[] = 	// allowed only in SDK 2.3 and higher
 { "HUD_GetStudioModelInterface", (void **)&clgame.dllFuncs.pfnGetStudioModelInterface },
 { "HUD_DirectorMessage", (void **)&clgame.dllFuncs.pfnDirectorMessage },
 { "HUD_VoiceStatus", (void **)&clgame.dllFuncs.pfnVoiceStatus },
+{ "IN_MouseLook", (void **)&clgame.dllFuncs.pfnMouseLook },
 { "HUD_ChatInputPosition", (void **)&clgame.dllFuncs.pfnChatInputPosition },
 { "HUD_GetRenderInterface", (void **)&clgame.dllFuncs.pfnGetRenderInterface },	// Xash3D ext
 { "HUD_GetPlayerTeam", (void **)&clgame.dllFuncs.pfnGetPlayerTeam },
 { "HUD_ClipMoveToEntity", (void **)&clgame.dllFuncs.pfnClipMoveToEntity },	// Xash3D ext
-{ "IN_ClientTouchEvent", (void **)&clgame.dllFuncs.pfnTouchEvent}, // Xash3D ext
-{ "IN_ClientMoveEvent", (void **)&clgame.dllFuncs.pfnMoveEvent}, // Xash3D ext
-{ "IN_ClientLookEvent", (void **)&clgame.dllFuncs.pfnLookEvent}, // Xash3D ext
 { NULL, NULL }
 };
 
@@ -4167,7 +4165,6 @@ qboolean CL_LoadProgs( const char *name )
 	{
 		MsgDev( D_WARN, "CL_LoadProgs: couldn't get render API\n" );
 	}
-	Mobile_Init(); // Xash3D extension: mobile interface
 
 	Sequence_Init();
 
@@ -4181,4 +4178,30 @@ qboolean CL_LoadProgs( const char *name )
 	CL_InitStudioAPI( );
 
 	return true;
+}
+
+int Engine_DrawScaledCharacter( int x, int y, int number, int r, int g, int b, float scale )
+{
+	int width  = clgame.scrInfo.charWidths[number] * scale * hud_scale->value;
+	int height = clgame.scrInfo.iCharHeight        * scale * hud_scale->value;
+
+	if( !cls.creditsFont.valid )
+		return 0;
+
+	x *= hud_scale->value;
+	y *= hud_scale->value;
+
+	number &= 255;
+	number = Con_UtfProcessChar( number );
+
+	if( number < 32 )
+		return 0;
+
+	if( y < -height )
+		return 0;
+
+	pfnPIC_Set( cls.creditsFont.hFontTexture, r, g, b, 255 );
+	pfnPIC_DrawAdditive( x, y, width, height, &cls.creditsFont.fontRc[number] );
+
+	return width;
 }

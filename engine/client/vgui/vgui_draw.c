@@ -157,7 +157,7 @@ void GAME_EXPORT VGUI_CursorSelect(enum VGUI_DefaultCursor cursor )
 			SDL_GetRelativeMouseState( NULL, NULL );
 #ifdef XASH_VGUI2
 		if( cls.key_dest == key_game && cls.state == ca_active
-			&& clgame.dllFuncs.pfnLookEvent && !Cvar_VariableInteger( "touch_enable" ))
+			&& clgame.dllFuncs.pfnMouseLook)
 			SDL_SetRelativeMouseMode( SDL_TRUE );
 #endif
 	}

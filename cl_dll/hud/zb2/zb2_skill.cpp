@@ -510,7 +510,6 @@ void CHudZB2_Skill::OnSkillInit(ZombieClassType zclass, ZombieSkillType skill1, 
 			gEngfuncs.pfnClientCmd(buf);
 			sprintf(buf, "touch_addbutton \"_moe_skill%d_button\" \"*white\" \"+_moe_skill%d_press\" %f %f %f %f 0 0 0 50 260", i, i, x1, y1, x2, y2);
 			gEngfuncs.pfnClientCmd(buf);
-			//gMobileAPI.pfnTouchAddClientButton("_moe_skill1_button", "*white", "+_moe_skill1_press", 0.100000, 0.408511, 0.340000, 0.459574, color, 0, 0.0f, 0);
 
 		}
 		
@@ -526,9 +525,6 @@ void CHudZB2_Skill::OnSkillActivate(ZombieSkillType skill, float flHoldTime, flo
 		auto& icon = m_ZombieSkillHudIcons[i];
 		if (icon.m_iCurrentSkill == skill)
 		{
-			char buf[128];
-			sprintf(buf, "touch_hide \"_moe_skill%d_button\"\n", i);
-			gEngfuncs.pfnClientCmd(buf);
 			icon = { skill, flFreezeTime > 0.0f ? SKILL_STATUS_FREEZING : SKILL_STATUS_USED, gHUD.m_flTime, gHUD.m_flTime + flFreezeTime, 0.0f };
 		}
 	}

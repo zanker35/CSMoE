@@ -133,7 +133,6 @@ set(XASH_ENGINE_CLIENT_SOURCES
    client/cl_game.c
    client/cl_main.c
    client/cl_menu.c
-   client/cl_mobile.c
    client/cl_parse.c
    client/cl_pmove.c
    client/cl_remap.c
@@ -161,12 +160,9 @@ set(XASH_ENGINE_CLIENT_SOURCES
    client/gl_studio.c
    client/vid_common.c
    client/gl_warp.c
-   client/joyinput.c
    client/input.c
    client/keys.c
-   client/input_evdevkey.c
    client/console.c
-   client/touch.c
    client/gamma.c
    client/s_dsp.c
    client/s_load.c

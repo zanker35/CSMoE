@@ -24,8 +24,6 @@ GNU General Public License for more details.
 #include "vgui2_surface.h"
 #endif
 
-#include "touch.h" // IN_TouchDraw( )
-#include "joyinput.h" // Joy_DrawOnScreenKeyboard( )
 
 /*
 ===============
@@ -417,7 +415,6 @@ void V_PostRender( void )
 
 	if( draw_2d )
 	{
-		Touch_Draw();
 		SCR_RSpeeds();
 		SCR_NetSpeeds();
 		SCR_DrawFPS();
@@ -437,7 +434,6 @@ void V_PostRender( void )
 		SCR_DrawNetGraph();
 		Con_DrawVersion();
 #if 0
-		Joy_DrawOnScreenKeyboard();
 #endif
 
 		Con_DrawDebug(); // must be last

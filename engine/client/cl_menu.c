@@ -24,7 +24,6 @@ GNU General Public License for more details.
 #include "gl_vidnt.h"
 
 static MENUAPI	GetMenuAPI;
-static ADDTOUCHBUTTONTOLIST pfnAddTouchButtonToList;
 static void UI_UpdateUserinfo( void );
 
 menu_static_t	menu;
@@ -640,18 +639,11 @@ static void UI_DrawSetTextColor( int r, int g, int b, int alpha )
 }
 /*
 =======================
-UI_AddTouchButtonToList
 
 send button parameters to menu
 =======================
 */
-void UI_AddTouchButtonToList( const char *name, const char *texture, const char *command, unsigned char *color, int flags )
-{
-	if( pfnAddTouchButtonToList )
-	{
-		pfnAddTouchButtonToList( name, texture, command, color, flags );
-	}
-}
+
 
 /*
 =======================
@@ -1147,7 +1139,6 @@ qboolean UI_LoadProgs( void )
 			menu.use_text_api = true;
 	}
 
-	pfnAddTouchButtonToList = (ADDTOUCHBUTTONTOLIST)Com_GetProcAddress( menu.hInstance, "AddTouchButtonToList" );
 
 	// setup gameinfo
 	for( i = 0; i < SI.numgames; i++ )

@@ -30,5 +30,4 @@ private:
 	class COptionsSubVoice *m_pOptionsSubVoice;
 	//class COptionsSubAdvanced *m_pOptionsSubAdvanced;
     class COptionsSubMoeSettings* m_pOptionsSubMoeSettings;
-    class COptionsSubTouch* m_pOptionsSubTouch;
 };

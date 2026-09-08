@@ -69,9 +69,9 @@ typedef struct cldll_func_s
 	int	(*pfnGetRenderInterface)( int version, struct render_api_s *renderfuncs, struct render_interface_s *callback );
 	void	(*pfnClipMoveToEntity)( struct physent_s *pe, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, struct pmtrace_s *tr );
 	// More extenstions for the extensions god! (SDL Xash port)
-	int (*pfnTouchEvent)( int type, int fingerID, float x, float y, float dx, float dy );
-	void (*pfnMoveEvent)( float forwardmove, float sidemove );
-	void (*pfnLookEvent)( float relyaw, float relpitch );
+	int (*reserved_touch_callback)( int type, int fingerID, float x, float y, float dx, float dy );
+	void (*reserved_move_callback)( float forwardmove, float sidemove );
+	void (*pfnMouseLook)( float relyaw, float relpitch );
 	// CSMoE extension
 	void (*reserved_gui_callback)(void *context); // Reserved ABI slot; never called.
 	void (*reserved_precache_callback)(int type, const char* name, int index); // Reserved ABI slot.

@@ -1,7 +1,6 @@
 
 #include "MoeLogin.h"
 #include "EngineInterface.h"
-#include "OptionsSubButtonSettings.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/IVGui.h>

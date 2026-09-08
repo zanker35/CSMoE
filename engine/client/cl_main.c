@@ -20,7 +20,6 @@ GNU General Public License for more details.
 #include "cl_tent.h"
 #include "gl_local.h"
 #include "input.h"
-#include "touch.h"
 #include "kbutton.h"
 #include "vgui_draw.h"
 #include "library.h"
@@ -830,16 +829,10 @@ void CL_SendConnectPacket( void )
 		if( !m_ignore->integer )
 			input_devices |= INPUT_DEVICE_MOUSE;
 
-		if( touch_enable->integer )
-			input_devices |= INPUT_DEVICE_TOUCH;
 
-		if(  Cvar_VariableInteger( "joy_enable" ) && Cvar_VariableInteger( "joy_found" ) )
-			input_devices |= INPUT_DEVICE_JOYSTICK;
 
 		// lock input devices change
-		Cvar_FullSet( "touch_enable", va( "%s", touch_enable->string ), touch_enable->flags | CVAR_READ_ONLY );
 		Cvar_FullSet( "m_ignore", va( "%s", m_ignore->string ), m_ignore->flags | CVAR_READ_ONLY );
-		Cvar_FullSet( "joy_enable", va( "%s", Cvar_VariableString( "joy_enable" ) ), CVAR_ARCHIVE | CVAR_READ_ONLY );
 
 
 		Info_SetValueForKey( useragent, "d", va( "%d", input_devices ), sizeof( useragent ) );
@@ -852,9 +845,7 @@ void CL_SendConnectPacket( void )
 	else
 	{
 		// reset to writable state
-		Cvar_FullSet( "touch_enable", va( "%s", touch_enable->string ), touch_enable->flags & ~CVAR_READ_ONLY );
 		Cvar_FullSet( "m_ignore", va( "%s", m_ignore->string ), m_ignore->flags & ~CVAR_READ_ONLY );
-		Cvar_FullSet( "joy_enable", va( "%s", Cvar_VariableString( "joy_enable" ) ), CVAR_ARCHIVE );
 	}
 
 	Netchan_OutOfBandPrint( NS_CLIENT, adr, "connect %i %i %i \"%s\" %d %s\n", PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo( ), extensions, useragent );
@@ -1177,9 +1168,7 @@ void CL_Disconnect( void )
 	CL_ChangeGame( GI->gamefolder, true );
 
 	// reset to writable state
-	Cvar_FullSet( "touch_enable", va( "%s", touch_enable->string ), touch_enable->flags & ~CVAR_READ_ONLY );
 	Cvar_FullSet( "m_ignore", va( "%s", m_ignore->string ), m_ignore->flags & ~CVAR_READ_ONLY );
-	Cvar_FullSet( "joy_enable", va( "%s", Cvar_VariableString( "joy_enable" ) ), CVAR_ARCHIVE );
 	Cbuf_InsertText( "menu_connectionprogress disconnect\n" );
 
 	// back to menu if developer mode set to "player" or "mapper"
@@ -2354,7 +2343,6 @@ void CL_Init( void )
 	// unreliable buffer. unsed for unreliable commands and voice stream
 	BF_Init( &cls.datagram, "cls.datagram", cls.datagram_buf, sizeof( cls.datagram_buf ));
 
-	Touch_Init();
 
 	{
 		char clientlib[256];
@@ -2406,10 +2394,8 @@ void CL_Shutdown( void )
 		Host_WriteOpenGLConfig ();
 		Host_WriteVideoConfig ();
 	}
-	Touch_Shutdown();
 	CL_CloseDemoHeader();
 	IN_Shutdown ();
-	Mobile_Shutdown();
 
 	SCR_Shutdown ();
 	if( cls.initialized )

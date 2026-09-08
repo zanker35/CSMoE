@@ -19,7 +19,6 @@
 #include "OptionsSubVideo.h"
 #include "OptionsSubAdvanced.h"
 #include "OptionsSubMoeSettings.h"
-#include "OptionsSubTouch.h"
 #include "ModInfo.h"
 
 #include "KeyValues.h"
@@ -38,7 +37,6 @@ COptionsDialog::COptionsDialog(vgui2::Panel *parent) : PropertyDialog(parent, "O
 	m_pOptionsSubVoice = NULL;
 	//m_pOptionsSubAdvanced = NULL;
     m_pOptionsSubMoeSettings = NULL;
-    m_pOptionsSubTouch = NULL;
 
 	if ((ModInfo().IsMultiplayerOnly() && !ModInfo().IsSinglePlayerOnly()) || (!ModInfo().IsMultiplayerOnly() && !ModInfo().IsSinglePlayerOnly()))
 		m_pOptionsSubMultiplayer = new COptionsSubMultiplayer(this);
@@ -54,14 +52,12 @@ COptionsDialog::COptionsDialog(vgui2::Panel *parent) : PropertyDialog(parent, "O
 
 	//m_pOptionsSubAdvanced = new COptionsSubAdvanced(this);
     m_pOptionsSubMoeSettings = new COptionsSubMoeSettings(this);
-    m_pOptionsSubTouch = new COptionsSubTouch(this);
 
     AddPage(m_pOptionsSubMoeSettings, "#GameUI_CSMoESettings");
 	if (m_pOptionsSubMultiplayer)
 		AddPage(m_pOptionsSubMultiplayer, "#GameUI_Multiplayer");
 	AddPage(m_pOptionsSubKeyboard, "#GameUI_Keyboard");
 	AddPage(m_pOptionsSubMouse, "#GameUI_Mouse");
-    AddPage(m_pOptionsSubTouch, "#GameUI_Touch");
 	AddPage(m_pOptionsSubAudio, "#GameUI_Audio");
 	AddPage(m_pOptionsSubVideo, "#GameUI_Video");
 	if (m_pOptionsSubVoice)

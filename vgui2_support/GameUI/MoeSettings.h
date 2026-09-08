@@ -23,6 +23,4 @@ public:
 
 private:
 	class COptionsSubMoeSettings* m_pOptionsSubMoeSettings;
-	class COptionsSubButtonSettings* m_pOptionsSubButtonSettings;
-	class COptionsSubTouch* m_pOptionsSubTouch;
 };

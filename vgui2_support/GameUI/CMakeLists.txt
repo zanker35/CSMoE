@@ -33,9 +33,7 @@ add_library(GameUI STATIC
 	ToolBar.cpp
 	URLButton.cpp
 	VControlsListPanel.cpp
-	OptionsSubTouch.cpp
 	MoeSettings.cpp
-	OptionsSubButtonSettings.cpp
 	OptionsSubMoeSettings.cpp
  )
 

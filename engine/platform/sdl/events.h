@@ -20,6 +20,5 @@ GNU General Public License for more details.
 
 void SDLash_RunEvents( void );
 void SDLash_EnableTextInput( int enable, qboolean force );
-int SDLash_JoyInit( int numjoy ); // pass -1 to init every joystick
 
 #endif // KEYWRAPPER_H

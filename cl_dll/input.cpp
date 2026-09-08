@@ -43,7 +43,6 @@ void VectorAngles( const float *forward, float *angles );
 int CL_ButtonBits( int );
 
 // xxx need client dll function to get and clear impuse
-extern cvar_t *in_joystick;
 
 int	in_impulse	= 0;
 int	in_cancel	= 0;
@@ -725,17 +724,7 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	cmd->buttons = CL_ButtonBits( 1 );
 
 	// Using joystick?
-	if ( in_joystick->value )
-	{
-		if ( cmd->forwardmove > 0 )
-		{
-			cmd->buttons |= IN_FORWARD;
-		}
-		else if ( cmd->forwardmove < 0 )
-		{
-			cmd->buttons |= IN_BACK;
-		}
-	}
+
 
 	gEngfuncs.GetViewAngles( (float *)viewangles );
 	// Set current view angles.
