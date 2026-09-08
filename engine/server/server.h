@@ -240,7 +240,6 @@ typedef struct sv_client_s
 	float		latency;
 	float		ping;
 
-	int		listeners;		// 32 bits == MAX_CLIENTS (voice listeners)
 
 	edict_t		*edict;			// EDICT_NUM(clientnum+1)
 	edict_t		*pViewEntity;		// svc_setview member

@@ -299,10 +299,7 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
-{
-	gHUD.m_Radio.Voice( entindex, bTalking );
-}
+
 
 /*
 ==========================
@@ -419,7 +416,7 @@ extern "C" void DLLEXPORT F(void *pv) {
 			HUD_Key_Event,
 			HUD_TempEntUpdate,
 			HUD_GetUserEntity,
-			HUD_VoiceStatus,
+			nullptr, // Reserved voice callback ABI slot
 			HUD_DirectorMessage,
 			HUD_GetStudioModelInterface,
 			nullptr,	// HUD_ChatInputPosition,
@@ -484,7 +481,6 @@ static dllexport_t switch_client_exports[] = {
 	{ "KB_Find", (void*)KB_Find },
 	{ "HUD_GetStudioModelInterface", (void*)HUD_GetStudioModelInterface },
 	{ "HUD_DirectorMessage", (void*)HUD_DirectorMessage },
-	{ "HUD_VoiceStatus", (void*)HUD_VoiceStatus },
 	{ "IN_MouseLook", (void*)IN_MouseLook },
 	{ NULL, NULL },
 };

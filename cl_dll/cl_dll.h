@@ -57,7 +57,6 @@ char       DLLEXPORT HUD_PlayerMoveTexture( char *name );
 int        DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
 int        DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void       DLLEXPORT HUD_Frame( double time );
-void       DLLEXPORT HUD_VoiceStatus( int entindex, qboolean bTalking );
 void       DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 int        DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
 void       DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );

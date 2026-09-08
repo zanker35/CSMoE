@@ -4545,20 +4545,7 @@ pfnVoice_GetClientListening
 
 =============
 */
-qboolean GAME_EXPORT pfnVoice_GetClientListening( int iReceiver, int iSender )
-{
-	int	iMaxClients = sv_maxclients->integer;
 
-	if( !svs.initialized ) return false;
-
-	if( iReceiver <= 0 || iReceiver > iMaxClients || iSender <= 0 || iSender > iMaxClients )
-	{
-		MsgDev( D_ERROR, "Voice_GetClientListening: invalid client indexes (%i, %i).\n", iReceiver, iSender );
-		return false;
-	}
-
-	return ((svs.clients[iSender-1].listeners & ( 1U << iReceiver )) != 0 );
-}
 
 /*
 =============
@@ -4566,28 +4553,7 @@ pfnVoice_SetClientListening
 
 =============
 */
-qboolean GAME_EXPORT pfnVoice_SetClientListening( int iReceiver, int iSender, qboolean bListen )
-{
-	int	iMaxClients = sv_maxclients->integer;
 
-	if( !svs.initialized ) return false;
-
-	if( iReceiver <= 0 || iReceiver > iMaxClients || iSender <= 0 || iSender > iMaxClients )
-	{
-		MsgDev( D_ERROR, "Voice_SetClientListening: invalid client indexes (%i, %i).\n", iReceiver, iSender );
-		return false;
-	}
-
-	if( bListen )
-	{
-		svs.clients[iSender-1].listeners |= (1U << iReceiver);
-	}
-	else
-	{
-		svs.clients[iSender-1].listeners &= ~(1U << iReceiver);
-	}
-	return true;
-}
 
 /*
 =============
@@ -4892,8 +4858,8 @@ static enginefuncs_t gEngfuncs =
 	pfnForceUnmodified,
 	pfnGetPlayerStats,
 	(void*)Cmd_AddGameCommand,
-	pfnVoice_GetClientListening,
-	pfnVoice_SetClientListening,
+	NULL, // Reserved voice API slot
+	NULL, // Reserved voice API slot
 	pfnGetPlayerAuthId,
 	pfnSequenceGet,
 	pfnSequencePickSentence,

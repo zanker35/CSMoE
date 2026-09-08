@@ -100,7 +100,6 @@ static dllfunc_t cdll_new_exports[] = 	// allowed only in SDK 2.3 and higher
 {
 { "HUD_GetStudioModelInterface", (void **)&clgame.dllFuncs.pfnGetStudioModelInterface },
 { "HUD_DirectorMessage", (void **)&clgame.dllFuncs.pfnDirectorMessage },
-{ "HUD_VoiceStatus", (void **)&clgame.dllFuncs.pfnVoiceStatus },
 { "IN_MouseLook", (void **)&clgame.dllFuncs.pfnMouseLook },
 { "HUD_ChatInputPosition", (void **)&clgame.dllFuncs.pfnChatInputPosition },
 { "HUD_GetRenderInterface", (void **)&clgame.dllFuncs.pfnGetRenderInterface },	// Xash3D ext
@@ -3651,11 +3650,7 @@ Voice_StartVoiceTweakMode
 
 =================
 */
-static int GAME_EXPORT Voice_StartVoiceTweakMode( void )
-{
-	// TODO: implement
-	return 0;
-}
+
 
 /*
 =================
@@ -3663,10 +3658,7 @@ Voice_EndVoiceTweakMode
 
 =================
 */
-static void GAME_EXPORT Voice_EndVoiceTweakMode( void )
-{
-	// TODO: implement
-}
+
 
 /*
 =================
@@ -3674,10 +3666,7 @@ Voice_SetControlFloat
 
 =================
 */	
-static void GAME_EXPORT Voice_SetControlFloat( VoiceTweakControl iControl, float value )
-{
-	// TODO: implement
-}
+
 
 /*
 =================
@@ -3685,11 +3674,7 @@ Voice_GetControlFloat
 
 =================
 */
-static float GAME_EXPORT Voice_GetControlFloat( VoiceTweakControl iControl )
-{
-	// TODO: implement
-	return 1.0f;
-}
+
 
 /*
 =================
@@ -3697,11 +3682,7 @@ Voice_GetSpeakingVolume
 
 =================
 */
-static int GAME_EXPORT Voice_GetSpeakingVolume( void )
-{
-	// TODO: implement
-	return 255;
-}
+
 
 // shared between client and server			
 triangleapi_t gTriApi =
@@ -3861,14 +3842,7 @@ static net_api_t gNetApi =
 	NetAPI_SetValueForKey,
 };
 
-static IVoiceTweak gVoiceApi =
-{
-	Voice_StartVoiceTweakMode,
-	Voice_EndVoiceTweakMode,
-	Voice_SetControlFloat,
-	Voice_GetControlFloat,
-	Voice_GetSpeakingVolume,
-};
+
 
 // engine callbacks
 static cl_enginefunc_t gEngfuncs = 
@@ -3960,7 +3934,7 @@ static cl_enginefunc_t gEngfuncs =
 	&gEventApi,
 	&gDemoApi,
 	&gNetApi,
-	&gVoiceApi,
+	NULL, // Reserved voice API slot
 	pfnIsSpectateOnly,
 	pfnLoadMapSprite,
 	COM_AddAppDirectoryToSearchPath,

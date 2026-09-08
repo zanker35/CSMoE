@@ -227,7 +227,6 @@ set(PM_SRCS
     )
 
 set(GAME_SHARED_SRCS
-    ../game_shared/voice_gamemgr.cpp
 	../game_shared/shared_util.cpp
 	../game_shared/bot/bot.cpp
 	../game_shared/bot/bot_manager.cpp

@@ -29,7 +29,6 @@ namespace sv {
 static char mp_com_token[ COM_TOKEN_LEN ];
 DLL_GLOBAL cvar_t *sv_clienttrace = NULL;
 
-DLL_GLOBAL CCStrikeGameMgrHelper g_GameMgrHelper;
 DLL_GLOBAL CHalfLifeMultiplay *g_pMPGameRules = NULL;
 
 bool IsBotSpeaking()
@@ -220,34 +219,7 @@ void CMapInfo::Spawn()
 
 LINK_ENTITY_TO_CLASS(info_map_parameters, CMapInfo);
 
-bool CCStrikeGameMgrHelper::CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pSender)
-{
-	if (!pSender->IsPlayer() || pListener->m_iTeam != pSender->m_iTeam)
-	{
-		return false;
-	}
 
-	BOOL bListenerAlive = pListener->IsAlive();
-	BOOL bSenderAlive = pSender->IsAlive();
-
-	if (pListener->IsObserver())
-	{
-		return true;
-	}
-
-	if (bListenerAlive)
-	{
-		if (!bSenderAlive)
-			return false;
-	}
-	else
-	{
-		if (bSenderAlive)
-			return true;
-	}
-
-	return (bListenerAlive == bSenderAlive);
-}
 
 void Broadcast(const char *sentence)
 {
@@ -404,7 +376,6 @@ void ReadMultiplayCvars(CHalfLifeMultiplay *mp)
 
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
-	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 	RefreshSkillData();
 
 	m_flIntermissionEndTime = invalid_time_point;
@@ -2334,7 +2305,6 @@ void CHalfLifeMultiplay::Think()
 {
 	MonitorTutorStatus();
 
-	m_VoiceGameMgr.Update(gpGlobals->frametime);
 
 	if (sv_clienttrace->value != 1.0f)
 	{
@@ -3079,10 +3049,7 @@ BOOL CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem
 	return TRUE;
 }
 
-BOOL CHalfLifeMultiplay::ClientCommand_DeadOrAlive(CBasePlayer *pPlayer, const char *pcmd)
-{
-	return m_VoiceGameMgr.ClientCommand(pPlayer, pcmd);
-}
+
 
 BOOL CHalfLifeMultiplay::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 {
@@ -3091,7 +3058,6 @@ BOOL CHalfLifeMultiplay::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 
 BOOL CHalfLifeMultiplay::ClientConnected(edict_t *pEntity, const char *pszName, const char *pszAddress, char *szRejectReason)
 {
-	m_VoiceGameMgr.ClientConnected(pEntity);
 	return TRUE;
 }
 

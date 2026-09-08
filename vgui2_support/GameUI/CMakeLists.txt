@@ -27,7 +27,6 @@ add_library(GameUI STATIC
 	OptionsSubMouse.cpp
 	OptionsSubMultiplayer.cpp
 	OptionsSubVideo.cpp
-	OptionsSubVoice.cpp
 	PanelListPanel.cpp
 	ScriptObject.cpp
 	ToolBar.cpp

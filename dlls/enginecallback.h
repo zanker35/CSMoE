@@ -86,7 +86,6 @@ inline CRC32_t	CRC32_FINAL( CRC32_t pulCRC ) { return (*g_engfuncs.pfnCRC32_Fina
 inline long	RANDOM_LONG( long lLow, long lHigh ) { return (*g_engfuncs.pfnRandomLong)(lLow, lHigh); }
 inline float	RANDOM_FLOAT( float flLow, float flHigh ) { return (*g_engfuncs.pfnRandomFloat)(flLow, flHigh); }
 inline void	ADD_SERVER_COMMAND( const char *cmd_name, void (*function) (void) ) { return (*g_engfuncs.pfnAddServerCommand)(cmd_name, function); }
-inline qboolean	SET_CLIENT_LISTENING(int iReceiver, int iSender, qboolean bListen) { return (*g_engfuncs.pfnVoice_SetClientListening)(iReceiver, iSender, bListen); }
 inline const char *GETPLAYERAUTHID		( edict_t *e ) { return (*g_engfuncs.pfnGetPlayerAuthId)(e); }
 inline int	GET_FILE_SIZE( const char *filename ) { return (*g_engfuncs.pfnGetFileSize)(filename); }
 inline unsigned int GET_APPROX_WAVE_PLAY_LEN( const char *filepath ) { return (*g_engfuncs.pfnGetApproxWavePlayLen)(filepath); }

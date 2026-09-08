@@ -128,7 +128,6 @@ char *Q_buildnum( void )
 
 int __MsgFunc_ADStop( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ItemStatus( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ForceCam( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_Spectator( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ServerName( const char *name, int size, void *buf )
@@ -157,7 +156,6 @@ void CHud :: Init( void )
 
 	HOOK_MESSAGE( ADStop );
 	HOOK_MESSAGE( ItemStatus );
-	HOOK_MESSAGE( ReqState );
 	HOOK_MESSAGE( ForceCam );
 	HOOK_MESSAGE( Spectator ); // ignored due to touch menus
 	HOOK_MESSAGE( ServerName );

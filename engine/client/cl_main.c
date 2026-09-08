@@ -2144,7 +2144,6 @@ void CL_InitLocal( void )
 	// these two added to shut up CS 1.5 about 'unknown' commands
 	Cvar_Get( "lightgamma", "1", 0, "ambient lighting level (legacy, unused)" );
 	Cvar_Get( "direct", "1", 0, "direct lighting level (legacy, unused)" );
-	Cvar_Get( "voice_serverdebug", "0", 0, "debug voice (legacy, unused)" );
 
 	// server commands
 	Cmd_AddCommand ("noclip", NULL, "toggle noclipping mode" );

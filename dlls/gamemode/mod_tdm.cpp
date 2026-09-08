@@ -13,23 +13,7 @@
 
 namespace sv {
 
-class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
-{
-public:
-	virtual bool		CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pTalker)
-	{
-		if (g_pGameRules->IsTeamplay())
-		{
-			if (g_pGameRules->PlayerRelationship(pListener, pTalker) != GR_TEAMMATE)
-			{
-				return false;
-			}
-		}
 
-		return true;
-	}
-};
-static CMultiplayGameMgrHelper g_GameMgrHelper;
 
 void CMod_TeamDeathMatch::InstallPlayerModStrategy(CBasePlayer *player)
 {
@@ -46,7 +30,6 @@ void CMod_TeamDeathMatch::InstallPlayerModStrategy(CBasePlayer *player)
 
 CMod_TeamDeathMatch::CMod_TeamDeathMatch()
 {
-	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 
 	m_flIntermissionEndTime = invalid_time_point;
 	m_flIntermissionStartTime = invalid_time_point;
@@ -56,7 +39,6 @@ CMod_TeamDeathMatch::CMod_TeamDeathMatch()
 
 void CMod_TeamDeathMatch::Think(void)
 {
-	m_VoiceGameMgr.Update(gpGlobals->frametime);\
 
 	///// Check game rules /////
 

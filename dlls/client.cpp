@@ -742,8 +742,6 @@ void Host_Say(edict_t *pEntity, int teamonly)
 			continue;
 
 		// can the receiver hear the sender? or has he muted him?
-		if (gpGlobals->deathmatch != 0.0f && g_pGameRules->m_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
-			continue;
 
 		if (teamonly && client->m_iTeam != player->m_iTeam)
 			continue;
@@ -3134,14 +3132,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 	}
 	else
 	{
-		if (mp->ClientCommand_DeadOrAlive(GetClassPtr<CBasePlayer>(pev), pcmd))
-			return;
-
-		if (TheBots != NULL)
-		{
-			if (TheBots->ClientCommand(GetClassPtr<CBasePlayer>(pev), pcmd))
-				return;
-		}
 
 		if (FStrEq(pcmd, "mp_debug"))
 		{

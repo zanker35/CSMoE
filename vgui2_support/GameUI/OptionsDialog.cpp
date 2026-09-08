@@ -15,7 +15,6 @@
 #include "OptionsSubKeyboard.h"
 #include "OptionsSubMouse.h"
 #include "OptionsSubAudio.h"
-#include "OptionsSubVoice.h"
 #include "OptionsSubVideo.h"
 #include "OptionsSubAdvanced.h"
 #include "OptionsSubMoeSettings.h"
@@ -34,7 +33,6 @@ COptionsDialog::COptionsDialog(vgui2::Panel *parent) : PropertyDialog(parent, "O
 	m_pOptionsSubMouse = NULL;
 	m_pOptionsSubAudio = NULL;
 	m_pOptionsSubVideo = NULL;
-	m_pOptionsSubVoice = NULL;
 	//m_pOptionsSubAdvanced = NULL;
     m_pOptionsSubMoeSettings = NULL;
 
@@ -47,7 +45,6 @@ COptionsDialog::COptionsDialog(vgui2::Panel *parent) : PropertyDialog(parent, "O
 	m_pOptionsSubVideo = new COptionsSubVideo(this);
 	if (!ModInfo().IsSinglePlayerOnly())
 	{
-		m_pOptionsSubVoice = new COptionsSubVoice(this);
 	}
 
 	//m_pOptionsSubAdvanced = new COptionsSubAdvanced(this);
@@ -60,8 +57,6 @@ COptionsDialog::COptionsDialog(vgui2::Panel *parent) : PropertyDialog(parent, "O
 	AddPage(m_pOptionsSubMouse, "#GameUI_Mouse");
 	AddPage(m_pOptionsSubAudio, "#GameUI_Audio");
 	AddPage(m_pOptionsSubVideo, "#GameUI_Video");
-	if (m_pOptionsSubVoice)
-		AddPage(m_pOptionsSubVoice, "#GameUI_Voice");
 	//AddPage(m_pOptionsSubAdvanced, "#GameUI_Advanced");
 
 	SetApplyButtonVisible(true);

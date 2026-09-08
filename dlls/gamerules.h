@@ -30,7 +30,6 @@
 #define GAMERULES_H
 
 #ifndef CLIENT_DLL
-#include "voice_gamemgr.h"
 #endif
 
 #define MAX_RULE_BUFFER				1024
@@ -213,7 +212,6 @@ public:
 	virtual time_point_t FlPlayerSpawnTime(CBasePlayer *pPlayer) = 0;
 	virtual edict_t *GetPlayerSpawnSpot(CBasePlayer *pPlayer);
 	virtual BOOL AllowAutoTargetCrosshair() { return TRUE; }
-	virtual BOOL ClientCommand_DeadOrAlive(CBasePlayer *pPlayer, const char *pcmd) { return FALSE; }
 	virtual BOOL ClientCommand(CBasePlayer *pPlayer, const char *pcmd) { return FALSE; }
 	virtual void ClientUserInfoChanged(CBasePlayer *pPlayer, char *infobuffer) {};
 	virtual int IPointsForKill(CBasePlayer *pAttacker, CBasePlayer *pKilled) = 0;
@@ -339,7 +337,6 @@ public:
 	virtual time_point_t FlPlayerSpawnTime(CBasePlayer *pPlayer);
 	virtual edict_t *GetPlayerSpawnSpot(CBasePlayer *pPlayer);
 	virtual BOOL AllowAutoTargetCrosshair();
-	virtual BOOL ClientCommand_DeadOrAlive(CBasePlayer *pPlayer, const char *pcmd);
 	virtual BOOL ClientCommand(CBasePlayer *pPlayer, const char *pcmd);
 	virtual void ClientUserInfoChanged(CBasePlayer *pPlayer, char *infobuffer);
 	virtual int IPointsForKill(CBasePlayer *pAttacker, CBasePlayer *pKilled);
@@ -463,7 +460,6 @@ private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);
 
 public:
-	CVoiceGameMgr m_VoiceGameMgr;
 	time_point_t m_fTeamCount;                // m_flRestartRoundTime, the global time when the round is supposed to end, if this is not 0
 	float m_flCheckWinConditions;
 	time_point_t m_fRoundCount;
@@ -577,11 +573,7 @@ public:
 	float m_flBombRadius;
 };
 
-class CCStrikeGameMgrHelper : public IVoiceGameMgrHelper
-{
-public:
-	virtual bool CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pSender);
-};
+
 
 extern CHalfLifeMultiplay *g_pGameRules;
 
