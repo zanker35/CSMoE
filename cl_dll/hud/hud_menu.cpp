@@ -44,8 +44,6 @@ DECLARE_MESSAGE( m_Menu, VGUIMenu )
 DECLARE_MESSAGE( m_Menu, BuyClose )
 DECLARE_MESSAGE( m_Menu, AllowSpec )
 
-DECLARE_COMMAND( m_Menu, OldStyleMenuOpen )
-DECLARE_COMMAND( m_Menu, OldStyleMenuClose )
 DECLARE_COMMAND( m_Menu, ShowVGUIMenu )
 DECLARE_COMMAND( m_Menu, ShowVGUIMenu2 )
 
@@ -57,8 +55,6 @@ int CHudMenu :: Init( void )
 	HOOK_MESSAGE( VGUIMenu );
 	HOOK_MESSAGE( BuyClose );
 	HOOK_MESSAGE( AllowSpec );
-	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
-	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
 	HOOK_COMMAND( "showvguimenu2", ShowVGUIMenu2 );
 
@@ -180,7 +176,6 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	{
 		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_DRAW;
-		ClientCmd("touch_removebutton _menu_*");
 #ifdef XASH_VGUI2
 		if (g_pViewport)
 			g_pViewport->HideAllVGUIMenu();
@@ -257,7 +252,8 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
-	UserCmd_OldStyleMenuClose();
+	m_fMenuDisplayed = 0;
+	m_iFlags &= ~HUD_DRAW;
 #ifdef XASH_VGUI2
 	if (g_pViewport)
 		g_pViewport->HideVGUIMenu(MENU_BUY);
@@ -274,20 +270,10 @@ int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-void CHudMenu::UserCmd_OldStyleMenuOpen()
-{
-	m_flShutoffTime = -1; // stay open until user will not close it
-	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
-}
 
-void CHudMenu::UserCmd_OldStyleMenuClose()
-{
-	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
-	m_iFlags &= ~HUD_DRAW;
-}
 
-// lol, no real VGUI here
-// it's really good only for touchscreen
+
+
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
@@ -299,76 +285,6 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		return;
 	}
 #endif
-	const char *szCmd;
-
-	switch(menuType)
-	{
-	case MENU_TEAM:
-		szCmd = "exec touch/chooseteam.cfg";
-		break;
-	case MENU_CLASS_T:
-		szCmd = "exec touch/chooseteam_tr.cfg";
-		break;
-	case MENU_CLASS_CT:
-		szCmd = "exec touch/chooseteam_ct.cfg";
-		break;
-	case MENU_BUY:
-		szCmd = "exec touch/buy.cfg";
-		
-		break;
-	case MENU_BUY_PISTOL:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_pistol_t.cfg";
-		else szCmd = "exec touch/buy_pistol_ct.cfg";
-		break;
-	case MENU_BUY_SHOTGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_shotgun_t.cfg";
-		else szCmd = "exec touch/buy_shotgun_ct.cfg";
-		break;
-	case MENU_BUY_RIFLE:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_rifle_t.cfg";
-		else szCmd ="exec touch/buy_rifle_ct.cfg";
-		break;
-	case MENU_BUY_SUBMACHINEGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_submachinegun_t.cfg";
-		else szCmd = "exec touch/buy_submachinegun_ct.cfg";
-		break;
-	case MENU_BUY_MACHINEGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_machinegun_t.cfg";
-		else szCmd = "exec touch/buy_machinegun_ct.cfg";
-		break;
-	case MENU_BUY_ITEM:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-			szCmd = "exec touch/buy_item_t.cfg";
-		else szCmd = "exec touch/buy_item_ct.cfg";
-		break;
-	case MENU_RADIOA:
-		szCmd = "exec touch/radioa.cfg";
-		break;
-	case MENU_RADIOB:
-		szCmd = "exec touch/radiob.cfg";
-		break;
-	case MENU_RADIOC:
-		szCmd = "exec touch/radioc.cfg";
-		break;
-	case MENU_RADIOSELECTOR:
-		szCmd = "exec touch/radioselector.cfg";
-		break;
-	case MENU_NUMERICAL_MENU:
-		szCmd = "exec touch/numerical_menu.cfg";
-		break;
-	default:
-		szCmd = "touch_removebutton _menu_*"; // back to the default touch page
-		m_fMenuDisplayed = 0;
-		break;
-	}
-
-	m_fMenuDisplayed = 1;
-	ClientCmd(szCmd);
 }
 
 void CHudMenu::UserCmd_ShowVGUIMenu()

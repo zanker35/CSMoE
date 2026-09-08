@@ -3306,7 +3306,6 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 
 					if (TheBots != NULL)
 					{
-						TheBots->OnEvent(EVENT_TUTOR_BUY_MENU_OPENNED);
 					}
 				}
 			}

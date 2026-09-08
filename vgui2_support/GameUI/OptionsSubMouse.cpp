@@ -16,8 +16,6 @@ COptionsSubMouse::COptionsSubMouse(vgui2::Panel *parent) : PropertyPage(parent, 
 	m_pMouseLookCheckBox = new CKeyToggleCheckButton(this, "MouseLook", "#GameUI_MouseLook", "in_mlook", "mlook");
 	m_pMouseFilterCheckBox = new CCvarToggleCheckButton(this, "MouseFilter", "#GameUI_MouseFilter", "m_filter");
 
-	m_pJoystickCheckBox = new CCvarToggleCheckButton(this, "Joystick", "#GameUI_Joystick", "joystick");
-	m_pJoystickLookCheckBox = new CKeyToggleCheckButton(this, "JoystickLook", "#GameUI_JoystickLook", "in_jlook", "jlook");
 	m_pMouseSensitivitySlider = new CCvarSlider(this, "Slider", "#GameUI_MouseSensitivity", 1.0f, 20.0f, "sensitivity", true);
 
 	m_pMouseSensitivityLabel = new vgui2::TextEntry(this, "SensitivityLabel");
@@ -47,8 +45,6 @@ void COptionsSubMouse::OnResetData(void)
 	m_pReverseMouseCheckBox->Reset();
 	m_pMouseLookCheckBox->Reset();
 	m_pMouseFilterCheckBox->Reset();
-	m_pJoystickCheckBox->Reset();
-	m_pJoystickLookCheckBox->Reset();
 	m_pMouseSensitivitySlider->Reset();
 	m_pAutoAimCheckBox->Reset();
 }
@@ -58,8 +54,6 @@ void COptionsSubMouse::OnApplyChanges(void)
 	m_pReverseMouseCheckBox->ApplyChanges();
 	m_pMouseLookCheckBox->ApplyChanges();
 	m_pMouseFilterCheckBox->ApplyChanges();
-	m_pJoystickCheckBox->ApplyChanges();
-	m_pJoystickLookCheckBox->ApplyChanges();
 	m_pMouseSensitivitySlider->ApplyChanges();
 	m_pAutoAimCheckBox->ApplyChanges();
 }

@@ -115,10 +115,7 @@ convar_t	*sv_skyspeed;
 
 
 convar_t	*sv_allow_noinputdevices;
-convar_t	*sv_allow_touch;
 convar_t	*sv_allow_mouse;
-convar_t	*sv_allow_joystick;
-convar_t	*sv_allow_vr;
 
 
 char localinfo[MAX_LOCALINFO];
@@ -757,26 +754,14 @@ qboolean SV_ProcessUserAgent( netadr_t from, char *useragent )
 	{
 		int input_devices = Q_atoi( input_devices_str );
 
-		if( !sv_allow_touch->integer && ( input_devices & INPUT_DEVICE_TOUCH ) )
-		{
-			Netchan_OutOfBandPrint( NS_SERVER, from, "errormsg\nThis server does not allow touch\nDisable it (touch_enable 0)\nto play on this server\n" );
-			return false;
-		}
+
 		if( !sv_allow_mouse->integer && ( input_devices & INPUT_DEVICE_MOUSE) )
 		{
 			Netchan_OutOfBandPrint( NS_SERVER, from, "errormsg\nThis server does not allow mouse\nDisable it(m_ignore 1)\nto play on this server\n" );
 			return false;
 		}
-		if( !sv_allow_joystick->integer && ( input_devices & INPUT_DEVICE_JOYSTICK) )
-		{
-			Netchan_OutOfBandPrint( NS_SERVER, from, "errormsg\nThis server does not allow joystick\nDisable it(joy_enable 0)\nto play on this server\n" );
-			return false;
-		}
-		if( !sv_allow_vr->integer && ( input_devices & INPUT_DEVICE_VR) )
-		{
-			Netchan_OutOfBandPrint( NS_SERVER, from, "errormsg\nThis server does not allow VR\n" );
-			return false;
-		}
+
+
 	}
 
 	if( id )
@@ -915,10 +900,7 @@ void SV_Init( void )
 	sv_forcesimulating = Cvar_Get( "sv_forcesimulating", DEFAULT_SV_FORCESIMULATING, 0, "forcing world simulating when server don't have active players" );
 	sv_nat = Cvar_Get( "sv_nat", "0", 0, "enable NAT bypass for this server" );
 
-	sv_allow_joystick = Cvar_Get( "sv_allow_joystick", "1", CVAR_ARCHIVE, "allow connect with joystick enabled" );
 	sv_allow_mouse = Cvar_Get( "sv_allow_mouse", "1", CVAR_ARCHIVE, "allow connect with mouse" );
-	sv_allow_touch = Cvar_Get( "sv_allow_touch", "1", CVAR_ARCHIVE, "allow connect with touch controls" );
-	sv_allow_vr = Cvar_Get( "sv_allow_vr", "1", CVAR_ARCHIVE, "allow connect from vr version" );
 	sv_allow_noinputdevices = Cvar_Get( "sv_allow_noinputdevices", "1", CVAR_ARCHIVE, "allow connect from old versions without useragent" );
 
 	sv_password = Cvar_Get( "sv_password", "", CVAR_PROTECTED, "server password. Leave blank or set to \"none\" if none" );

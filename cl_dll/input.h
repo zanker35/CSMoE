@@ -5,7 +5,6 @@
 extern kbutton_t	in_strafe;
 extern kbutton_t	in_mlook;
 extern kbutton_t	in_speed;
-extern kbutton_t	in_jlook;
 extern kbutton_t	in_forward;
 extern kbutton_t	in_back;
 extern kbutton_t	in_moveleft;

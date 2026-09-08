@@ -450,8 +450,6 @@ public:
 	// server sends false when spectating is not allowed, and true when allowed
 	CHudMsgFunc(AllowSpec);
 
-	CHudUserCmd(OldStyleMenuClose);
-	CHudUserCmd(OldStyleMenuOpen);
 	CHudUserCmd(ShowVGUIMenu);
 	CHudUserCmd(ShowVGUIMenu2);
 

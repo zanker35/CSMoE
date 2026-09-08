@@ -91,7 +91,6 @@ state bit 2 is edge triggered on the down to up transition
 
 kbutton_t	in_mlook;
 kbutton_t	in_klook;
-kbutton_t	in_jlook;
 kbutton_t	in_left;
 kbutton_t	in_right;
 kbutton_t	in_forward;
@@ -263,7 +262,6 @@ void KB_Init( void )
 
 	KB_Add( "in_graph", &in_graph );
 	KB_Add( "in_mlook", &in_mlook );
-	KB_Add( "in_jlook", &in_jlook );
 }
 
 /*
@@ -375,8 +373,6 @@ void IN_BreakDown( void ) { KeyDown( &in_break );}
 void IN_BreakUp( void ) { KeyUp( &in_break ); }
 void IN_KLookDown (void) {KeyDown(&in_klook);}
 void IN_KLookUp (void) {KeyUp(&in_klook);}
-void IN_JLookDown (void) {KeyDown(&in_jlook);}
-void IN_JLookUp (void) {KeyUp(&in_jlook);}
 void IN_MLookDown (void) {KeyDown(&in_mlook);}
 void IN_UpDown(void) {KeyDown(&in_up);}
 void IN_UpUp(void) {KeyUp(&in_up);}
@@ -928,8 +924,6 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-klook", IN_KLookUp);
 	gEngfuncs.pfnAddCommand ("+mlook", IN_MLookDown);
 	gEngfuncs.pfnAddCommand ("-mlook", IN_MLookUp);
-	gEngfuncs.pfnAddCommand ("+jlook", IN_JLookDown);
-	gEngfuncs.pfnAddCommand ("-jlook", IN_JLookUp);
 	gEngfuncs.pfnAddCommand ("+duck", IN_DuckDown);
 	gEngfuncs.pfnAddCommand ("-duck", IN_DuckUp);
 	gEngfuncs.pfnAddCommand ("+reload", IN_ReloadDown);

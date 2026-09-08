@@ -30,8 +30,6 @@ struct CHudZB2_Skill::Config
 	static const char * const ZOMBIE_SKILL_HUD_ICON[MAX_ZOMBIE_SKILL];
 	static const char * const ZOMBIE_SKILL_HUD_TIP[MAX_ZOMBIE_SKILL];
 	static const char * const ZOMBIE_CLASS_HUD_ICON[MAX_ZOMBIE_CLASS];
-	static const char * const ZOMBIE_SKILL_HUD_ICON_NEW[MAX_ZOMBIE_SKILL];
-	static const char * const ZOMBIE_CLASS_HUD_ICON_NEW[MAX_ZOMBIE_CLASS];
 	static const char * const ZOMBIE_ITEM_HUD_ICON[2][3];
 };
 
@@ -71,28 +69,9 @@ const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON[MAX_ZOMBIE_CLAS
 		"zombiGTER", // ZOMBIE_CLASS_HEAL,
 };
 
-const char *  const CHudZB2_Skill::Config::ZOMBIE_SKILL_HUD_ICON_NEW[MAX_ZOMBIE_SKILL] =
-{
-		"", // ZOMBIE_SKILL_EMPTY
-		"resource/zombi/humanskill_hm_spd", // ZOMBIE_SKILL_SPRINT
-		"resource/zombi/humanskill_hm_hd", // ZOMBIE_SKILL_HEADSHOT
-		"resource/zombi/humanskill_hm_2x", // ZOMBIE_SKILL_KNIFE2X
-		"resource/zombi/zombieskill_zombicrazy", // ZOMBIE_SKILL_CRAZY,
-		"resource/zombi/zombieskill_zombihiding", // ZOMBIE_SKILL_HIDE,
-		"resource/zombi/zombieskill_zombitrap", // ZOMBIE_SKILL_TRAP,
-		"resource/zombi/zombieskill_zombismoke", // ZOMBIE_SKILL_SMOKE,
-		"resource/zombi/zombieskill_zombiheal", // ZOMBIE_SKILL_HEAL,
-};
 
-const char *  const CHudZB2_Skill::Config::ZOMBIE_CLASS_HUD_ICON_NEW[MAX_ZOMBIE_CLASS] =
-{
-		"", // ZOMBIE_CLASS_HUMAN
-		"resource/zombi/zombietype_defaultzb", // ZOMBIE_CLASS_TANK,
-		"resource/zombi/zombietype_lightzb", // ZOMBIE_CLASS_SPEED,
-		"resource/zombi/zombietype_heavyzb", // ZOMBIE_CLASS_HEAVY,
-		"resource/zombi/zombietype_pczb", // ZOMBIE_CLASS_PC,
-		"resource/zombi/zombietype_doctorzb", // ZOMBIE_CLASS_HEAL,
-};
+
+
 
 const char *  const CHudZB2_Skill::Config::ZOMBIE_ITEM_HUD_ICON[2][3] =
 {
@@ -109,7 +88,6 @@ CHudZB2_Skill::CHudZB2_Skill(void) :  // 0-init
 	m_iCurrentClass(ZOMBIE_CLASS_HUMAN),
 	m_ZombieSkillHudIcons{}
 {
-	touch_enable = gEngfuncs.pfnGetCvarPointer("touch_enable");
 }
 
 int CHudZB2_Skill::VidInit(void)
@@ -135,25 +113,6 @@ int CHudZB2_Skill::VidInit(void)
 				m_pTexture_SkillTips[i] = R_LoadTextureUnique(Config::ZOMBIE_SKILL_HUD_TIP[i]);
 	}
 
-	if(!m_pTexture_skillslotkeybg)
-		m_pTexture_skillslotkeybg = R_LoadTextureUnique("resource/zombi/skillslotkeybg");
-	if (!m_pTexture_skillslotbg)
-		m_pTexture_skillslotbg = R_LoadTextureUnique("resource/zombi/skillslotbg");
-
-	for (int i = 0; i < MAX_ZOMBIE_SKILL; ++i)
-	{
-		if (Config::ZOMBIE_SKILL_HUD_ICON_NEW[i][0] != '\0')
-			if (!m_pTexture_NewSkillIcons[i])
-				m_pTexture_NewSkillIcons[i] = R_LoadTextureUnique(Config::ZOMBIE_SKILL_HUD_ICON_NEW[i]);
-	}
-
-	for (int i = 0; i < MAX_ZOMBIE_CLASS; ++i)
-	{
-		if (Config::ZOMBIE_CLASS_HUD_ICON_NEW[i][0] != '\0')
-			if (!m_pTexture_NewClassIcons[i])
-				m_pTexture_NewClassIcons[i] = R_LoadTextureUnique(Config::ZOMBIE_CLASS_HUD_ICON_NEW[i]);
-	}
-
 	return 1;
 }
 
@@ -169,15 +128,8 @@ int CHudZB2_Skill::Draw(float time)
 	int y = ScreenHeight - gHUD.m_iFontHeight * 3 / 2 - iHeight;
 
 	x = DrawHealthRecoveryIcon(time, x, y);
-	if (!touch_enable || !touch_enable->value)
-	{
-		x = DrawSkillBoard(time, x, y);
-		DrawSkillTip(time);
-	}
-	else
-	{
-		DrawSkillBoardNew(time);
-	}
+	x = DrawSkillBoard(time, x, y);
+	DrawSkillTip(time);
 
 	return 1;
 }
@@ -193,10 +145,6 @@ void CHudZB2_Skill::Think()
 			{
 				icon.m_iCurrentSkillStatus = SKILL_STATUS_READY;
 				icon.m_flTimeSkillBlink = gHUD.m_flTime + 3.0f;
-
-				char buf[128];
-				sprintf(buf, "touch_show \"_moe_skill%d_button\"\n", i);
-				gEngfuncs.pfnClientCmd(buf);
 			}
 			
 		}
@@ -333,129 +281,7 @@ void CHudZB2_Skill::DrawSkillTip(float time) const
 	}
 }
 
-void CHudZB2_Skill::DrawSkillBoardNew(float time) const
-{
-	int x = ScreenWidth / 2;
-	int y = 58;
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-
-	x -= m_pTexture_skillslotbg->w() / 2;
-	if (m_iCurrentClass >= 0 && m_iCurrentClass < MAX_ZOMBIE_CLASS)
-	{
-		const auto &classicon = m_pTexture_NewClassIcons[m_iCurrentClass];
-		if (classicon != nullptr)
-		{
-			x -= (classicon->w() + 4) / 2;
-
-			gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-			classicon->Bind();
-			DrawUtils::Draw2DQuadScaled(x, y, x + classicon->w(), y + classicon->h());
-
-			x += classicon->w() + 4;
-		}
-	}
-
-	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-	m_pTexture_skillslotbg->Bind();
-	DrawUtils::Draw2DQuadScaled(x, y, x + m_pTexture_skillslotbg->w(), y + m_pTexture_skillslotbg->h());
-
-	char SkillKey = 'G';
-	if (m_iCurrentClass == ZOMBIE_CLASS_HUMAN)
-		SkillKey = '5';
-
-	for (auto &icon : m_ZombieSkillHudIcons)
-	{
-		const auto &skillicon = m_pTexture_NewSkillIcons[icon.m_iCurrentSkill];
-        const int w = m_pTexture_skillslotbg->w() / 4;
-        const int h = m_pTexture_skillslotbg->h();
-		if (skillicon && icon.m_iCurrentSkill >= 0 && icon.m_iCurrentSkill < MAX_ZOMBIE_SKILL)
-		{
-            
-			if (time < icon.m_flTimeSkillReady)
-			{
-				// waiting for freezing
-				float flPercent = (time - icon.m_flTimeSkillStart) / (icon.m_flTimeSkillReady - icon.m_flTimeSkillStart);
-
-				float center_y = y + h * (1.0f - flPercent);
-
-				// top half
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 50);
-				skillicon->Bind();
-
-				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-				// �I (x1, y1)
-				gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-				gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, y * gHUD.m_flScale, 0);
-				// �L (x1, y2)
-				gEngfuncs.pTriAPI->TexCoord2f(0, (1.0f - flPercent));
-				gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, center_y * gHUD.m_flScale, 0);
-				// �K (x2, y2)
-				gEngfuncs.pTriAPI->TexCoord2f(1, (1.0f - flPercent));
-				gEngfuncs.pTriAPI->Vertex3f((x + w) * gHUD.m_flScale, center_y * gHUD.m_flScale, 0);
-				// �J (x2, y1)
-				gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-				gEngfuncs.pTriAPI->Vertex3f((x + w) * gHUD.m_flScale, y * gHUD.m_flScale, 0);
-				gEngfuncs.pTriAPI->End();
-
-				// bottom half
-				gEngfuncs.pTriAPI->Color4ub(230, 150, 150, 255);
-				skillicon->Bind();
-
-				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-				// �I (x1, y1)
-				gEngfuncs.pTriAPI->TexCoord2f(0, (1.0f - flPercent));
-				gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, center_y * gHUD.m_flScale, 0);
-				// �L (x1, y2)
-				gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-				gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, (y + h) * gHUD.m_flScale, 0);
-				// �K (x2, y2)
-				gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-				gEngfuncs.pTriAPI->Vertex3f((x + w) * gHUD.m_flScale, (y + h) * gHUD.m_flScale, 0);
-				// �J (x2, y1)
-				gEngfuncs.pTriAPI->TexCoord2f(1, (1.0f - flPercent));
-				gEngfuncs.pTriAPI->Vertex3f((x + w) * gHUD.m_flScale, center_y * gHUD.m_flScale, 0);
-				gEngfuncs.pTriAPI->End();
-			}
-			else if (icon.m_iCurrentSkillStatus == SKILL_STATUS_USED)
-			{
-				// used
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 50);
-				skillicon->Bind();
-				DrawUtils::Draw2DQuadScaled(x, y, x + w, y + h);
-			}
-			else if (time < icon.m_flTimeSkillBlink)
-			{
-				// blinking
-				float timeDelta = icon.m_flTimeSkillBlink - time;
-				float modDelta = timeDelta - static_cast<float>(static_cast<int>(timeDelta));
-				float a = modDelta < 0.5f ? modDelta * 2.0f : 2.0f - modDelta * 2.0f;
-				a = 1.0 - a; // reverse ?
-
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 255 * a);
-				skillicon->Bind();
-				DrawUtils::Draw2DQuadScaled(x, y, x + w, y + h);
-			}
-			else
-			{
-				// normal
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 255);
-				skillicon->Bind();
-				DrawUtils::Draw2DQuadScaled(x, y, x + w, y + h);
-			}
-		}
-		
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-		m_pTexture_skillslotkeybg->Bind();
-		DrawUtils::Draw2DQuadScaled(x - 3, y - 3, x + m_pTexture_skillslotkeybg->w(), y + m_pTexture_skillslotkeybg->h());
-
-		DrawUtils::TextMessageDrawChar(x + 7, y, SkillKey, 100, 100, 100);
-
-		SkillKey = SkillKey == 'G' ? '5' : SkillKey + 1;
-		x += w;
-	}
-}
 
 void CHudZB2_Skill::OnSkillInit(ZombieClassType zclass, ZombieSkillType skill1, ZombieSkillType skill2, ZombieSkillType skill3, ZombieSkillType skill4)
 {
@@ -466,56 +292,6 @@ void CHudZB2_Skill::OnSkillInit(ZombieClassType zclass, ZombieSkillType skill1, 
 	m_ZombieSkillHudIcons[1] = { skill2, SKILL_STATUS_READY, 0.0f, 0.0f, flSkillBlinkTime };
 	m_ZombieSkillHudIcons[2] = { skill3, SKILL_STATUS_READY, 0.0f, 0.0f, flSkillBlinkTime };
 	m_ZombieSkillHudIcons[3] = { skill4, SKILL_STATUS_READY, 0.0f, 0.0f, flSkillBlinkTime };
-	// some blink ? 
-	if (!m_pTexture_skillslotbg || !m_pTexture_skillslotbg->valid())
-		return;
-
-	int x = ScreenWidth / 2 - m_pTexture_skillslotbg->w() / 2;
-	const int y = 58;
-	if (m_iCurrentClass >= 0 && m_iCurrentClass < MAX_ZOMBIE_CLASS)
-	{
-		const auto& classicon = m_pTexture_NewClassIcons[m_iCurrentClass];
-		if (classicon != nullptr)
-		{
-			x += (classicon->w() + 4) / 2;
-		}
-	}
-
-	for (int i = 0; i < 4; ++i)
-	{
-		auto& icon = m_ZombieSkillHudIcons[i];
-		const auto& skillicon = m_pTexture_NewSkillIcons[icon.m_iCurrentSkill];
-
-		char buf[256];
-		sprintf(buf, "touch_removebutton \"_moe_skill%d_button\"\n", i);
-		gEngfuncs.pfnClientCmd(buf);
-
-        const int w = m_pTexture_skillslotbg->w() / 4;
-        const int h = m_pTexture_skillslotbg->h();
-		if (skillicon && icon.m_iCurrentSkill >= 0 && icon.m_iCurrentSkill < MAX_ZOMBIE_SKILL)
-		{
-			const float x1 = x / (float)ScreenWidth;
-			const float y1 = y / (float)ScreenHeight;
-			const float x2 = (x + w) / (float)ScreenWidth;
-			const float y2 = (y + h) / (float)ScreenHeight;
-
-			sprintf(buf, "alias +_moe_skill%d_press \"touch_setcolor _moe_skill%d_button 156 77 20 180\"\n", i, i);
-			gEngfuncs.pfnClientCmd(buf);
-
-			if(m_iCurrentClass == ZOMBIE_CLASS_HUMAN)
-				sprintf(buf, "alias -_moe_skill%d_press \"MoE_HumanSkill%d; touch_setcolor _moe_skill%d_button 0 0 0 50\"\n", i, i + 1, i);
-			else
-				sprintf(buf, "alias -_moe_skill%d_press \"BTE_ZombieSkill%d; touch_setcolor _moe_skill%d_button 0 0 0 50\"\n", i, i + 1, i);
-
-			gEngfuncs.pfnClientCmd(buf);
-			sprintf(buf, "touch_addbutton \"_moe_skill%d_button\" \"*white\" \"+_moe_skill%d_press\" %f %f %f %f 0 0 0 50 260", i, i, x1, y1, x2, y2);
-			gEngfuncs.pfnClientCmd(buf);
-
-		}
-		
-		x += w;
-	}
-
 }
 
 void CHudZB2_Skill::OnSkillActivate(ZombieSkillType skill, float flHoldTime, float flFreezeTime)

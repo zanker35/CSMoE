@@ -78,7 +78,7 @@ enum EState
 enum ESource
 {
 	SOURCE_CONSOLE,
-	SOURCE_SERVERBROWSER,
+	SOURCE_MENU,
 	SOURCE_CREATEGAME
 };
 
@@ -151,7 +151,7 @@ void UI_ConnectionProgress_f(void)
 	else if (!strcmp(engine->Cmd_Argv(1), "menu"))
 	{
 		m_iState = STATE_MENU;
-		m_iSource = SOURCE_SERVERBROWSER;
+		m_iSource = SOURCE_MENU;
 		if (g_pGameUI)
 		{
 			g_pGameUI->ConnectToServer("", 0, 0);

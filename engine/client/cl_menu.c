@@ -713,10 +713,7 @@ pfnClientJoin
 send client connect
 ====================
 */
-static void pfnClientJoin( const netadr_t adr )
-{
-	Cbuf_AddText( va( "connect %s\n", NET_AdrToString( adr )));
-}
+
 
 /*
 ====================
@@ -1022,7 +1019,7 @@ static ui_enginefuncs_t gEngfuncs =
 	pfnGetGameDir,
 	(void*)Cmd_CheckMapsList,
 	(void*)CL_Active,
-	pfnClientJoin,
+	NULL, // Reserved remote-join API slot
 	COM_LoadFileForMe,
 	COM_ParseFile,
 	COM_FreeFile,

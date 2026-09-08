@@ -197,25 +197,7 @@ public:
 	virtual void OnKeyCodePressed(KeyCode code)
 	{
 		m_KeyRepeat.KeyDown(code);
-#ifdef _DEBUG
-		if (engine->pfnGetCvarFloat("developer") >= 1)
-		{
-			switch (code)
-			{
-				case KeyCode::KEY_F1:
-				{
-					engine->pfnClientCmd("connect 127.1:27015\n");
-					break;
-				}
 
-				case KeyCode::KEY_F2:
-				{
-					engine->pfnClientCmd("connect 127.1:4242\n");
-					break;
-				}
-			}
-		}
-#else
 		if (code >= vgui2::KEY_F1 && code <= vgui2::KEY_F12)
 		{
 			const char *binding = gameuifuncs->Key_BindingForKey(K_F1 + (code - vgui2::KEY_F1));
@@ -227,7 +209,7 @@ public:
 				engine->pfnClientCmd(szCommand);
 			}
 		}
-#endif
+
 		BaseClass::OnKeyCodePressed(code);
 	}
 
@@ -285,8 +267,6 @@ public:
 					shouldBeVisible = false;
 				else if (kv->GetInt("ConsoleOnly"))
 					shouldBeVisible = false;
-                else if (kv->GetInt("OnlyInCareerGame"))
-                    shouldBeVisible = false;
 
 				menuItem->SetVisible(shouldBeVisible);
 				
@@ -773,7 +753,9 @@ CGameMenu *CBasePanel::RecursiveLoadGameMenu(KeyValues *datafile)
 	{
 		const char *label = dat->GetString("label", "<unknown>");
 		const char *cmd = dat->GetString("command", NULL);
-		if (dat->GetInt("OnlyInCareerGame") || (cmd && !Q_stricmp(cmd, "OpenPlayerListDialog")))
+		if (!cmd || (Q_stricmp(cmd, "ResumeGame") && Q_stricmp(cmd, "Disconnect") &&
+            Q_stricmp(cmd, "OpenCreateMultiplayerGameDialog") && Q_stricmp(cmd, "OpenOptionsDialog") &&
+            Q_stricmp(cmd, "Quit")))
 			continue;
 		const char *name = dat->GetString("name", label);
 		if (cmd && !Q_stricmp(cmd, "OpenCreateMultiplayerGameDialog"))

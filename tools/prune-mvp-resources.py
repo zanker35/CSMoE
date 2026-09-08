@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Remove retired scripting/HUD resources from an explicitly selected local pack.
+"""Remove retired MVP features from an explicitly selected local resource pack.
 
 Defaults to a dry run. Only edits csmoe, never the cstrike/valve Steam fallbacks.
-Shared fonts, weapon/character assets and mobile controls are retained.
+Shared fonts, weapon/character assets and BOT radio sounds are retained.
 """
 
 import argparse
@@ -18,12 +18,30 @@ RETIRED_SPRITES = {
     "sbtext_1st", "sbtext_kill", "sbtext_round", "csgo_number",
 }
 RETIRED_TOKENS = {"cso_hudclassicstyle", "cso_hudcsgostyle", "cso_hudnewstyle", "csmoe_hudstyle"}
+RETIRED_COMMAND = re.compile(
+    r"(?:[+-]?(?:jlook|voicerecord)|joystick|voice_\w+|touch\w*|joy_\w+|"
+    r"vibration_\w+|tutor_\w+|career_\w+|_spec_toggle_menu\w*|hud_style)", re.I)
+RETIRED_MENU = {"OpenServerBrowser", "OpenPlayerListDialog", "EndRound", "Surrender"}
+
+
+def remove_retired_controls(text):
+    """Remove leaf VGUI records without changing surrounding layout data."""
+    def replace(match):
+        name, body = match[1], match[2]
+        command = re.search(r'"command"\s+"([^"]*)"', body)
+        if (command and command[1] in RETIRED_MENU) or re.search(
+                r'"(?:fieldName|labelText)"\s+"[^"\r\n]*(?:Joystick|Tutor)', body, re.I):
+            return ""
+        return match[0]
+    result = re.sub(r'(?m)^[ \t]*"([^"\r\n]+)"\s*\{([^{}]*)\}', replace, text)
+    return re.sub(r'(?im)^[ \t]*"(?:OnlyInCareerGame|NotInCareerGame)"[^\r\n]*\r?\n', "", result)
 
 
 def prune(game, apply):
     if not game.is_dir() or game.is_symlink():
         raise ValueError(f"Expected a real csmoe directory: {game}")
     changes = []
+    removed_roots = []
 
     def safe(path):
         if path.is_symlink() or not path.resolve().is_relative_to(game.resolve()):
@@ -33,6 +51,7 @@ def prune(game, apply):
         if not path.exists():
             return
         safe(path)
+        removed_roots.append(path)
         files = list(path.rglob("*")) if path.is_dir() else [path]
         for file in files:
             safe(file)
@@ -42,6 +61,8 @@ def prune(game, apply):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
 
     def rewrite(path, transform):
+        if any(path == root or root in path.parents for root in removed_roots):
+            return
         if not path.is_file():
             return
         safe(path)
@@ -57,6 +78,37 @@ def prune(game, apply):
             path.write_bytes(updated.encode(encoding, errors="surrogateescape"))
 
     remove(game / "addons/luash")
+    for relative in (
+        "touch", "gfx/touch", "touch_default", "touch_presets", "touch_profiles",
+        "voice_ban.dt", "resource/optionssubvoice.res", "resource/optionssubtouch.res",
+        "resource/optionssubtouchprofiles.res", "resource/optionssubbuttonsettings.res",
+        "resource/tutorscheme.res", "tutordata.txt", "tutor_text.txt",
+    ):
+        remove(game / relative)
+    for path in (game / "gfx/shell").glob("*touch*"):
+        remove(path)
+    for path in game.glob("*.dem"):
+        remove(path)
+    # Textures used only by the retired touchscreen skill panel.
+    for stem in (
+        'resource/zombi/humanskill_hm_spd',
+        'resource/zombi/humanskill_hm_hd',
+        'resource/zombi/humanskill_hm_2x',
+        'resource/zombi/zombieskill_zombicrazy',
+        'resource/zombi/zombieskill_zombihiding',
+        'resource/zombi/zombieskill_zombitrap',
+        'resource/zombi/zombieskill_zombismoke',
+        'resource/zombi/zombieskill_zombiheal',
+        'resource/zombi/zombietype_defaultzb',
+        'resource/zombi/zombietype_lightzb',
+        'resource/zombi/zombietype_heavyzb',
+        'resource/zombi/zombietype_pczb',
+        'resource/zombi/zombietype_doctorzb',
+        'resource/zombi/skillslotkeybg',
+        'resource/zombi/skillslotbg',
+    ):
+        for suffix in (".tga", ".dds", ".png"):
+            remove(game / (stem + suffix))
     remove(game / "resource/hud/csgo")
     for prefix in ("killbg", "deathbg", "defaultbg"):
         for side in ("left", "center", "right"):
@@ -91,12 +143,30 @@ def prune(game, apply):
                       lambda m: "" if "HudStyle" in m[0] else m[0], text)
 
     rewrite(game / "resource/optionssubmoesettings.res", settings)
+    for relative in ("resource/gamemenu.res", "resource/optionssubmouse.res",
+                     "resource/createmultiplayergameserverpage.res"):
+        rewrite(game / relative, remove_retired_controls)
     for path in (game / "resource").glob("*.txt"):
         rewrite(path, lambda text: "".join(line for line in text.splitlines(keepends=True)
                 if not (match := re.match(r'\s*"([^"\r\n]+)"', line))
-                or match[1].lower() not in RETIRED_TOKENS))
-    for path in game.rglob("*.cfg"):
-        rewrite(path, lambda text: re.sub(r'(?im)^[ \t]*(?:set\s+)?hud_style\s+[^\r\n]*(?:\r?\n|$)', "", text))
+                or (match[1].lower() not in RETIRED_TOKENS and not match[1].lower().startswith(
+                    ("career_", "tutor_", "cstrike_tutor", "gameui_joystick", "gameui_touch")))))
+
+    def config(text):
+        kept = []
+        for line in text.splitlines(keepends=True):
+            words = re.findall(r'"([^"\r\n]*)"|([^\s";]+)', line.split("//", 1)[0])
+            tokens = [quoted or bare for quoted, bare in words]
+            if any(RETIRED_COMMAND.fullmatch(token) for token in tokens):
+                continue
+            if tokens and tokens[0].lower() == "exec" and len(tokens) > 1 and tokens[1].lower().startswith("touch"):
+                continue
+            kept.append(line)
+        return "".join(kept)
+
+    for pattern in ("*.cfg", "*.rc", "kb_act.lst"):
+        for path in game.rglob(pattern):
+            rewrite(path, config)
     return changes
 
 

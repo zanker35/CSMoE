@@ -17,111 +17,25 @@ GNU General Public License for more details.
 #define DEFAULTS_H
 
 #include "backends.h"
-
-/*
-===================================================================
-
-SETUP BACKENDS DEFINITIONS
-
-===================================================================
-*/
-
-
-		// by default, use SDL subsystems
-		#ifndef XASH_VIDEO
-			#define XASH_VIDEO VIDEO_SDL
-		#endif // XASH_VIDEO
-
-		#ifndef XASH_TIMER
-			#define XASH_TIMER TIMER_SDL
-		#endif
-
-		#ifndef XASH_INPUT
-			#define XASH_INPUT INPUT_SDL
-		#endif
-
-		#ifndef XASH_SOUND
-			#define XASH_SOUND SOUND_SDL
-		#endif
-
-
-
-
-// select crashhandler based on defines
+#define XASH_VIDEO VIDEO_SDL
+#define XASH_TIMER TIMER_SDL
+#define XASH_INPUT INPUT_SDL
+#define XASH_SOUND SOUND_SDL
 #ifndef XASH_CRASHHANDLER
-	#if   defined CRASHHANDLER
-		#define XASH_CRASHHANDLER CRASHHANDLER_UCONTEXT
-	#else
-		#define XASH_CRASHHANDLER CRASHHANDLER_NULL
-	#endif
-#endif
-
-// no timer - no xash
-#ifndef XASH_TIMER
-		#define XASH_TIMER TIMER_LINUX
-#endif
-
-//
-// fallback to NULL
-//
-#ifndef XASH_VIDEO
-	#define XASH_VIDEO VIDEO_NULL
-#endif
-
-#ifndef XASH_SOUND
-	#define XASH_SOUND SOUND_NULL
-#endif
-
-#ifndef XASH_INPUT
-	#define XASH_INPUT INPUT_NULL
-#endif
-
-/*
-=========================================================================
-
-Default build-depended cvar and constant values
-
-=========================================================================
-*/
-
-#if defined __ANDROID__ || TARGET_OS_IPHONE || defined __SAILFISH__
-	#define DEFAULT_TOUCH_ENABLE "1"
-	#define DEFAULT_M_IGNORE "1"
+#ifdef CRASHHANDLER
+#define XASH_CRASHHANDLER CRASHHANDLER_UCONTEXT
 #else
-	#define DEFAULT_TOUCH_ENABLE "0"
-	#define DEFAULT_M_IGNORE "0"
+#define XASH_CRASHHANDLER CRASHHANDLER_NULL
 #endif
-
-// this means that libraries are provided with engine, but not in game data
-// You need add library loading code to library.c when adding new platform
+#endif
+#define DEFAULT_M_IGNORE "0"
 #define XASH_INTERNAL_GAMELIBS
-
-#if defined XASH_NANOGL || defined XASH_WES || defined XASH_REGAL
-#define XASH_GLES
-#ifndef XASH_GL_STATIC
-#define XASH_GL_STATIC
-#endif // XASH_GL_STATIC
-#endif // XASH_NANOGL || XASH_WES || XASH_REGAL
-
-#define DEFAULT_PRIMARY_MASTER "ms.xash.su:27010"
-#define DEFAULT_SECONDARY_MASTER "ms2.xash.su:27010"
-// Set ForceSimulating to 1 by default for dedicated, because AMXModX timers require this
-// TODO: enable simulating for any server?
-	#define DEFAULT_SV_FORCESIMULATING "0"
-
-// allow override for developer/debug builds
+#define DEFAULT_SV_FORCESIMULATING "0"
 #ifndef DEFAULT_DEV
-	#define DEFAULT_DEV 0
+#define DEFAULT_DEV 0
 #endif
-
 #ifndef DEFAULT_FULLSCREEN
 #define DEFAULT_FULLSCREEN 1
 #endif
-
-#if TARGET_OS_IPHONE
-	#define DEFAULT_CON_MAXFRAC "0.5"
-#else
-	#define DEFAULT_CON_MAXFRAC "1"
-#endif
-
+#define DEFAULT_CON_MAXFRAC "1"
 #endif // DEFAULTS_H
