@@ -6,6 +6,7 @@ pauses; no OS mouse/keyboard automation or in-engine wait queue is used.
 """
 
 import argparse
+import codecs
 from contextlib import contextmanager
 import os
 from pathlib import Path
@@ -71,6 +72,7 @@ class ConsoleSession:
         os.close(slave)
         self.raw = ""
         self.text = ""
+        self.decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
     def read(self, seconds=0.2):
         readable, _, _ = select.select([self.master], [], [], seconds)
@@ -82,7 +84,8 @@ class ConsoleSession:
             if data:
                 sys.stdout.buffer.write(data)
                 sys.stdout.buffer.flush()
-                self.raw += data.decode("utf-8", errors="replace")
+                # A PTY read can split a Chinese character between two chunks.
+                self.raw += self.decoder.decode(data)
                 # Re-clean the accumulated stream so split ANSI sequences cannot
                 # turn a Local status line into a false negative.
                 self.text = clean_output(self.raw)
